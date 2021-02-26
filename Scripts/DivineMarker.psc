@@ -7,8 +7,6 @@ bool property activateKeywordRefs = true auto
 { Default: true - Should this marker activate keyword-linked object references when activated? }
 bool property enableToggleKeywordRefs = false auto
 { Default: false - Should this marker toggle keyword-linked object references enabled when activated? }
-bool property inheritSignalerProperties = true auto
-{ Default: true - Should this marker inherit property values of the same name set on the signaler? }
 
 state busy
 	event onBeginState()

@@ -9,7 +9,7 @@ float property scaleMax = 1.0 auto
 { Default: 1.0 - Maximum scale to set the object to if "scaleRandomly" is set to True. }
 bool property scaleRandomly = false auto
 { Default: False - Scale to a random size between "scaleMin" and "scaleMax" property values when activated. 
-  Overrides "toggleMinMax" setting when set to True. }
+	Overrides "toggleMinMax" setting when set to True. }
 bool property scaleSync = true auto
 { Default: True - Ensure all objects are the same scale when "scaleRandomly" is selected. }
 bool property toggleMinMax = false auto

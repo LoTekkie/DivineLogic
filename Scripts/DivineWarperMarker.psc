@@ -3,6 +3,8 @@ scriptName DivineWarperMarker extends DivineMarker
 
 import DivineUtils
 
+bool property warpPlayer = false auto
+{ Default: false - Should the player be warped to this marker? }
 float property delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references warp to this marker. }
 bool property collapseSpacing = false auto
