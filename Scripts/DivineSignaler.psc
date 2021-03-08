@@ -19,6 +19,8 @@ bool property detectNPC = false auto
 { Default: False - Should this trigger send a signal when an NPC enters it? }
 bool property paused = false auto hidden
 { Prevent any input to or signaling from this trigger. }
+bool property ignoreBusy = false auto hidden
+{ Should we prevent reaching the busy state? }
 bool property sendTogglePauseSignal = false auto
 { Default: False - Pause all attached signalers when this one sends a signal. }
 bool property preventDefaultSignal = false auto
@@ -37,7 +39,6 @@ float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 ; Set whether or not activation should be blocked
 function setActivationBlocked(bool blocked=true)
 	self.blockActivation(blocked)
-	; TODO: should we alter form name here to prevent activation attempts?
 endFunction
 
 ;/ Set whether or not a divineRef object is paused
@@ -165,6 +166,11 @@ function onSignalling()
 	dd(self + "@ eventHandler: onSignalling", enabled=self.showDebug)
 endFunction
 
+;/ Event method used to customize behavior within the onUpdating event
+of both the busy and waiting states. To be overriden within child scripts /;
+function onUpdating()
+endFunction
+
 ; Ensure all rotation angles on this signaler are not 0 to allow for player activation 
 function initRotation()
 	if (self.getAngleX() || self.getAngleY() || self.getAngleZ())
@@ -219,13 +225,16 @@ state waiting
 			goToState("busy")
 		endIf
 	endEvent
+	event onUpdate()
+		self.onUpdating()
+	endEVent
 endState
 
 ; Attempt to send signal to attached objects
 state busy
 	event onBeginState()
 		dd(self + "@ state: busy", enabled=self.showDebug)
-		if (self.paused)
+		if (self.paused || self.ignoreBusy)
 			goToState("waiting")
 			return
 		endIf
@@ -246,25 +255,20 @@ state busy
 		endIf
 		self.setActivationBlocked(false)
 		if ( ! self.signalOnce )
-			goToState("routing")
+			if ( ! self.signalContinuously || self.paused || self.ignoreBusy)
+				goToState("waiting")
+			else
+				float delay = clampf(            \
+					self.signalDelay,              \
+					self.continuousSignalDelayMin, \
+					self.signalDelay               \
+				)
+				utility.wait(delay)
+				goToState("busy")
+			endIf	
 		endIf
 	endEvent
-endState
-
-; Decide which state to enter based on player set properties
-state routing
-	event onBeginState()
-		dd(self + "@ state: routing", enabled=self.showDebug)
-		if ( ! self.signalContinuously || self.paused )
-			goToState("waiting")
-		else
-			float delay = clampf(            \
-				self.signalDelay,              \
-				self.continuousSignalDelayMin, \
-				self.signalDelay               \
-			)
-			utility.wait(delay)
-			goToState("busy")
-		endIf	
-	endEvent
+	event onUpdate()
+		self.onUpdating()
+	endEVent
 endState

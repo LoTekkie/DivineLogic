@@ -71,21 +71,21 @@ endFunction
 
 function onSignalling()
 	if ( ! self.nextMarker && self.noMarkersAttached )
-			self.translateKeywordRefsTo(     \
-				self,                          \
-				self.keywordRefSpacingOffsets, \
-				self.m_speed,                  \
-				self.m_rotationSpeedClamp,     \
-				self.m_tangentMagnitude,       \
-				self.individualDelay,          \
-				self.m_offsetX,                \
-				self.m_offsetY,                \
-				self.m_offsetZ,                \
-				self.m_offsetAX,               \
-				self.m_offsetAY,               \
-				self.m_offsetAZ,               \
-				self.m_matchRotation,          \
-				self.m_rotateOnArrival         \
+		self.translateKeywordRefsTo(     \
+			self,                          \
+			self.keywordRefSpacingOffsets, \
+			self.m_speed,                  \
+			self.m_rotationSpeedClamp,     \
+			self.m_tangentMagnitude,       \
+			self.individualDelay,          \
+			self.m_offsetX,                \
+			self.m_offsetY,                \
+			self.m_offsetZ,                \
+			self.m_offsetAX,               \
+			self.m_offsetAY,               \
+			self.m_offsetAZ,               \
+			self.m_matchRotation,          \
+			self.m_rotateOnArrival         \
 		)
 		if (self.relayActivation)
 			self.setRefActivated(self.linkedRef, self)	

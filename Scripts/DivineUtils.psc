@@ -96,3 +96,10 @@ bool function conformBool(bool value, bool conformed, bool default) global
 		return conformed
 	endIf 
 endFunction
+
+; Rotate the given object about its local axes
+function setLocalAngle(objectReference objectRef, float localX, float localY, float localZ) global
+	float angleX = localX * Math.cos(LocalZ) + localY * Math.sin(localZ)
+	float angleY = localY * Math.cos(LocalZ) - localX * Math.sin(localZ)
+	objectRef.setAngle(angleX, angleY, localZ)
+endFunction

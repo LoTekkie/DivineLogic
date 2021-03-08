@@ -18,7 +18,7 @@ string property keywordRefSignature = "DivineRef" auto hidden
 { The base keyword signature used to identify objects available to enter the keywordRefs property. }
 string property formName auto hidden
 { A reference to the form name of this object when it's loaded. }
-objectReference property playerRef auto hidden
+actor property playerRef auto hidden
 { A reference to the Player object. }
 bool property showDebug = false auto
 { Default: False - Output divine logic debug messages to logs. }
@@ -74,17 +74,6 @@ string function getRefFormName(objectReference objectRef)
 	return refForm.GetName()
 endFunction
 
-;TODO: is this needed?
-float[] function getRefPosArray(objectReference objectRef)
-		float[] posArray = new float[6]
-		posArray[0] = objectRef.X
-		posArray[1] = objectRef.Y
-		posArray[2] = objectRef.Z
-		posArray[3] = objectRef.getAngleX()
-		posArray[4] = objectRef.getAngleY()
-		posArray[5] = objectRef.getAngleZ()
-		return posArray
-endFunction
 
 ; Get an array of keyword-linked object references attached with the "DivineRef" keyword signature
 objectReference[] function getKeywordRefs()
@@ -120,6 +109,16 @@ function scaleRefBetween(         \
 	)
 	float newScale = utility.randomFloat(minScale, maxScale)
 	self.scaleRef(objectRef, newScale, withCollision)
+endFunction
+
+; Set the given objectReferences position
+function setRefPosition(       \
+	objectReference objectRef,   \
+	float x, float y, float z,   \
+	float aX, float aY, float aZ \
+	)
+	objectRef.setPosition(x, y, z)
+	objectRef.setAngle(aX, aY, aZ)
 endFunction
 
 ; Move the given objectReference to the destination objectReference
@@ -167,6 +166,30 @@ function impulseRef(                        \
 		self.playerRef.pushActorAway(actorRef, 0.0)
 	endIf
 	objectRef.applyHavokImpulse(forceX, forceY, forceZ, magnitude)
+endFunction
+
+; Wait for the given objectReference to be at the desired destination
+function waitForRefAt(                  \
+	objectReference objectRef,            \
+	float[] destination,                  \
+	bool positions=true, bool angles=true \
+	)
+	if (positions)
+		float destX = destination[0]
+		float destY = destination[1]
+		float destZ = destination[2]
+		while( ! self.refPosAt(objectRef, destX, destY, destZ) )
+			; wait for object to finish translation
+		endWhile
+	endIf
+	if (angles)
+		float destAx = destination[3]
+		float destAy = destination[4]
+		float destAZ = destination[5]
+		while ( ! self.refAnglesAt(objectRef, destAx, destAy, destAz) )
+			; wait for object to finish translation
+		endWhile
+	endIf
 endFunction
 
 ; Set each keyword-linked object reference as activated
@@ -305,26 +328,77 @@ function waitForKeywordRefsAt(float[] destinations, bool positions=true, bool an
 	while (refIndex >= 0)
 		objectReference ref = self.keywordRefs[refIndex]
 		if (ref)
-			if (positions)
-				float destX = getFloatFromCoordinateArrayXY(destinations, 0, refIndex) 
-				float destY = getFloatFromCoordinateArrayXY(destinations, 1, refIndex)
-				float destZ = getFloatFromCoordinateArrayXY(destinations, 2, refIndex)
-				while ( ! self.refPosAt(ref, destX, destY, destZ) )
-				; wait for object to finish translation
-				endWhile
-			endIf
-			if (angles)
-				float destAx = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
-				float destAy = getFloatFromCoordinateArrayXY(destinations, 4, refIndex)
-				float destAz = getFloatFromCoordinateArrayXY(destinations, 5, refIndex)
-				while ( ! self.refAnglesAt(ref, destAx, destAy, destAz) )
-					; wait for object to finish translation
-				endWhile
-			endIf
+				float[] destination = new float[6]
+				destination[0] = getFloatFromCoordinateArrayXY(destinations, 0, refIndex) 
+				destination[1] = getFloatFromCoordinateArrayXY(destinations, 1, refIndex)
+				destination[2] = getFloatFromCoordinateArrayXY(destinations, 2, refIndex)
+				destination[3] = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
+				destination[4] = getFloatFromCoordinateArrayXY(destinations, 4, refIndex)
+				destination[5] = getFloatFromCoordinateArrayXY(destinations, 5, refIndex)
+				self.waitForRefAt(ref, destination, positions, angles)
 		endIf
 		refIndex -= 1
 	endWhile
 endFunction
+
+; Translate the given objectReference to the destinationRef
+function translateRefTo(                                      \
+	objectReference objectRef,                                  \
+	objectReference destinationRef,                             \
+	float speed=100.0, float rotationSpeedClamp=0.0,            \
+	float tangentMagnitude=0.0,                                 \
+	float xOffset=0.0, float yOffset=0.0, float zOffset=0.0,    \
+	float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
+	bool matchRotation=false, bool rotateOnArrival=false        \
+	)
+  float[] destination = new float[6]
+	float newX = destinationRef.X + xOffset
+	float newY = destinationRef.Y + yOffset
+	float newZ = destinationRef.Z + zOffset
+	objectReference rotationRef = destinationRef
+	if ( ! matchRotation )
+		rotationRef = objectRef
+	endIf
+	float newAx = rotationRef.getAngleX() + aXOffset
+	float newAy = rotationRef.getAngleY() + aYOffset
+	float newAz = rotationRef.getAngleZ() + aZOffset
+	destination[0] = newX
+	destination[1] = newY
+	destination[2] = newZ
+	destination[3] = newAX
+	destination[4] = newAY
+	destination[5] = newAZ
+	dd(self + "@ function: TranslateRefTo | destination: " + destination, enabled=self.showDebug)
+	if (rotateOnArrival)
+		newAx = objectRef.getAngleX()
+		newAy = objectRef.getAngleY()
+		newAz = objectRef.getAngleZ()
+	endIf
+	if ( tangentMagnitude == 0.0)
+		objectRef.translateTo(      \
+			newX, newY, newZ,         \
+			newAx, newAy, newAz,      \
+			speed, rotationSpeedClamp \
+		)
+	else
+		objectRef.splineTranslateTo( \
+			newX, newY, newZ,          \
+			newAx, newAy, newAz,       \
+			tangentMagnitude,          \
+			speed, rotationSpeedClamp  \
+		)
+	endIf
+	self.waitForRefAt(objectRef, destination, true, false)
+	if (rotateOnArrival)
+		objectRef.translateTo(                            \
+			destination[0], destination[1], destination[2], \
+			destination[3], destination[4], destination[5], \
+			speed, rotationSpeedClamp                       \
+		)
+	endIf
+	self.waitForRefAt(objectRef, destination, false, true)
+endFunction
+
 
 ; Translate all keyword-linked object references to the given objectReference
 function translateKeywordRefsTo(                              \
@@ -369,16 +443,18 @@ function translateKeywordRefsTo(                              \
 				newAy = ref.getAngleY()
 				newAz = ref.getAngleZ()
 			endIf
-			if ( tangentMagnitude == 0.0)
-				ref.translateTo(                         \
-					newX, newY, newZ, newAx, newAy, newAz, \
-					speed, rotationSpeedClamp              \
+			if ( tangentMagnitude != 0.0)
+				ref.splineTranslateTo(      \
+					newX, newY, newZ,         \
+					newAx, newAy, newAz,      \
+					tangentMagnitude,         \
+					speed, rotationSpeedClamp \
 				)
 			else
-				ref.splineTranslateTo(                   \
-					newX, newY, newZ, newAx, newAy, newAz, \
-					tangentMagnitude,                      \
-					speed, rotationSpeedClamp              \
+				ref.translateTo(            \
+					newX, newY, newZ,         \
+					newAx, newAy, newAz,      \
+					speed, rotationSpeedClamp \
 				)
 			endIf
 			if (delay > 0)
@@ -399,9 +475,10 @@ function translateKeywordRefsTo(                              \
 				float newAx = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
 				float newAy = getFloatFromCoordinateArrayXY(destinations, 4, refIndex)
 				float newAz = getFloatFromCoordinateArrayXY(destinations, 5, refIndex)
-				ref.translateTo(                         \
-					newX, newY, newZ, newAx, newAy, newAz, \
-					speed, rotationSpeedClamp              \
+				ref.translateTo(            \
+					newX, newY, newZ,         \
+					newAx, newAy, newAz,      \
+					speed, rotationSpeedClamp \
 				)
 			endIf
 			refIndex -= 1
@@ -475,7 +552,7 @@ endFunction
 event onInit()
 	dd(self + "@ event: onInit", enabled=self.showDebug)
 	self.formName = self.getRefFormName(self) ; cached for later use
-	self.playerRef = Game.getPlayer()
+	self.playerRef = game.getPlayer()
 	self.setLinkedRef()
 	self.setKeywordRefs()
 endEvent
