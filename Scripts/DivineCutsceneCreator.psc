@@ -150,6 +150,7 @@ Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
 		self.moveRefTo(self.cameraActor, self.nextMarker, matchRotation=true)
 	endIf
 	self.cameraActor.setMotionType(motion_keyframed)
+	self.scaleRef(self.cameraActor, 1.0)
 	self.setActorVisible(self.cameraActor, false)
 	if (self.hidePlayer)
 		self.setActorVisible(self.playerRef, false)
