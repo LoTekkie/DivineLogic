@@ -125,20 +125,24 @@ endFunction
 function moveRefTo(                                           \
 	objectReference objectRef,                                  \
 	objectReference destinationRef,                             \
+	bool[] axisLimits,																					\
 	float xOffset=0.0, float yOffset=0.0, float zOffset=0.0,    \
 	float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
 	bool matchRotation=false                                    \
 	)
-	float newX = destinationRef.X + xOffset
-	float newY = destinationRef.Y + yOffset
-	float newZ = destinationRef.Z + zOffset
+	if ( axisLimits.length != 6 )
+		axisLimits = new bool[6]
+	endIf
+	float newX = ternaryFloat(axisLimits[0], objectRef.X, destinationRef.X + xOffset)
+	float newY = ternaryFloat(axisLimits[1], objectRef.Y, destinationRef.Y + yOffset)
+	float newZ = ternaryFloat(axisLimits[2], objectRef.Z, destinationRef.Z + zOffset)
 	objectReference rotationRef = destinationRef
 	if ( ! matchRotation )
 		rotationRef = objectRef
 	endIf
-	float newAx = rotationRef.getAngleX() + aXOffset
-	float newAy = rotationRef.getAngleY() + aYOffset
-	float newAz = rotationRef.getAngleZ() + aZOffset	
+	float newAx = ternaryFloat(axisLimits[3], objectRef.getAngleX(), rotationRef.getAngleX() + aXOffset)
+	float newAy = ternaryFloat(axisLimits[4], objectRef.getAngleY(), rotationRef.getAngleY() + aYOffset)
+	float newAz = ternaryFloat(axisLimits[5], objectRef.getAngleZ(), rotationRef.getAngleZ() + aZOffset)	
 	objectRef.setPosition(newX, newY, newZ)
 	objectRef.setAngle(newAx, newAy, newAz)
 endFunction
@@ -166,6 +170,10 @@ function impulseRef(                        \
 		self.playerRef.pushActorAway(actorRef, 0.0)
 	endIf
 	objectRef.applyHavokImpulse(forceX, forceY, forceZ, magnitude)
+endFunction
+
+function animateRef()
+	
 endFunction
 
 ; Wait for the given objectReference to be at the desired destination
@@ -289,6 +297,7 @@ endFunction
 function moveKeywordRefsTo(                                   \
 	objectReference objectRef,                                  \
 	float[] spacingOffsets,                                     \
+	bool[] axisLimits,                                          \
 	float delay=0.0,                                            \
 	float xOffset=0.0, float yOffset=0.0, float zOffset=0.0,    \
 	float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
@@ -310,6 +319,7 @@ function moveKeywordRefsTo(                                   \
 			self.moveRefTo(                 \
 				ref,                          \
 				objectRef,                    \
+				axisLimits,                   \
 				offsetX, offsetY, offsetZ,    \
 				aXOffset, aYOffset, aZOffset, \
 				matchRotation                 \
@@ -345,6 +355,7 @@ endFunction
 function translateRefTo(                                      \
 	objectReference objectRef,                                  \
 	objectReference destinationRef,                             \
+	bool[] axisLimits,    																			\
 	float speed=100.0, float rotationSpeedClamp=0.0,            \
 	float tangentMagnitude=0.0,                                 \
 	float xOffset=0.0, float yOffset=0.0, float zOffset=0.0,    \
@@ -352,29 +363,32 @@ function translateRefTo(                                      \
 	bool matchRotation=false, bool rotateOnArrival=false        \
 	)
   float[] destination = new float[6]
-	float newX = destinationRef.X + xOffset
-	float newY = destinationRef.Y + yOffset
-	float newZ = destinationRef.Z + zOffset
+  if ( axisLimits.length != 6 )
+		axisLimits = new bool[6]
+	endIf	
+	float newX = ternaryFloat(axisLimits[0], objectRef.X, destinationRef.X + xOffset)
+	float newY = ternaryFloat(axisLimits[1], objectRef.Y, destinationRef.Y + yOffset)
+	float newZ = ternaryFloat(axisLimits[2], objectRef.Z, destinationRef.Z + zOffset)
 	objectReference rotationRef = destinationRef
 	if ( ! matchRotation )
 		rotationRef = objectRef
 	endIf
-	float newAx = rotationRef.getAngleX() + aXOffset
-	float newAy = rotationRef.getAngleY() + aYOffset
-	float newAz = rotationRef.getAngleZ() + aZOffset
+	float newAx = ternaryFloat(axisLimits[3], objectRef.getAngleX(), rotationRef.getAngleX() + aXOffset)
+	float newAy = ternaryFloat(axisLimits[4], objectRef.getAngleY(), rotationRef.getAngleY() + aYOffset)
+	float newAz = ternaryFloat(axisLimits[5], objectRef.getAngleZ(), rotationRef.getAngleZ() + aZOffset)
 	destination[0] = newX
 	destination[1] = newY
 	destination[2] = newZ
-	destination[3] = newAX
-	destination[4] = newAY
-	destination[5] = newAZ
+	destination[3] = newAx
+	destination[4] = newAy
+	destination[5] = newAz
 	dd(self + "@ function: TranslateRefTo | destination: " + destination, enabled=self.showDebug)
 	if (rotateOnArrival)
 		newAx = objectRef.getAngleX()
 		newAy = objectRef.getAngleY()
 		newAz = objectRef.getAngleZ()
 	endIf
-	if ( tangentMagnitude == 0.0)
+	if ( tangentMagnitude == 0.0 )
 		objectRef.translateTo(      \
 			newX, newY, newZ,         \
 			newAx, newAy, newAz,      \
@@ -399,11 +413,11 @@ function translateRefTo(                                      \
 	self.waitForRefAt(objectRef, destination, false, true)
 endFunction
 
-
 ; Translate all keyword-linked object references to the given objectReference
 function translateKeywordRefsTo(                              \
 	objectReference objectRef,                                  \
 	float[] spacingOffsets,                                     \
+	bool[] axisLimits,                                          \
 	float speed=100.0, float rotationSpeedClamp=0.0,            \
 	float tangentMagnitude=0.0,                                 \
 	float delay=0.0,                                            \
@@ -414,6 +428,9 @@ function translateKeywordRefsTo(                              \
 	if ( spacingOffsets.length != 27 )
 		spacingOffsets = new float[27]
 	endIf
+	if ( axisLimits.length != 6 )
+		axisLimits = new bool[6]
+	endIf	
 	float[] destinations = new float[54]
 	int refIndex = self.keywordRefs.length - 1
 	while (refIndex >= 0)
@@ -422,16 +439,16 @@ function translateKeywordRefsTo(                              \
 			float xSpacingOffset = getFloatFromCoordinateArrayXY(spacingOffsets, 0, refIndex)
 			float ySpacingOffset = getFloatFromCoordinateArrayXY(spacingOffsets, 1, refIndex)
 			float zSpacingOffset = getFloatFromCoordinateArrayXY(spacingOffsets, 2, refIndex)
-			float newX = objectRef.X + xSpacingOffset + xOffset
-			float newY = objectRef.Y + ySpacingOffset + yOffset
-			float newZ = objectRef.Z + zSpacingOffset + zOffset
+			float newX = ternaryFloat(axisLimits[0], ref.X, objectRef.X + xSpacingOffset + xOffset)
+			float newY = ternaryFloat(axisLimits[1], ref.Y, objectRef.Y + ySpacingOffset + yOffset)
+			float newZ = ternaryFloat(axisLimits[2], ref.Z, objectRef.Z + zSpacingOffset + zOffset)
 			objectReference rotationRef = objectRef
 			if ( ! matchRotation )
 				rotationRef = ref
 			endIf
-			float newAx = rotationRef.getAngleX() + aXOffset
-			float newAy = rotationRef.getAngleY() + aYOffset
-			float newAz = rotationRef.getAngleZ() + aZOffset	
+			float newAx = ternaryFloat(axisLimits[3], ref.getAngleX(), rotationRef.getAngleX() + aXOffset)
+			float newAy = ternaryFloat(axisLimits[4], ref.getAngleY(), rotationRef.getAngleY() + aYOffset)
+			float newAz = ternaryFloat(axisLimits[5], ref.getAngleZ(), rotationRef.getAngleZ() + aZOffset)	
 			setFloatInCoordinateArrayXY(destinations, 0, refIndex, newX)
 			setFloatInCoordinateArrayXY(destinations, 1, refIndex, newY)
 			setFloatInCoordinateArrayXY(destinations, 2, refIndex, newZ)
@@ -443,7 +460,7 @@ function translateKeywordRefsTo(                              \
 				newAy = ref.getAngleY()
 				newAz = ref.getAngleZ()
 			endIf
-			if ( tangentMagnitude != 0.0)
+			if ( tangentMagnitude != 0.0 )
 				ref.splineTranslateTo(      \
 					newX, newY, newZ,         \
 					newAx, newAy, newAz,      \
@@ -463,13 +480,14 @@ function translateKeywordRefsTo(                              \
 		endIf
 		refIndex -= 1
 	endWhile
-	self.waitForKeywordRefsAt(destinations, true, false)
+	bool shouldWait = objectRef != self.playerRef as objectReference
+	self.waitForKeywordRefsAt(destinations, shouldWait, false)
 	if (rotateOnArrival)
 		refIndex = self.keywordRefs.length - 1
 		while (refIndex >= 0)
 			objectReference ref = self.keywordRefs[refIndex]
 			if (ref)
-				float newX = getFloatFromCoordinateArrayXY(destinations, 0, refIndex) 
+				float newX = getFloatFromCoordinateArrayXY(destinations, 0, refIndex)
 				float newY = getFloatFromCoordinateArrayXY(destinations, 1, refIndex)
 				float newZ = getFloatFromCoordinateArrayXY(destinations, 2, refIndex)
 				float newAx = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
@@ -484,13 +502,14 @@ function translateKeywordRefsTo(                              \
 			refIndex -= 1
 		endWhile
 	endIf
-	self.waitForKeywordRefsAt(destinations, false, true)
+	self.waitForKeywordRefsAt(destinations, false, shouldWait)
 endFunction
 
 ; Spawn an instance of all keyword-linked object references at the given objectReference location
 function spawnKeywordRefsAt(                                  \
 	objectReference objectRef,                                  \
 	float[] spacingOffsets,                                     \
+	bool[] axisLimits,																					\
 	float delay=0.0,                                            \
 	float xOffset=0.0, float yOffset=0.0, float zOffset=0.0,    \
 	float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
@@ -515,6 +534,7 @@ function spawnKeywordRefsAt(                                  \
 			self.moveRefTo(                 \
 				ref,                          \
 				objectRef,                    \
+				axisLimits,                   \
 				offsetX, offsetY, offsetZ,    \
 				aXOffset, aYOffset, aZOffset, \
 				matchRotation                 \
@@ -547,6 +567,33 @@ function impulseKeywordRefs(                \
 		endIf
 		refIndex -= 1
 	endWhile
+endFunction
+
+function animateKeywordRefs()
+endFunction
+
+; Build an array of axis limits to pass to translation and warping functions
+bool[] function buildAxisLimitsArray(bool limX=false, bool limY=false, bool limZ=false, bool limAX=false, bool limAY=false, bool limAZ=false)
+	bool[] axisLimits = new bool[6]
+	axisLimits[0] = limX
+	axisLimits[1] = limY
+	axisLimits[2] = limZ 
+	axisLimits[3] = limAX
+	axisLimits[4] = limAY
+	axisLimits[5] = limAZ
+	return axisLimits
+endFunction
+
+; Build an array of floats representing the given object references position
+float[] function buildRefPositionsArray(objectReference objectRef)
+	float[] positions = new float[6]
+	positions[0] = objectRef.X
+	positions[1] = objectRef.Y
+	positions[2] = objectRef.Z
+	positions[3] = objectRef.getAngleX()
+	positions[4] = objectRef.getAngleY()
+	positions[5] = objectRef.getAngleZ()
+	return positions
 endFunction
 
 event onInit()

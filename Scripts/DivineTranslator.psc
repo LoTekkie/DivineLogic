@@ -20,11 +20,11 @@ float property m_speed = 100.0 auto
 float property m_rotationSpeedClamp = 0.0 auto
 { Default: 0.0 - Amount of rotation speed clamping applied to translating objects. (0.0 means don't clamp rotation speed) }
 bool property m_rotateOnArrival = false auto
-{ Default: false - Should rotation of the translating objects be prevented until they arrive at this marker? }
+{ Default: False - Should rotation of the translating objects be prevented until they arrive at this marker? }
 float property m_tangentMagnitude = 0.0 auto
 { Default: 0.0 - Magnitude of the spline tangents. If this value is 0.0 no splines will be created. }
 bool property m_collapseSpacing = false auto
-{ Defualt: false - Should translating objects ignore original spacing and meet at the same postion on this marker? }
+{ Defualt: False - Should translating objects ignore original spacing and meet at the same postion on this marker? }
 float property m_offsetX = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects positions in the X direction. }
 float property m_offsetY = 0.0 auto
@@ -37,8 +37,23 @@ float property m_offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects angles in the Y direction. }
 float property m_offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects angles in the Z direction. }
+bool property m_limitX = false auto
+{ Default: False - Prevent translation of the x axis. }
+bool property m_limitY = false auto
+{ Default: False - Prevent translation of the y axis. }
+bool property m_limitZ = false auto
+{ Default: False - Prevent translation of the z axis. }
+bool property m_limitAX = false auto
+{ Default: False - Prevent translation of the aX axis. }
+bool property m_limitAY = false auto
+{ Default: False - Prevent translation of the aY axis. }
+bool property m_limitAZ = false auto
+{ Default: False - Prevent translation of the aZ axis. }
+
 bool property m_matchRotation = false auto
-{ Default: false - Should the translating objects match the rotation of this marker when they arrive? }
+{ Default: False - Should the translating objects match the rotation of this marker when they arrive? }
+bool property m_toPlayer = false auto
+{ Default: False - Should the translating objects move to the player? }
 
 event onInit()
 	parent.onInit()
@@ -64,16 +79,32 @@ function conformMarkerProperties(DivineTranslatorMarker markerRef)
 	markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
 	markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
 	markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
+	markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
+	markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
+	markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
+	markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
+	markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
+	markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
 	markerRef.collapseSpacing = conformBool(markerRef.collapseSpacing, self.m_collapseSpacing, false)
 	markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
 	markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
+	markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
 function onSignalling()
 	if ( ! self.nextMarker && self.noMarkersAttached )
+		objectReference destinationRef = self
+		if (self.m_toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(   \
+			self.m_limitX, self.m_limitY, self.m_limitZ,   \
+			self.m_limitAX, self.m_limitAY, self.m_limitAZ \
+		)
 		self.translateKeywordRefsTo(     \
-			self,                          \
+			destinationRef,                \
 			self.keywordRefSpacingOffsets, \
+			axisLimits,                    \
 			self.m_speed,                  \
 			self.m_rotationSpeedClamp,     \
 			self.m_tangentMagnitude,       \
@@ -88,7 +119,7 @@ function onSignalling()
 			self.m_rotateOnArrival         \
 		)
 		if (self.relayActivation)
-			self.setRefActivated(self.linkedRef, self)	
+			self.setRefActivated(self.linkedRef, self)
 		endIf
 	elseIf (self.nextMarker)
 		self.conformMarkerProperties(self.nextMarker)
@@ -97,9 +128,18 @@ function onSignalling()
 			spacingOffsets = self.keywordRefSpacingOffsets
 		endIf
 		utility.wait(nextMarker.delay)
+		objectReference destinationRef = self.nextMarker
+		if (self.nextMarker.toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(                              \
+			self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
+			self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
+		)
 		self.translateKeywordRefsTo(          \
-			self.nextMarker,                    \
-			spacingOffsets,                     \ 
+			destinationRef,                     \
+			spacingOffsets,                     \
+			axisLimits,                         \ 
 			self.nextMarker.speed,              \
 			self.nextMarker.rotationSpeedClamp, \
 			self.nextMarker.tangentMagnitude,   \

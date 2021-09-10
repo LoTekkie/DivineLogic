@@ -20,8 +20,8 @@ bool property inCutScene = false auto hidden
 int property skipCutSceneKeyId = 28 auto hidden
 { Key id used for skipping cutscenes }
 actor property cameraActor auto hidden
-{ Reference to the acter used to view cutscenes through }
-int property cameraActorFormId = 0x0010D13E auto hidden
+{ Reference to the actor used to view cutscenes through }
+int property cameraActorFormId = 0x00089A85 auto hidden ;0x0010D13E
 { Interal reference ID used as the camera actor }
 bool property cutSceneLocked = false auto hidden
 { Internal state of the cutscene creator, prevents starting and ending multiple times. }
@@ -61,8 +61,23 @@ float property m_offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects angles in the Y direction. }
 float property m_offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects angles in the Z direction. }
+bool property m_limitX = false auto
+{ Default: False - Prevent translation of the x axis. }
+bool property m_limitY = false auto
+{ Default: False - Prevent translation of the y axis. }
+bool property m_limitZ = false auto
+{ Default: False - Prevent translation of the z axis. }
+bool property m_limitAX = false auto
+{ Default: False - Prevent translation of the aX axis. }
+bool property m_limitAY = false auto
+{ Default: False - Prevent translation of the aY axis. }
+bool property m_limitAZ = false auto
+{ Default: False - Prevent translation of the aZ axis. }
+
 bool property m_matchRotation = false auto
 { Default: False - Should the translating objects match the rotation of this marker when they arrive? }
+bool property m_toPlayer = false auto
+{ Default: False - Should the translating objects move to the player? }
 
 event onInit()
 	parent.onInit()
@@ -88,8 +103,15 @@ function conformMarkerProperties(DivineCutsceneCreatorMarker markerRef)
 	markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
 	markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
 	markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
+	markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
+	markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
+	markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
+	markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
+	markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
+	markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
 	markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
 	markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
+	markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
 ; Apply fadeTo imageSpaceModifier in the given number of seconds
@@ -106,12 +128,9 @@ function fadeIn(float delay)
 	fadeTo.popTo(fadeFrom)
 endFunction
 
-; Create a new camera actor if one does not already 
+; Create a new camera actor
 actor function createCameraActor()
-	if ( ! self.cameraActor )
 		return self.placeAtMe(game.getForm(self.cameraActorFormId)) as Actor
-	endIf
-	return self.cameraActor
 endFunction
 
 ; Set the given Actor reference visibility
@@ -139,18 +158,19 @@ Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
 	game.disablePlayerControls(true, true, true, true, true, true, true, true)
 	utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 0.0)
 	utility.setIniBool("bDisablePlayerCollision:Havok", true)
-	debug.toggleAI()
 	debug.toggleCollisions()
 	self.fadeOut(fadeOutDelay)
 	if ( ! self.cameraActor )
 		self.cameraActor = self.createCameraActor()
+		utility.wait(1.0)
 	endIf
-	self.setRefEnabled(self.cameraActor, true, false)
 	if (self.nextMarker)
-		self.moveRefTo(self.cameraActor, self.nextMarker, matchRotation=true)
+		self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
 	endIf
-	self.cameraActor.setMotionType(motion_keyframed)
 	self.scaleRef(self.cameraActor, 1.0)
+	self.cameraActor.enableAI(false)
+	self.setRefEnabled(self.cameraActor, true, false)
+	self.cameraActor.setMotionType(Motion_Keyframed)
 	self.setActorVisible(self.cameraActor, false)
 	if (self.hidePlayer)
 		self.setActorVisible(self.playerRef, false)
@@ -168,7 +188,6 @@ Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
 	utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
 	utility.setIniBool("bDisablePlayerCollision:Havok", false)
 	debug.toggleCollisions()
-	debug.toggleAI()
 	self.cameraActor.delete()
 	self.cameraActor = None
 	self.setCameraTarget(self.playerRef)
@@ -196,9 +215,18 @@ function onSignalling()
 		endIf
 	endIf
 	if ( ! self.nextMarker && self.noMarkersAttached )
+		objectReference destinationRef = self
+		if (self.m_toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(   \
+			self.m_limitX, self.m_limitY, self.m_limitZ,   \
+			self.m_limitAX, self.m_limitAY, self.m_limitAZ \
+		)
 		self.translateRefTo(         \
 			self.cameraActor,          \
-			self,                      \
+			destinationRef,            \
+			axisLimits,								 \
 			self.m_speed,              \
 			self.m_rotationSpeedClamp, \
 			self.m_tangentMagnitude,   \
@@ -217,9 +245,18 @@ function onSignalling()
 	elseIf (self.nextMarker)
 		self.conformMarkerProperties(self.nextMarker)
 		utility.wait(nextMarker.delay)
+		objectReference destinationRef = self.nextMarker
+		if (self.nextMarker.toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(                              \
+			self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
+			self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
+		)
 		self.translateRefTo(                  \
 			self.cameraActor,                   \
-			self.nextMarker,                    \
+			destinationRef,                     \
+			axisLimits,                         \
 			self.nextMarker.speed,              \
 			self.nextMarker.rotationSpeedClamp, \
 			self.nextMarker.tangentMagnitude,   \

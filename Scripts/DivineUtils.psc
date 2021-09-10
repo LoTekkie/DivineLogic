@@ -97,6 +97,15 @@ bool function conformBool(bool value, bool conformed, bool default) global
 	endIf 
 endFunction
 
+; Set float value based on the given condition
+float function ternaryFloat(bool condition, float trueValue, float falseValue) global
+	if (condition)
+		return trueValue
+	else
+		return falseValue
+	endIf
+endFunction	
+
 ; Rotate the given object about its local axes
 function setLocalAngle(objectReference objectRef, float localX, float localY, float localZ) global
 	float angleX = localX * Math.cos(LocalZ) + localY * Math.sin(localZ)

@@ -32,8 +32,23 @@ float property m_offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects angles in the Y direction. }
 float property m_offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects angles in the Z direction. }
+bool property m_limitX = false auto
+{ Default: False - Prevent translation of the x axis. }
+bool property m_limitY = false auto
+{ Default: False - Prevent translation of the y axis. }
+bool property m_limitZ = false auto
+{ Default: False - Prevent translation of the z axis. }
+bool property m_limitAX = false auto
+{ Default: False - Prevent translation of the aX axis. }
+bool property m_limitAY = false auto
+{ Default: False - Prevent translation of the aY axis. }
+bool property m_limitAZ = false auto
+{ Default: False - Prevent translation of the aZ axis. }
+
 bool property m_matchRotation = false auto
 { Default: false - Should the warping objects match the rotation of this marker when they arrive? }
+bool property m_toPlayer = false auto
+{ Default: False - Should the translating objects move to the player? }
 
 event onInit()
 	parent.onInit()
@@ -56,16 +71,32 @@ function conformMarkerProperties(DivineWarperMarker markerRef)
 	markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
 	markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
 	markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
+	markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
+	markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
+	markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
+	markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
+	markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
+	markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
 	markerRef.collapseSpacing = conformBool(markerRef.collapseSpacing, self.m_collapseSpacing, false)
 	markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
 	markerRef.warpPlayer = conformBool(markerRef.warpPlayer, self.m_warpPlayer, false)
+	markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
 function onSignalling()
 	if ( ! self.nextMarker && self.noMarkersAttached )
+		objectReference destinationRef = self
+		if (self.m_toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(   \
+			self.m_limitX, self.m_limitY, self.m_limitZ,   \
+			self.m_limitAX, self.m_limitAY, self.m_limitAZ \
+		)
 		self.moveKeywordRefsTo(          \
-			self,                          \
+			destinationRef,                \
 			self.keywordRefSpacingOffsets, \
+			axisLimits,                    \
 			self.individualDelay,          \
 			self.m_offsetX,                \
 			self.m_offsetY,                \
@@ -85,9 +116,18 @@ function onSignalling()
 			spacingOffsets = self.keywordRefSpacingOffsets
 		endIf
 		utility.wait(nextMarker.delay)
+		objectReference destinationRef = self.nextMarker
+		if (self.nextMarker.toPlayer)
+			destinationRef = self.playerRef
+		endIf
+		bool[] axisLimits = self.buildAxisLimitsArray(                              \
+			self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
+			self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
+		)
 		self.moveKeywordRefsTo(         \
-			self.nextMarker,              \
+			destinationRef,               \
 			spacingOffsets,               \
+			axisLimits,										\
 			self.individualDelay,         \
 			self.nextMarker.offsetX,      \
 			self.nextMarker.offsetY,      \
@@ -101,6 +141,7 @@ function onSignalling()
 			self.moveRefTo(                 \
 				self.playerRef,               \
 				self.nextMarker,              \
+				axisLimits,                   \
 				self.nextMarker.offsetX,      \
 				self.nextMarker.offsetY,      \
 				self.nextMarker.offsetZ,      \

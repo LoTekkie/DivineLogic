@@ -19,5 +19,19 @@ float property offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects angles in the Y direction. }
 float property offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects angles in the Z direction. }
+bool property limitX = false auto
+{ Default: False - Prevent spawning in the x axis. }
+bool property limitY = false auto
+{ Default: False - Prevent spawning in the y axis. }
+bool property limitZ = false auto
+{ Default: False - Prevent spawning in the z axis. }
+bool property limitAX = false auto
+{ Default: False - Prevent spawning in the aX axis. }
+bool property limitAY = false auto
+{ Default: False - Prevent spawning in the aY axis. }
+bool property limitAZ = false auto
+{ Default: False - Prevent spawning in the aZ axis. }
 bool property matchRotation = false auto
 { Default: false - Should the spawning objects match the rotation of this marker when they arrive? }
+bool property toPlayer = false auto
+{ Default: False - Should the spawning objects move to the player? }

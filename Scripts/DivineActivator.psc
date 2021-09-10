@@ -4,7 +4,7 @@ scriptName DivineActivator extends DivineSignaler
 import DivineUtils
 
 function onSignalling()
-	parent.onSignalling()
-	self.setRefActivated(self.linkedRef, self)
-	self.setKeywordRefsActivated()
+		parent.onSignalling()
+		self.setRefActivated(self.linkedRef, self)
+		self.setKeywordRefsActivated()
 endFunction

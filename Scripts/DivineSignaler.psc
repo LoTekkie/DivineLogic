@@ -17,8 +17,25 @@ bool property detectPlayer = false auto
 { Default: False - Should this trigger send a signal when the Player enters it? }
 bool property detectNPC = false auto
 { Default: False - Should this trigger send a signal when an NPC enters it? }
+int property detectEquippedItemType = -1 auto
+{ Default: -1 (Don't Detect) - Should this trigger require an equipped item type before it signals? 
+Detected item types can be one of:
+-1: Don't Detect
+0: Nothing (Hand to hand)
+1: One-handed sword
+2: One-handed dagger
+3: One-handed axe
+4: One-handed mace
+5: Two-handed sword
+6: Two-handed axe/mace
+7: Bow
+8: Staff
+9: Magic spell
+10: Shield
+11: Torch
+12: Crossbow }
 bool property paused = false auto hidden
-{ Prevent any input to or signaling from this trigger. }
+{ Default: False - Prevent any input to or signaling from this trigger. }
 bool property ignoreBusy = false auto hidden
 { Should we prevent reaching the busy state? }
 bool property sendTogglePauseSignal = false auto
@@ -210,7 +227,7 @@ state waiting
 		if (self.detectHit)
 			goToState("busy")
 		endIf
-		dd(self + "@ event: onHit | activate:" + self.detectHit, enabled=self.showDebug)
+		dd(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName(), enabled=self.showDebug)
 	endEvent
 	event onTriggerEnter(objectReference objectRef)
 		bool signal = false
@@ -238,6 +255,14 @@ state busy
 			goToState("waiting")
 			return
 		endIf
+		if (self.detectEquippedItemType != -1)
+			bool leftDetected = self.playerRef.getEquippedItemType(0) == self.detectEquippedItemType
+			bool rightDetected = self.playerRef.getEquippedItemType(1) == self.detectEquippedItemType
+			if ( !leftDetected && !rightDetected )
+				goToState("waiting")
+				return
+			endIf
+		endIf	
 		self.setRefActivated(self, self)
 		self.setActivationBlocked(true)
 		if ( ! self.signalContinuously )
