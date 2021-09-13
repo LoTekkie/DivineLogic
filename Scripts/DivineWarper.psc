@@ -106,6 +106,20 @@ function onSignalling()
 			self.m_offsetAZ,               \
 			self.m_matchRotation           \
 		)
+		if (self.m_warpPlayer)
+			self.moveRefTo(                 \
+				self.playerRef,               \
+				self,                         \
+				axisLimits,                   \
+				self.nextMarker.offsetX,      \
+				self.nextMarker.offsetY,      \
+				self.nextMarker.offsetZ,      \
+				self.nextMarker.offsetAX,     \
+				self.nextMarker.offsetAY,     \
+				self.nextMarker.offsetAZ,     \
+				self.nextMarker.matchRotation \
+			)
+		endIf
 		if (self.relayActivation)
 			self.setRefActivated(self.linkedRef, self)	
 		endIf

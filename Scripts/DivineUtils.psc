@@ -104,6 +104,15 @@ float function ternaryFloat(bool condition, float trueValue, float falseValue) g
 	else
 		return falseValue
 	endIf
+endFunction
+
+; Set bool value based on the given condition
+bool function ternaryBool(bool condition, bool trueValue, bool falseValue) global
+	if (condition)
+		return trueValue
+	else
+		return falseValue
+	endIf	
 endFunction	
 
 ; Rotate the given object about its local axes

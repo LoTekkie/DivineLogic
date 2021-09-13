@@ -11,6 +11,11 @@ bool property relayActivation = false auto
 float property individualDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait between translation of each keyword-linked object reference. 
 (A non-zero value will cause each object to translate one at a time) }
+bool property treatAsHavok = false auto
+{ Default: False - Treat all keyword-linked object references as havok objects. 
+	(Before translation, linked references will have their motion types set to Motion_Keyframed. 
+	Upon ending translation, linked references will have their motion types set to Motion_Dynamic.) 
+}
 
 ; Marker Properties m_*
 float property m_delay = 0.0 auto
@@ -93,6 +98,10 @@ endFunction
 
 function onSignalling()
 	if ( ! self.nextMarker && self.noMarkersAttached )
+		if (self.treatAsHavok)
+			self.setKeywordRefsAIEnabled(false)
+			self.setKeywordRefsMotionType(Motion_Keyframed)
+		endIf	
 		objectReference destinationRef = self
 		if (self.m_toPlayer)
 			destinationRef = self.playerRef
@@ -121,7 +130,16 @@ function onSignalling()
 		if (self.relayActivation)
 			self.setRefActivated(self.linkedRef, self)
 		endIf
+		if (self.treatAsHavok)
+			self.setKeywordRefsMotionType(Motion_Dynamic)
+			self.setKeywordRefsAIEnabled(true)
+			self.animateKeywordRefs("IdleForceDefaultState")
+		endIf	
 	elseIf (self.nextMarker)
+		if (self.treatAsHavok)
+			self.setKeywordRefsAIEnabled(false)
+			self.setKeywordRefsMotionType(Motion_Keyframed)
+		endIf	
 		self.conformMarkerProperties(self.nextMarker)
 		float[] spacingOffsets = new float[27]
 		if ( ! self.nextMarker.collapseSpacing )
@@ -152,8 +170,13 @@ function onSignalling()
 			self.nextMarker.offsetAZ,           \
 			self.nextMarker.matchRotation,      \
 			self.nextMarker.rotateOnArrival     \
-		)
+		)	
 		self.setRefActivated(self.nextMarker, self)
 		self.nextMarker = self.nextMarker.linkedRef as DivineTranslatorMarker
+		if ( ! self.nextMarker && self.treatAsHavok )
+			self.setKeywordRefsMotionType(Motion_Dynamic)
+			self.setKeywordRefsAIEnabled(true)
+			self.animateKeywordRefs("IdleForceDefaultState")
+		endIf	
 	endIf
 endFunction

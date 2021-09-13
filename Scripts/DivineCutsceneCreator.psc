@@ -10,7 +10,7 @@ DivineCutsceneCreatorMarker property cameraActorHomeMarker auto hidden
 bool property noMarkersAttached = true auto hidden
 { Does this singaler have any markers attached when it's initializing? }
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of a translate signal. }
+{ Default: False - Send an activation signal to the non-keyword linked reference instead of a translate signal. }
 imageSpaceModifier property fadeTo auto hidden
 { Screen effect used for fading in/out }
 imageSpaceModifier property fadeFrom auto hidden
@@ -128,19 +128,19 @@ function fadeIn(float delay)
 	fadeTo.popTo(fadeFrom)
 endFunction
 
+; Set the given Actor reference visibility
+function setActorVisible(actor actorRef, bool visible=true)
+  float alpha = 1.0
+  if ( ! visible )
+    alpha = 0.0
+  endIf
+  actorRef.setAlpha(alpha)
+  actorRef.setGhost( ! visible )
+endFunction
+
 ; Create a new camera actor
 actor function createCameraActor()
 		return self.placeAtMe(game.getForm(self.cameraActorFormId)) as Actor
-endFunction
-
-; Set the given Actor reference visibility
-function setActorVisible(actor actorRef, bool visible=true)
-	float alpha = 1.0
-	if ( ! visible )
-		alpha = 0.0
-	endIf
-	actorRef.setAlpha(alpha)
-	actorRef.setGhost( ! visible )
 endFunction
 
 ; Set which Actor reference should be used as our cutscene camera
@@ -167,9 +167,7 @@ Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
 	if (self.nextMarker)
 		self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
 	endIf
-	self.scaleRef(self.cameraActor, 1.0)
 	self.cameraActor.enableAI(false)
-	self.setRefEnabled(self.cameraActor, true, false)
 	self.cameraActor.setMotionType(Motion_Keyframed)
 	self.setActorVisible(self.cameraActor, false)
 	if (self.hidePlayer)

@@ -8,11 +8,15 @@ bool property signalOnStart = false auto
 { Default: False - Send a signal to all attached objects when the game is loaded. }
 bool property signalOnce = false auto
 { Default: False - Send a signal only once for the lifetime of the trigger. }
+int property signalLimit = 0 auto
+{ Default: 0 - How many times total should this trigger signal? (Overridden when setting signalOnce to True, values less than 0 will signal once) }
 bool property signalContinuously = false auto
 { Default: False - Send a signal every x number of seconds where x is the value of "signalDelay".
 Combine this with "signalOnStart" to automatically signal forever once the game is loaded. }
 bool property detectHit = false auto
 { Default: False - Should this trigger send a signal when hit? }
+string property detectHitSource = "" auto
+{ Default: "" - Name of the source to filter detectHit by. (Only used when detectHit is True)} 
 bool property detectPlayer = false auto
 { Default: False - Should this trigger send a signal when the Player enters it? }
 bool property detectNPC = false auto
@@ -52,6 +56,8 @@ float[] property keywordRefSpacingOffsets auto hidden; x, y, z for each of the 9
 { Reference to offsets from the calculated collective center of all attched object references. }
 float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 { Minimum value for the user set delay when the signalContinuously property value is set to true. }
+int property signalCount = 0 auto hidden
+{ How many times has this signaled? }
 
 ; Set whether or not activation should be blocked
 function setActivationBlocked(bool blocked=true)
@@ -225,16 +231,22 @@ state waiting
 		bool hitBlocked                                      \
 		)
 		if (self.detectHit)
-			goToState("busy")
+			dd(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName() + " | projectile: " + akProjectile.getName(),  enabled=self.showDebug)
+			if (self.detectHitSource != "")
+				if (self.detectHitSource == source.getName() || self.detectHitSource == akProjectile.getName())
+					goToState("busy")
+				endIf	
+			else
+				goToState("busy")
+			endIf	
 		endIf
-		dd(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName(), enabled=self.showDebug)
-	endEvent
+	endEvent	
 	event onTriggerEnter(objectReference objectRef)
 		bool signal = false
-		if (objectRef == self.playerRef && self.detectPlayer)
+		if (objectRef as actor == self.playerRef as actor && self.detectPlayer)
 			signal = true
 		endIf
-		if (objectRef != self.playerRef && self.detectNPC) ; this may have to check for Actor script
+		if (objectRef as actor != self.playerRef as actor && self.detectNPC)
 			signal = true
 		endIf
 		dd(self + "@ event: onTriggerEnter | signal:" + signal, enabled=self.showDebug)
@@ -273,14 +285,16 @@ state busy
 			self.toggleKeywordRefsPaused()
 		endIf
 		if ( ! self.preventDefaultSignal )
+			self.signalCount += 1
 			self.onSignalling()
 		endIf
 		if ( ! self.signalContinuously )
 			utility.wait(self.postSignalDelay)
 		endIf
 		self.setActivationBlocked(false)
-		if ( ! self.signalOnce )
-			if ( ! self.signalContinuously || self.paused || self.ignoreBusy)
+		dd(self + "@ state: busy | signalLimit:" + self.signalLimit + " | signalCount: " + self.signalCount, enabled=self.showDebug)
+		if ( ! self.signalOnce && ternaryBool(self.signalLimit == 0, true, self.signalCount + 1 <= self.signalLimit) )
+			if ( ! self.signalContinuously || self.paused || self.ignoreBusy )
 				goToState("waiting")
 			else
 				float delay = clampf(            \
