@@ -29,16 +29,16 @@ bool property disablePlayerJournalTabs = false auto
 { Default: False - [toggleable] : Disable player journal controls. }
 int property disablePlayerPOVType = 0 auto
 { Default: 0 - [toggleable] : What system is disabling POV.
-	One of:
-	0 - Script (Default)
-	1 - Warewolf	
+  One of:
+  0 - Script (Default)
+  1 - Warewolf  
 }
 bool property stopPlayerCombat = false auto
 { Default: False - Stop the player from engaging in combat. }
 bool property transferPlayerControls = false auto
 { Default: False - [toggleable] : Transfer player controls to the default linked object reference. 
-	(Player will be hidden from view upon transfer and relocated to this trigger box until controls are handed back to the player through this script.
-	To return control back to the player ensure toggleControlSettings is also set to True and this trigger sends a signal a second time.)
+  (Player will be hidden from view upon transfer and relocated to this trigger box until controls are handed back to the player through this script.
+  To return control back to the player ensure toggleControlSettings is also set to True and this trigger sends a signal a second time.)
 }
 bool property transferPlayerCamera = false auto
 { Default: False - [toggleable] : Transfer the players camera to the non-keyword linked object reference. }
@@ -64,117 +64,117 @@ function setActorVisible(actor actorRef, bool visible=true)
 endFunction
 
 function onSignalling()
-	parent.onSignalling()	
-	if ( ! self.relayActivation )
-		if (self.transferPlayerControls && self.playerRef.getPlayerControls())
-			actor actorRef = self.linkedRef as actor
-			if (actorRef)
-				self.setRefEnabled(actorRef, true)
-				self.playerRef.stopCombat()
-				self.playerRef.setPlayerControls(false)
-				game.disablePlayerControls(false, false, false, false, true, true, true, true)
-				self.setActorVisible(self.playerRef, false)
-				self.playerRef.setMotionType(Motion_Keyframed)
-				utility.setIniBool("bDisablePlayerCollision:Havok", true)
-				self.playerRef.MoveTo(self)
-				actorRef.setPlayerControls(true)
-				actorRef.enableAI(true)
-				if (self.transferPlayerCamera)
-					game.setCameraTarget(actorRef)
-				endIf	
-			endIf
-		elseIf( ! self.playerRef.getPlayerControls() && self.toggleControlSettings ) ; revert user settings
-			actor actorRef = self.linkedRef as actor
-			if (actorRef)
-				actorRef.stopCombat()
-				actorRef.setPlayerControls(false)
-				self.playerRef.MoveTo(actorRef)
-				self.playerRef.setMotionType(Motion_Dynamic)
-				utility.setIniBool("bDisablePlayerCollision:Havok", false)
-				self.setActorVisible(self.playerRef, true)
-				self.animateRef(self.playerRef, "IdleForceDefaultState")
-				self.playerRef.clearLookAt()
-				if (self.transferPlayerCamera)
-					game.setCameraTarget(self.playerRef)
-				endIf	
-				game.enablePlayerControls()
-				self.playerRef.setPlayerControls(true)
-			endIf
-		elseIf ( ! self.transferPlayerControls )
-				actor actorRef = self.linkedRef as actor
-				if (actorRef && self.transferPlayerCamera)
-					if ( ! self.toggleSettingsReady )
-						game.setCameraTarget(actorRef)
-					else
-						game.setCameraTarget(self.playerRef)
-					endIf			
-				endIf	
-		endIf	
-	else
-		self.setRefActivated(self.linkedRef, self)
-	endIf
-	if (self.stopPlayerCombat)
-		self.playerRef.stopCombat()
-	endIf
-	bool individualControlsDisabled = self.disablePlayerMovement     || \
-																		self.disablePlayerFighting     || \
-																		self.disablePlayerCamSwitching || \
-																		self.disablePlayerLooking      || \
-																		self.disablePlayerSneaking     || \
-																		self.disablePlayerMenuControls || \
-																		self.disablePlayerActivation   || \
-																		self.disablePlayerJournalTabs  || \
-																		self.disablePlayerPOVType as bool
-	if ( ! self.toggleSettingsReady )	
-		if (self.disableAllPlayerControls)
-			game.disablePlayerControls(true, true, true, true, true, true, true, true)
-		else
-			if (individualControlsDisabled)
-				game.disablePlayerControls(       \
-					self.disablePlayerMovement,     \
-					self.disablePlayerFighting,     \
-					self.disablePlayerCamSwitching, \
-					self.disablePlayerLooking,      \
-					self.disablePlayerSneaking,     \
-					self.disablePlayerMenuControls, \
-					self.disablePlayerActivation,   \
-					self.disablePlayerJournalTabs,  \
-					self.disablePlayerPOVType       \
-				)
-			else
-				game.enablePlayerControls()
-			endIf		
-		endIf
-		if (self.hidePlayer)
-			self.setActorVisible(self.playerRef, false)
-		endIf
-		debug.setGodMode(self.enableGodMode)
-	elseIf (self.toggleControlSettings) ; revert user settings
-		if (individualControlsDisabled || self.disableAllPlayerControls)
-			game.enablePlayerControls()
-		endIf
-		if (self.hidePlayer)
-			self.setActorVisible(self.playerRef, true)
-		endIf
-		if (self.enableGodMode)
-			debug.setGodMode(false)
-		endIf	
-	endIf
+  parent.onSignalling() 
+  if ( ! self.relayActivation )
+    if (self.transferPlayerControls && self.playerRef.getPlayerControls())
+      actor actorRef = self.linkedRef as actor
+      if (actorRef)
+        self.setRefEnabled(actorRef, true)
+        self.playerRef.stopCombat()
+        self.playerRef.setPlayerControls(false)
+        game.disablePlayerControls(false, false, false, false, true, true, true, true)
+        self.setActorVisible(self.playerRef, false)
+        self.playerRef.setMotionType(Motion_Keyframed)
+        utility.setIniBool("bDisablePlayerCollision:Havok", true)
+        self.playerRef.MoveTo(self)
+        actorRef.setPlayerControls(true)
+        actorRef.enableAI(true)
+        if (self.transferPlayerCamera)
+          game.setCameraTarget(actorRef)
+        endIf 
+      endIf
+    elseIf( ! self.playerRef.getPlayerControls() && self.toggleControlSettings ) ; revert user settings
+      actor actorRef = self.linkedRef as actor
+      if (actorRef)
+        actorRef.stopCombat()
+        actorRef.setPlayerControls(false)
+        self.playerRef.MoveTo(actorRef)
+        self.playerRef.setMotionType(Motion_Dynamic)
+        utility.setIniBool("bDisablePlayerCollision:Havok", false)
+        self.setActorVisible(self.playerRef, true)
+        self.animateRef(self.playerRef, "IdleForceDefaultState")
+        self.playerRef.clearLookAt()
+        if (self.transferPlayerCamera)
+          game.setCameraTarget(self.playerRef)
+        endIf 
+        game.enablePlayerControls()
+        self.playerRef.setPlayerControls(true)
+      endIf
+    elseIf ( ! self.transferPlayerControls )
+        actor actorRef = self.linkedRef as actor
+        if (actorRef && self.transferPlayerCamera)
+          if ( ! self.toggleSettingsReady )
+            game.setCameraTarget(actorRef)
+          else
+            game.setCameraTarget(self.playerRef)
+          endIf     
+        endIf 
+    endIf 
+  else
+    self.setRefActivated(self.linkedRef, self)
+  endIf
+  if (self.stopPlayerCombat)
+    self.playerRef.stopCombat()
+  endIf
+  bool individualControlsDisabled = self.disablePlayerMovement     || \
+                                    self.disablePlayerFighting     || \
+                                    self.disablePlayerCamSwitching || \
+                                    self.disablePlayerLooking      || \
+                                    self.disablePlayerSneaking     || \
+                                    self.disablePlayerMenuControls || \
+                                    self.disablePlayerActivation   || \
+                                    self.disablePlayerJournalTabs  || \
+                                    self.disablePlayerPOVType as bool
+  if ( ! self.toggleSettingsReady ) 
+    if (self.disableAllPlayerControls)
+      game.disablePlayerControls(true, true, true, true, true, true, true, true)
+    else
+      if (individualControlsDisabled)
+        game.disablePlayerControls(       \
+          self.disablePlayerMovement,     \
+          self.disablePlayerFighting,     \
+          self.disablePlayerCamSwitching, \
+          self.disablePlayerLooking,      \
+          self.disablePlayerSneaking,     \
+          self.disablePlayerMenuControls, \
+          self.disablePlayerActivation,   \
+          self.disablePlayerJournalTabs,  \
+          self.disablePlayerPOVType       \
+        )
+      else
+        game.enablePlayerControls()
+      endIf   
+    endIf
+    if (self.hidePlayer)
+      self.setActorVisible(self.playerRef, false)
+    endIf
+    debug.setGodMode(self.enableGodMode)
+  elseIf (self.toggleControlSettings) ; revert user settings
+    if (individualControlsDisabled || self.disableAllPlayerControls)
+      game.enablePlayerControls()
+    endIf
+    if (self.hidePlayer)
+      self.setActorVisible(self.playerRef, true)
+    endIf
+    if (self.enableGodMode)
+      debug.setGodMode(false)
+    endIf 
+  endIf
 
-	if (self.forceFirstPersonCamera)
-		game.forceFirstPerson()
-	elseIf (self.forceThirdPersonCamera)
-		game.forceThirdPerson()
-	endIf
+  if (self.forceFirstPersonCamera)
+    game.forceFirstPerson()
+  elseIf (self.forceThirdPersonCamera)
+    game.forceThirdPerson()
+  endIf
 
-	self.toggleSettingsReady = ! self.toggleSettingsReady
-	
-	if (self.activateKeywordRefs)
-		self.setKeywordRefsActivated()
-	endIf
-	
-	if (self.killPlayer)
-		debug.setGodMode(false)
-		self.playerRef.kill(self.playerRef)
-	endIf	
+  self.toggleSettingsReady = ! self.toggleSettingsReady
+  
+  if (self.activateKeywordRefs)
+    self.setKeywordRefsActivated()
+  endIf
+  
+  if (self.killPlayer)
+    debug.setGodMode(false)
+    self.playerRef.kill(self.playerRef)
+  endIf 
 endFunction

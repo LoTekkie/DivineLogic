@@ -9,11 +9,11 @@ bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instad of an enable signal. }
 
 function onSignalling()
-	parent.onSignalling()
-	if ( ! self.relayActivation )
-		self.toggleRefEnabled(self.linkedRef, self.waitForAnimation)
-	else
-		self.setRefActivated(self.linkedRef, self)	
-	endIf
-	self.toggleKeywordRefsEnabled(self.waitForAnimation)
+  parent.onSignalling()
+  if ( ! self.relayActivation )
+    self.toggleRefEnabled(self.linkedRef, self.waitForAnimation)
+  else
+    self.setRefActivated(self.linkedRef, self)  
+  endIf
+  self.toggleKeywordRefsEnabled(self.waitForAnimation)
 endFunction

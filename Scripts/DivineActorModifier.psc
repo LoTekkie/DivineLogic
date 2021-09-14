@@ -39,7 +39,7 @@ bool property compareActorValuePercentage = false auto
 bool property toPlayer = false auto
 { Default: False - Set or compare an actor value to the player. }
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instead of a transfer controls signal. 
+{ Default: False - Send an activation signal to the non-keyword linked reference instead of a modify signal. 
 (Only used when not comparing, otherwise activation out only occurs when comparisons result in True) }
 
 function onSignalling()

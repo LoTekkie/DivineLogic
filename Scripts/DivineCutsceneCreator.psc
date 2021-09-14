@@ -80,52 +80,52 @@ bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 
 event onInit()
-	parent.onInit()
-	if ( ! self.nextMarker )
-		DivineCutsceneCreatorMarker linkedMarker = self.getLinkedRef() as DivineCutsceneCreatorMarker
-		if (linkedMarker)
-			self.nextMarker = linkedMarker
-			self.noMarkersAttached = false
-		endIf
-	endIf
+  parent.onInit()
+  if ( ! self.nextMarker )
+    DivineCutsceneCreatorMarker linkedMarker = self.getLinkedRef() as DivineCutsceneCreatorMarker
+    if (linkedMarker)
+      self.nextMarker = linkedMarker
+      self.noMarkersAttached = false
+    endIf
+  endIf
 endEvent
 
 ;/ Make the given DivineCutsceneCreatorMarker object property values conform to 
 this objects values of the same property name if those values are not default /; 
 function conformMarkerProperties(DivineCutsceneCreatorMarker markerRef)
-	markerRef.delay = conformFloat(markerRef.delay, self.m_delay, 0.0)
-	markerRef.speed = conformFloat(markerRef.speed, self.m_speed, 100.0)
-	markerRef.rotationSpeedClamp = clampf(conformFloat(markerRef.rotationSpeedClamp, self.m_rotationSpeedClamp, 0.0), 0, 100)
-	markerRef.tangentMagnitude = conformFloat(markerRef.tangentMagnitude, self.m_tangentMagnitude, 0.0)
-	markerRef.offsetX = conformFloat(markerRef.offsetX, self.m_offsetX, 0.0)
-	markerRef.offsetY = conformFloat(markerRef.offsetY, self.m_offsetY, 0.0)
-	markerRef.offsetZ = conformFloat(markerRef.offsetZ, self.m_offsetZ, 0.0)
-	markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
-	markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
-	markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
-	markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
-	markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
-	markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
-	markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
-	markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
-	markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
-	markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
-	markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
-	markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
+  markerRef.delay = conformFloat(markerRef.delay, self.m_delay, 0.0)
+  markerRef.speed = conformFloat(markerRef.speed, self.m_speed, 100.0)
+  markerRef.rotationSpeedClamp = clampf(conformFloat(markerRef.rotationSpeedClamp, self.m_rotationSpeedClamp, 0.0), 0, 100)
+  markerRef.tangentMagnitude = conformFloat(markerRef.tangentMagnitude, self.m_tangentMagnitude, 0.0)
+  markerRef.offsetX = conformFloat(markerRef.offsetX, self.m_offsetX, 0.0)
+  markerRef.offsetY = conformFloat(markerRef.offsetY, self.m_offsetY, 0.0)
+  markerRef.offsetZ = conformFloat(markerRef.offsetZ, self.m_offsetZ, 0.0)
+  markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
+  markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
+  markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
+  markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
+  markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
+  markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
+  markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
+  markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
+  markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
+  markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
+  markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
+  markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
 ; Apply fadeTo imageSpaceModifier in the given number of seconds
 function fadeOut(float delay)
-	utility.wait(delay)
-	fadeTo.apply()
-	game.fadeOutGame(false, true, 50, 1)
+  utility.wait(delay)
+  fadeTo.apply()
+  game.fadeOutGame(false, true, 50, 1)
 endFunction
 
 ; Apply the fadeFrom imageSpaceModifier in the given number of seconds
 function fadeIn(float delay)
-	utility.wait(delay)
-	game.fadeOutGame(false, true, 0.1, 0.1)
-	fadeTo.popTo(fadeFrom)
+  utility.wait(delay)
+  game.fadeOutGame(false, true, 0.1, 0.1)
+  fadeTo.popTo(fadeFrom)
 endFunction
 
 ; Set the given Actor reference visibility
@@ -140,166 +140,166 @@ endFunction
 
 ; Create a new camera actor
 actor function createCameraActor()
-		return self.placeAtMe(game.getForm(self.cameraActorFormId)) as Actor
+    return self.placeAtMe(game.getForm(self.cameraActorFormId)) as Actor
 endFunction
 
 ; Set which Actor reference should be used as our cutscene camera
 function setCameraTarget(actor actorRef)
-	game.setCameraTarget(actorRef)
-	game.forceThirdPerson()
-	game.forceFirstPerson()
+  game.setCameraTarget(actorRef)
+  game.forceThirdPerson()
+  game.forceFirstPerson()
 endFunction
 
 ; Start the cutscene
 Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
-	self.inCutScene = true
-	debug.setGodMode(true)
-	self.playerRef.stopCombat()
-	game.disablePlayerControls(true, true, true, true, true, true, true, true)
-	utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 0.0)
-	utility.setIniBool("bDisablePlayerCollision:Havok", true)
-	debug.toggleCollisions()
-	self.fadeOut(fadeOutDelay)
-	if ( ! self.cameraActor )
-		self.cameraActor = self.createCameraActor()
-		utility.wait(1.0)
-	endIf
-	if (self.nextMarker)
-		self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
-	endIf
-	self.cameraActor.enableAI(false)
-	self.cameraActor.setMotionType(Motion_Keyframed)
-	self.setActorVisible(self.cameraActor, false)
-	if (self.hidePlayer)
-		self.setActorVisible(self.playerRef, false)
-	endIf	
-	self.setCameraTarget(self.cameraActor)
-	self.fadeIn(fadeInDelay)
+  self.inCutScene = true
+  debug.setGodMode(true)
+  self.playerRef.stopCombat()
+  game.disablePlayerControls(true, true, true, true, true, true, true, true)
+  utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 0.0)
+  utility.setIniBool("bDisablePlayerCollision:Havok", true)
+  debug.toggleCollisions()
+  self.fadeOut(fadeOutDelay)
+  if ( ! self.cameraActor )
+    self.cameraActor = self.createCameraActor()
+    utility.wait(1.0)
+  endIf
+  if (self.nextMarker)
+    self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
+  endIf
+  self.cameraActor.enableAI(false)
+  self.cameraActor.setMotionType(Motion_Keyframed)
+  self.setActorVisible(self.cameraActor, false)
+  if (self.hidePlayer)
+    self.setActorVisible(self.playerRef, false)
+  endIf 
+  self.setCameraTarget(self.cameraActor)
+  self.fadeIn(fadeInDelay)
 endFunction
 
 ; End the cutscene
 Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
-	self.ignoreBusy = true
-	self.cutSceneLocked = true
-	self.fadeOut(fadeOutDelay)
-	self.cameraActor.stopTranslation()
-	utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
-	utility.setIniBool("bDisablePlayerCollision:Havok", false)
-	debug.toggleCollisions()
-	self.cameraActor.delete()
-	self.cameraActor = None
-	self.setCameraTarget(self.playerRef)
-	if (self.hidePlayer)
-		self.setActorVisible(self.playerRef, true)
-	endIf	
-	game.enablePlayerControls()
-	debug.setGodMode(false)
-	self.nextMarker = self.cameraActorHomeMarker
-	self.fadeIn(fadeInDelay)
-	self.inCutScene = false
-	if (self.cutsceneEndPause)
-		self.paused = true
-	endIf
+  self.ignoreBusy = true
+  self.cutSceneLocked = true
+  self.fadeOut(fadeOutDelay)
+  self.cameraActor.stopTranslation()
+  utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
+  utility.setIniBool("bDisablePlayerCollision:Havok", false)
+  debug.toggleCollisions()
+  self.cameraActor.delete()
+  self.cameraActor = None
+  self.setCameraTarget(self.playerRef)
+  if (self.hidePlayer)
+    self.setActorVisible(self.playerRef, true)
+  endIf 
+  game.enablePlayerControls()
+  debug.setGodMode(false)
+  self.nextMarker = self.cameraActorHomeMarker
+  self.fadeIn(fadeInDelay)
+  self.inCutScene = false
+  if (self.cutsceneEndPause)
+    self.paused = true
+  endIf
 endFunction
 
 function onSignalling()
-	if ( ! self.inCutScene && ! self.cutSceneLocked )
-		self.startCutScene(self.fadeInDelay, self.fadeOutDelay)
-		registerForSingleUpdate(0.0)
-		if (self.nextMarker)
-			self.setRefActivated(self.nextMarker, self)
-			self.cameraActorHomeMarker = self.nextMarker
-			self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
-		endIf
-	endIf
-	if ( ! self.nextMarker && self.noMarkersAttached )
-		objectReference destinationRef = self
-		if (self.m_toPlayer)
-			destinationRef = self.playerRef
-		endIf
-		bool[] axisLimits = self.buildAxisLimitsArray(   \
-			self.m_limitX, self.m_limitY, self.m_limitZ,   \
-			self.m_limitAX, self.m_limitAY, self.m_limitAZ \
-		)
-		self.translateRefTo(         \
-			self.cameraActor,          \
-			destinationRef,            \
-			axisLimits,								 \
-			self.m_speed,              \
-			self.m_rotationSpeedClamp, \
-			self.m_tangentMagnitude,   \
-			self.m_offsetX,            \
-			self.m_offsetY,            \
-			self.m_offsetZ,            \
-			self.m_offsetAX,           \
-			self.m_offsetAY,           \
-			self.m_offsetAZ,           \
-			self.m_matchRotation,      \
-			self.m_rotateOnArrival     \
-		)
-		if (self.relayActivation)
-			self.setRefActivated(self.linkedRef, self)	
-		endIf
-	elseIf (self.nextMarker)
-		self.conformMarkerProperties(self.nextMarker)
-		utility.wait(nextMarker.delay)
-		objectReference destinationRef = self.nextMarker
-		if (self.nextMarker.toPlayer)
-			destinationRef = self.playerRef
-		endIf
-		bool[] axisLimits = self.buildAxisLimitsArray(                              \
-			self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
-			self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
-		)
-		self.translateRefTo(                  \
-			self.cameraActor,                   \
-			destinationRef,                     \
-			axisLimits,                         \
-			self.nextMarker.speed,              \
-			self.nextMarker.rotationSpeedClamp, \
-			self.nextMarker.tangentMagnitude,   \
-			self.nextMarker.offsetX,            \
-			self.nextMarker.offsetY,            \
-			self.nextMarker.offsetZ,            \
-			self.nextMarker.offsetAX,           \
-			self.nextMarker.offsetAY,           \
-			self.nextMarker.offsetAZ,           \
-			self.nextMarker.matchRotation,      \
-			self.nextMarker.rotateOnArrival     \
-		)
-		self.setRefActivated(self.nextMarker, self)
-		self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
-	endIf
-	if ( ! self.nextMarker && self.inCutScene )
-		utility.wait(self.cutsceneEndDelay)
-		if ( ! self.cutSceneLocked )
-			self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
-		endIf
-	endIf
+  if ( ! self.inCutScene && ! self.cutSceneLocked )
+    self.startCutScene(self.fadeInDelay, self.fadeOutDelay)
+    registerForSingleUpdate(0.0)
+    if (self.nextMarker)
+      self.setRefActivated(self.nextMarker, self)
+      self.cameraActorHomeMarker = self.nextMarker
+      self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
+    endIf
+  endIf
+  if ( ! self.nextMarker && self.noMarkersAttached )
+    objectReference destinationRef = self
+    if (self.m_toPlayer)
+      destinationRef = self.playerRef
+    endIf
+    bool[] axisLimits = self.buildAxisLimitsArray(   \
+      self.m_limitX, self.m_limitY, self.m_limitZ,   \
+      self.m_limitAX, self.m_limitAY, self.m_limitAZ \
+    )
+    self.translateRefTo(         \
+      self.cameraActor,          \
+      destinationRef,            \
+      axisLimits,                \
+      self.m_speed,              \
+      self.m_rotationSpeedClamp, \
+      self.m_tangentMagnitude,   \
+      self.m_offsetX,            \
+      self.m_offsetY,            \
+      self.m_offsetZ,            \
+      self.m_offsetAX,           \
+      self.m_offsetAY,           \
+      self.m_offsetAZ,           \
+      self.m_matchRotation,      \
+      self.m_rotateOnArrival     \
+    )
+    if (self.relayActivation)
+      self.setRefActivated(self.linkedRef, self)  
+    endIf
+  elseIf (self.nextMarker)
+    self.conformMarkerProperties(self.nextMarker)
+    utility.wait(nextMarker.delay)
+    objectReference destinationRef = self.nextMarker
+    if (self.nextMarker.toPlayer)
+      destinationRef = self.playerRef
+    endIf
+    bool[] axisLimits = self.buildAxisLimitsArray(                              \
+      self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
+      self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
+    )
+    self.translateRefTo(                  \
+      self.cameraActor,                   \
+      destinationRef,                     \
+      axisLimits,                         \
+      self.nextMarker.speed,              \
+      self.nextMarker.rotationSpeedClamp, \
+      self.nextMarker.tangentMagnitude,   \
+      self.nextMarker.offsetX,            \
+      self.nextMarker.offsetY,            \
+      self.nextMarker.offsetZ,            \
+      self.nextMarker.offsetAX,           \
+      self.nextMarker.offsetAY,           \
+      self.nextMarker.offsetAZ,           \
+      self.nextMarker.matchRotation,      \
+      self.nextMarker.rotateOnArrival     \
+    )
+    self.setRefActivated(self.nextMarker, self)
+    self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
+  endIf
+  if ( ! self.nextMarker && self.inCutScene )
+    utility.wait(self.cutsceneEndDelay)
+    if ( ! self.cutSceneLocked )
+      self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
+    endIf
+  endIf
 endFunction
 
 state waiting
-	event onEndState()
-		if ( ! self.inCutScene && self.cutSceneLocked )
-			self.ignoreBusy = false
-			self.cutSceneLocked = false
-		endIF
-	endEvent
+  event onEndState()
+    if ( ! self.inCutScene && self.cutSceneLocked )
+      self.ignoreBusy = false
+      self.cutSceneLocked = false
+    endIF
+  endEvent
 endState
 
 function onUpdating()
-	if (self.inCutScene)
-		if (self.allowSkip)
-			debug.notification("Hold Enter to skip Cutscene")
-			if (input.isKeyPressed(self.skipCutSceneKeyId))
-				if ( ! self.cutSceneLocked )
-					self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
-					goToState("waiting")
-				endIf
-			endIf
-		else
-			debug.notification("In Cutscene")
-		endIf
-		registerForSingleUpdate(0.25)
-	endIf
+  if (self.inCutScene)
+    if (self.allowSkip)
+      debug.notification("Hold Enter to skip Cutscene")
+      if (input.isKeyPressed(self.skipCutSceneKeyId))
+        if ( ! self.cutSceneLocked )
+          self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
+          goToState("waiting")
+        endIf
+      endIf
+    else
+      debug.notification("In Cutscene")
+    endIf
+    registerForSingleUpdate(0.25)
+  endIf
 endFunction

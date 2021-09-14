@@ -24,48 +24,48 @@ bool property implode = false auto
 { Default: False - Should all linked object references be pulled toward the signaler? }
 
 event onInit()
-	parent.onInit()
-	if (self.explode && self.implode)
-		self.explode = false
-		self.heartbeat = true
-	endIf
+  parent.onInit()
+  if (self.explode && self.implode)
+    self.explode = false
+    self.heartbeat = true
+  endIf
 endEvent
 
 function onSignalling()
-	if (self.heartbeat)
-		self.explode = ! self.explode
-		self.implode = ! self.implode
-	endIf
-	if (forcePlayer)
-		self.impulseRef(       \
-			self.playerRef,      \
-			self.XforceVector,   \
-			self.YforceVector,   \
-			self.ZforceVector,   \
-			self.forceMagnitude, \
-			self.explode,        \
-			self.implode         \
-		)
-	endIf
-	self.impulseKeywordRefs( \
-		self.XforceVector,     \
-		self.YforceVector,     \
-		self.ZforceVector,     \
-		self.forceMagnitude,   \
-		self.explode,          \
-		self.implode           \
-	)
-	if ( ! self.relayActivation && self.linkedRef )
-		self.impulseRef(       \
-			self.linkedRef,      \
-			self.XforceVector,   \
-			self.YforceVector,   \
-			self.ZforceVector,   \
-			self.forceMagnitude, \
-			self.explode,        \
-			self.implode         \
-		)
-	else
-		self.setRefActivated(self.linkedRef, self)
-	endIf
+  if (self.heartbeat)
+    self.explode = ! self.explode
+    self.implode = ! self.implode
+  endIf
+  if (forcePlayer)
+    self.impulseRef(       \
+      self.playerRef,      \
+      self.XforceVector,   \
+      self.YforceVector,   \
+      self.ZforceVector,   \
+      self.forceMagnitude, \
+      self.explode,        \
+      self.implode         \
+    )
+  endIf
+  self.impulseKeywordRefs( \
+    self.XforceVector,     \
+    self.YforceVector,     \
+    self.ZforceVector,     \
+    self.forceMagnitude,   \
+    self.explode,          \
+    self.implode           \
+  )
+  if ( ! self.relayActivation && self.linkedRef )
+    self.impulseRef(       \
+      self.linkedRef,      \
+      self.XforceVector,   \
+      self.YforceVector,   \
+      self.ZforceVector,   \
+      self.forceMagnitude, \
+      self.explode,        \
+      self.implode         \
+    )
+  else
+    self.setRefActivated(self.linkedRef, self)
+  endIf
 endFunction

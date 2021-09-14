@@ -33,81 +33,81 @@ bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instad of an animation signal. }
 
 function onSignalling()
-	parent.onSignalling()
-	bool sendAsVariable = self.sendEventAsBoolVariable  || \ 
-												self.sendEventAsFloatVariable || \
-											  self.sendEventAsIntVariable
-	if ( ! self.relayActivation )
-		if ( ! sendAsVariable )
-			self.animateRef(          \
-				self.linkedRef,         \
-				self.animationEvent,    \
-				self.subGraphAnimation, \
-				self.gameBryoAnimation, \
-				self.gameBryoStartOver, \
-				self.gameBryoEaseInTime \
-			)
-		else
-			self.setRefAnimationVariable(    \
-				self.linkedRef,          			 \
-				self.animationEvent,           \
-				self.animationVariableValue,	 \
-				self.sendEventAsBoolVariable,  \
-				self.sendEventAsFloatVariable, \
-				self.sendEventAsIntVariable    \
-			)
-		endIf	
-	else
-		self.setRefActivated(self.linkedRef, self)	
-	endIf
-	if ( ! sendAsVariable )
-		self.animateKeywordRefs(   \
-	    self.animationEvent,     \
-	    self.subGraphAnimation,  \
-	    self.gameBryoAnimation,  \
-	    self.gameBryoStartOver,  \
-	    self.gameBryoEaseInTime  \
-	  )
-	else
-		self.setKeywordRefsAnimationVariable( \
-			self.animationEvent,   							\
-			self.animationVariableValue,				\
-			self.sendEventAsBoolVariable,				\
-			self.sendEventAsFloatVariable,			\
-			self.sendEventAsIntVariable					\
-		)
-	endIf
-	if (self.toPlayer)
-		if ( ! sendAsVariable )
-			self.animateRef(          \
-				self.playerRef,         \
-				self.animationEvent,    \
-				self.subGraphAnimation, \
-				self.gameBryoAnimation, \
-				self.gameBryoStartOver, \
-				self.gameBryoEaseInTime \
-			)
-		else
-			self.setRefAnimationVariable(    \
-				self.playerRef,          			 \
-				self.animationEvent,           \
-				self.animationVariableValue,	 \
-				self.sendEventAsBoolVariable,  \
-				self.sendEventAsFloatVariable, \
-				self.sendEventAsIntVariable    \
-			)
-		endIf	
-	endIf
-	actor ref = self.linkedRef as actor
-	if ( self.lookAtPlayer || self.lookAtPlayerWhilePathing && ! self.clearLookAt )
-		if (ref)
-			ref.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
-		endIf
-		self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
-	elseIf (self.clearLookAt)
-		if (ref)
-			ref.clearLookAt()
-		endIf
-		self.clearKeywordRefsLookAt()
-	endIf	
+  parent.onSignalling()
+  bool sendAsVariable = self.sendEventAsBoolVariable  || \ 
+                        self.sendEventAsFloatVariable || \
+                        self.sendEventAsIntVariable
+  if ( ! self.relayActivation )
+    if ( ! sendAsVariable )
+      self.animateRef(          \
+        self.linkedRef,         \
+        self.animationEvent,    \
+        self.subGraphAnimation, \
+        self.gameBryoAnimation, \
+        self.gameBryoStartOver, \
+        self.gameBryoEaseInTime \
+      )
+    else
+      self.setRefAnimationVariable(    \
+        self.linkedRef,                \
+        self.animationEvent,           \
+        self.animationVariableValue,   \
+        self.sendEventAsBoolVariable,  \
+        self.sendEventAsFloatVariable, \
+        self.sendEventAsIntVariable    \
+      )
+    endIf 
+  else
+    self.setRefActivated(self.linkedRef, self)  
+  endIf
+  if ( ! sendAsVariable )
+    self.animateKeywordRefs(   \
+      self.animationEvent,     \
+      self.subGraphAnimation,  \
+      self.gameBryoAnimation,  \
+      self.gameBryoStartOver,  \
+      self.gameBryoEaseInTime  \
+    )
+  else
+    self.setKeywordRefsAnimationVariable( \
+      self.animationEvent,                \
+      self.animationVariableValue,        \
+      self.sendEventAsBoolVariable,       \
+      self.sendEventAsFloatVariable,      \
+      self.sendEventAsIntVariable         \
+    )
+  endIf
+  if (self.toPlayer)
+    if ( ! sendAsVariable )
+      self.animateRef(          \
+        self.playerRef,         \
+        self.animationEvent,    \
+        self.subGraphAnimation, \
+        self.gameBryoAnimation, \
+        self.gameBryoStartOver, \
+        self.gameBryoEaseInTime \
+      )
+    else
+      self.setRefAnimationVariable(    \
+        self.playerRef,                \
+        self.animationEvent,           \
+        self.animationVariableValue,   \
+        self.sendEventAsBoolVariable,  \
+        self.sendEventAsFloatVariable, \
+        self.sendEventAsIntVariable    \
+      )
+    endIf 
+  endIf
+  actor ref = self.linkedRef as actor
+  if ( self.lookAtPlayer || self.lookAtPlayerWhilePathing && ! self.clearLookAt )
+    if (ref)
+      ref.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+    endIf
+    self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+  elseIf (self.clearLookAt)
+    if (ref)
+      ref.clearLookAt()
+    endIf
+    self.clearKeywordRefsLookAt()
+  endIf 
 endFunction
