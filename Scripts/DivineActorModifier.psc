@@ -44,18 +44,15 @@ bool property relayActivation = false auto
 
 function onSignalling()
   parent.onSignalling()
-  actor targetActor = self.linkedRef as actor
-  if (toPlayer) 
-    targetActor = self.playerRef
-  endIf
   bool shouldCompare = self.compareActorValue     || \  
                        self.compareActorBaseValue || \
                        self.compareActorValuePercentage
   if ( ! shouldCompare )
     if ( ! self.relayActivation )
-      if (targetActor)
+      actor actorRef = self.linkedRef as actor
+      if (actorRef)
         self.modifyActorValue(    \
-          targetActor,            \
+          actorRef,               \
           self.valueName,         \
           self.value,             \
           self.forceActorValue,   \
@@ -70,7 +67,7 @@ function onSignalling()
     endIf
     if (toPlayer)
       self.modifyActorValue(    \
-        targetActor,            \
+        self.playerRef,         \
         self.valueName,         \
         self.value,             \
         self.forceActorValue,   \
@@ -93,7 +90,7 @@ function onSignalling()
     bool playerResult = true
     if (toPlayer)
       playerResult = self.compareActorValue( \
-        targetActor,                         \
+        self.playerRef,                      \
         self.valueName,                      \
         self.value,                          \
         self.comparisonOperator,             \
