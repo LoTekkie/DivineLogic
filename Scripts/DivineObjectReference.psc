@@ -239,13 +239,13 @@ function modifyActorValue( \
 endFunction
 
 ; Ensure the actor value is equal to the expected value
-bool function compareActorValue(         \
-  actor actorRef,                        \
-  string valueName,                      \
-  float compareValue,                    \
-  string compareOperator="==",           \
-  bool asBase=false,                     \
-  bool asPercentage=false                \
+bool function compareActorValue( \
+  actor actorRef,                \
+  string valueName,              \
+  float compareValue,            \
+  string compareOperator="==",   \
+  bool asBase=false,             \
+  bool asPercentage=false        \
   )
   float currentValue = actorRef.getActorValue(valueName)
   
