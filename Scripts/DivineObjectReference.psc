@@ -199,8 +199,8 @@ endFunction
 ; Set an animation variable value on the given object reference
 function setRefAnimationVariable( \
   objectReference objectRef,      \
-  string variableName,            \
-  string variableValue,           \
+  string variableName="",         \
+  string variableValue="",        \
   bool isBool=false,              \
   bool isFloat=false,             \
   bool isInt=false                \
@@ -212,6 +212,64 @@ function setRefAnimationVariable( \
   elseIf (isInt)
     objectRef.setAnimationVariableInt(variableName, variableValue as int)  
   endIf 
+endFunction
+
+; Modify an actors value
+function modifyActorValue( \
+  actor actorRef,          \
+  string valueName="",     \
+  float value=0.0,         \
+  bool force=false,        \
+  bool damage=false,       \
+  bool mod=false,          \
+  bool restore=false,      \
+  bool set=true            \
+  )
+  if (force)
+    actorRef.forceActorValue(valueName, value)
+  elseIf (damage)
+    actorRef.damageActorValue(valueName, value)
+  elseIf (mod)
+    actorRef.modActorValue(valueName, value)
+  elseIf (restore)
+    actorRef.restoreActorValue(valueName, value)
+  elseIf (set) 
+    actorRef.setActorValue(valueName, value)
+  endIf
+endFunction
+
+; Ensure the actor value is equal to the expected value
+bool function compareActorValue(         \
+  actor actorRef,                        \
+  string valueName,                      \
+  float compareValue,                    \
+  string compareOperator="==",           \
+  bool asBase=false,                     \
+  bool asPercentage=false                \
+  )
+  float currentValue = actorRef.getActorValue(valueName)
+  
+  if (asBase)
+    currentValue = actorRef.getBaseActorValue(valueName)
+  elseIf (asPercentage)
+    currentValue = actorRef.getActorValuePercentage(valueName) * 100
+  endIf
+
+  if (compareOperator == "==")
+    return currentValue == compareValue
+  elseif (compareOperator == "!=")
+    return currentValue != compareValue
+  elseIf (compareOperator == ">")
+    return currentValue > compareValue
+  elseIf (compareOperator == ">=")
+    return currentValue >= compareValue
+  elseIf (compareOperator == "<")
+    return currentValue < compareValue
+  elseIf (compareOperator == "<=")
+    return currentValue <= compareValue
+  else 
+    return false  
+  endIf  
 endFunction
 
 ; Wait for the given objectReference to be at the desired destination
@@ -656,12 +714,12 @@ function impulseKeywordRefs(                \
 endFunction
 
 ; Play an animation for all keyword-linked object references and or actors
-function animateKeywordRefs( \
-  string animationEvent,     \
-  bool subGraph=false,       \
-  bool gamebryo=false,       \
-  bool startOver=false,      \
-  float easeInTime=0.0       \
+function animateKeywordRefs(  \
+  string animationEvent="",   \
+  bool subGraph=false,        \
+  bool gamebryo=false,        \
+  bool startOver=false,       \
+  float easeInTime=0.0        \
   )
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
@@ -680,10 +738,52 @@ function animateKeywordRefs( \
   endWhile    
 endFunction
 
+; Modify actor vales for all actor base keyword-linked object references
+function modifyKeywordActorsValue( \
+  string valueName="",             \
+  float value=0.0,                 \
+  bool force=false,                \
+  bool damage=false,               \
+  bool mod=false,                  \
+  bool restore=false,              \
+  bool set=true                    \
+  )
+  int refIndex = self.keywordRefs.length - 1
+  while (refIndex >= 0)
+    actor ref = self.keywordRefs[refIndex] as actor
+    if (ref)
+      self.modifyActorValue(ref, valueName, value, force, damage, mod, restore, set)
+    endIf
+    refIndex -= 1
+  endWhile    
+endFunction
+
+; Ensure the actor value is equal to the expected value for all keyword-linked object references
+bool function compareKeywordActorsValue( \
+  string valueName,                      \
+  float compareValue,                    \
+  string compareOperator="==",           \
+  bool asBase=false,                     \
+  bool asPercentage=false                \
+  )
+  int refIndex = self.keywordRefs.length - 1
+  while (refIndex >= 0)
+    actor ref = self.keywordRefs[refIndex] as actor
+    if (ref)
+      bool result = self.compareActorValue(ref, valueName, compareValue, compareOperator, asBase, asPercentage)
+      if ( ! result )
+        return false
+      endIf  
+    endIf
+    refIndex -= 1
+  endWhile
+  return true
+endFunction
+
 ; Set an animation variable value on all keyword-linked object references
 function setKeywordRefsAnimationVariable( \
-  string variableName,                    \
-  string variableValue,                   \ 
+  string variableName="",                 \
+  string variableValue="",                \ 
   bool isBool=false,                      \
   bool isFloat=false,                     \
   bool isInt=false                        \
@@ -703,7 +803,7 @@ function setKeywordRefsAnimationVariable( \
     endIf
     refIndex -= 1
   endWhile    
-endFunction  
+endFunction
 
 ; Build an array of axis limits to pass to translation and warping functions
 bool[] function buildAxisLimitsArray(bool limX=false, bool limY=false, bool limZ=false, bool limAX=false, bool limAY=false, bool limAZ=false)
