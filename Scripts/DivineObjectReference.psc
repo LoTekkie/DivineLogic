@@ -805,6 +805,49 @@ function setKeywordRefsAnimationVariable( \
   endWhile    
 endFunction
 
+; Transfer all items from all keyword-linked object references to the target ref
+function transferKeywordRefsItemsTo(objectReference targetRef, bool keepOwnership=false, bool transferQuestItems=false)
+  int refIndex = self.keywordRefs.length - 1
+  while (refIndex >= 0)
+    objectReference ref = self.keywordRefs[refIndex]
+    if (ref)
+      ref.removeAllItems(targetRef, keepOwnership, transferQuestItems)
+    endIf
+    refIndex -= 1
+  endWhile    
+endFunction
+
+; Transfer all items from the target ref to the first available keyword-linked object reference 
+function tranferItemsToKeywordRefsFrom(objectReference targetRef, bool keepOwnership=false, bool transferQuestItems=false, bool randomize=false)
+  if ( ! randomize )
+    int refIndex = self.keywordRefs.length - 1
+    while (refIndex >= 0)
+      objectReference ref = self.keywordRefs[refIndex]
+      if (ref)
+        targetRef.removeAllItems(ref, keepOwnership, transferQuestItems)
+        return
+      endIf
+      refIndex -= 1
+    endWhile
+  else 
+    int refIndex = self.keywordRefs.length - 1
+    int lastRefIndex = -1
+    while (refIndex >= 0)
+      objectReference ref = self.keywordRefs[refIndex]
+      if (ref)
+        lastRefIndex = refIndex
+        refIndex = 0
+      endIf
+      refIndex -= 1
+    endWhile
+    if (lastRefIndex >= 0)
+      int randIndex = utility.randomInt(0, lastRefIndex)
+      objectReference randRef = self.keywordRefs[randIndex]
+      targetRef.removeAllItems(randRef, keepOwnership, transferQuestItems)
+    endIf
+  endIf 
+endFunction  
+
 ; Build an array of axis limits to pass to translation and warping functions
 bool[] function buildAxisLimitsArray(bool limX=false, bool limY=false, bool limZ=false, bool limAX=false, bool limAY=false, bool limAZ=false)
   bool[] axisLimits = new bool[6]

@@ -121,3 +121,48 @@ function setLocalAngle(objectReference objectRef, float localX, float localY, fl
   float angleY = localY * Math.cos(LocalZ) - localX * Math.sin(localZ)
   objectRef.setAngle(angleX, angleY, localZ)
 endFunction
+
+; Removes blank elements by shifting all elements down.
+  ;-----------\
+  ;Description \  Author: Chesko
+  ;----------------------------------------------------------------
+  ;Removes blank elements by shifting all elements down.
+  ;Optionally starts sorting from element i.
+
+  ;-------------\
+  ;Return Values \
+  ;----------------------------------------------------------------
+  ;       false = No sorting required
+  ;       true  = Success
+bool function arraySort(objectReference[] myArray, int i = 0) global
+   bool bFirstNoneFound = false
+   int iFirstNonePos = i
+   while i < myArray.length
+      if myArray[i] == none
+         if bFirstNoneFound == false
+          bFirstNoneFound = true
+          iFirstNonePos = i
+          i += 1
+         else
+          i += 1
+         endIf
+      else
+         if bFirstNoneFound == true
+         ;check to see if it's a couple of blank entries in a row
+          if !(myArray[i] == none)
+             ;notification("Moving element " + i + " to index " + iFirstNonePos)
+             myArray[iFirstNonePos] = myArray[i]
+             myArray[i] = none
+             ;Call this function recursively until it returns
+             arraySort(myArray, iFirstNonePos + 1)
+             return true
+          else
+             i += 1
+          endIf
+         else
+          i += 1
+         endIf
+      endIf
+   endWhile
+   return false
+endFunction
