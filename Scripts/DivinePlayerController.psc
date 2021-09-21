@@ -33,6 +33,8 @@ int property disablePlayerPOVType = 0 auto
   0 - Script (Default)
   1 - Warewolf  
 }
+bool property disablePlayerFastTravel = false auto
+{ Default: False - [toggleable] : Disable the players ability to fast travel. }
 bool property stopPlayerCombat = false auto
 { Default: False - Stop the player from engaging in combat. }
 bool property transferPlayerControls = false auto
@@ -52,6 +54,10 @@ bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instead of a transfer controls signal. }
 bool property activateKeywordRefs = false auto
 { Default: False - Should all keyword-linked object references be activated? }
+int property triggerScreenBloodAmount = 0 auto
+{ Default: 0 - Trigger on-screen blood splatter with any value greater than 0. Value is the number of droplets to put on the screen. }
+bool property setBeastForm = false auto
+{ Default: False - [toggleable] : Shoud the player enter beast form? }
 bool property toggleSettingsReady = false auto hidden
 
 function setActorVisible(actor actorRef, bool visible=true)
@@ -64,7 +70,10 @@ function setActorVisible(actor actorRef, bool visible=true)
 endFunction
 
 function onSignalling()
-  parent.onSignalling() 
+  parent.onSignalling()
+  if (self.triggerScreenBloodAmount > 0)
+    game.triggerScreenBlood(self.triggerScreenBloodAmount)
+  endIf  
   if ( ! self.relayActivation )
     if (self.transferPlayerControls && self.playerRef.getPlayerControls())
       actor actorRef = self.linkedRef as actor
@@ -125,7 +134,7 @@ function onSignalling()
                                     self.disablePlayerActivation   || \
                                     self.disablePlayerJournalTabs  || \
                                     self.disablePlayerPOVType as bool
-  if ( ! self.toggleSettingsReady ) 
+  if ( ! self.toggleSettingsReady ) ; apply user settings
     if (self.disableAllPlayerControls)
       game.disablePlayerControls(true, true, true, true, true, true, true, true)
     else
@@ -148,6 +157,12 @@ function onSignalling()
     if (self.hidePlayer)
       self.setActorVisible(self.playerRef, false)
     endIf
+    if (self.disablePlayerFastTravel)
+      game.enableFastTravel(false)
+    endIf
+    if (self.setBeastForm)
+      game.setBeastForm(true)
+    endIf  
     debug.setGodMode(self.enableGodMode)
   elseIf (self.toggleControlSettings) ; revert user settings
     if (individualControlsDisabled || self.disableAllPlayerControls)
@@ -156,23 +171,26 @@ function onSignalling()
     if (self.hidePlayer)
       self.setActorVisible(self.playerRef, true)
     endIf
+    if (self.disablePlayerFastTravel)
+      game.enableFastTravel(true)
+    endIf
+    if (self.setBeastForm)
+      game.setBeastForm(false)
+    endIf  
     if (self.enableGodMode)
       debug.setGodMode(false)
     endIf 
   endIf
-
+  ; non toggled adjustments
   if (self.forceFirstPersonCamera)
     game.forceFirstPerson()
   elseIf (self.forceThirdPersonCamera)
     game.forceThirdPerson()
   endIf
-
   self.toggleSettingsReady = ! self.toggleSettingsReady
-  
   if (self.activateKeywordRefs)
     self.setKeywordRefsActivated()
   endIf
-  
   if (self.killPlayer)
     debug.setGodMode(false)
     self.playerRef.kill(self.playerRef)

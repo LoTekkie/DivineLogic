@@ -41,3 +41,9 @@ bool property matchRotation = false auto
 { Default: false - Should the translating objects match the rotation of this marker when they arrive? }
 bool property toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
+bool property shakeCamera = false auto
+{ Default: False - Shake the player camera? }
+float property cameraShakeStrength = 0.5 auto
+{ Default: 0.5 - How strong should the camera shake? (Only used when the shakeCamera property is set to True) }
+float property cameraShakeDuration = 0.0 auto
+{ Default: 0.0 - How long should the camera shake? (Only used when the shakeCamera property is set to True) }

@@ -99,33 +99,37 @@ function toggleKeywordRefsPaused()
 endFunction
 
 ; Make boolean comparisons on the signaled property of all keyword-linked object references
-bool function compareKeywordRefs(bool andCompare, bool notCompare, bool orCompare)
-  int refIndex = self.keywordRefs.length - 1
-  bool result = false
-  while (refIndex >= 0)
-    DivineSignaler divineRef = self.keywordRefs[refIndex] as DivineSignaler
-    if (divineRef)
-      result = true
-      if (andCompare)
-        if ( ! divineRef.signaled ) ; found false
-          return false
+bool function compareKeywordRefs(bool andCompare=false, bool notCompare=false, bool orCompare=false, bool xorCompare=false)
+  if ( ! xorCompare )
+    int refIndex = self.keywordRefs.length - 1
+    bool result = false
+    while (refIndex >= 0)
+      DivineSignaler divineRef = self.keywordRefs[refIndex] as DivineSignaler
+      if (divineRef)
+        result = true
+        if (andCompare)
+          if ( ! divineRef.signaled ) ; found false
+            return false
+          endIf
+        elseIf (notCompare)
+          if (divineRef.signaled) ; found true
+            return false
+          endIf
+        elseIf (orCompare)
+          result = false
+          if (divineRef.signaled)
+            return true ; at least one true found
+          endIf  
+        else
+          return false ; no comparisons made
         endIf
-      elseIf (notCompare)
-        if (divineRef.signaled) ; found true
-          return false
-        endIf
-      elseIf (orCompare)
-        result = false
-        if (divineRef.signaled)
-          return true ; at least one true found
-        endIf
-      else
-        return false ; no comparisons made
       endIf
-    endIf
-    refIndex -= 1
-  endWhile
-  return result
+      refIndex -= 1
+    endWhile
+    return result
+  else
+    return !self.compareKeywordRefs(andCompare=true) && self.compareKeywordRefs(orCompare=true)
+  endIf  
 endFunction
 
 ; Get offsets from the calculated collective center of all attched object references

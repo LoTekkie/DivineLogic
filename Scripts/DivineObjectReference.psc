@@ -255,21 +255,7 @@ bool function compareActorValue( \
     currentValue = actorRef.getActorValuePercentage(valueName) * 100
   endIf
 
-  if (compareOperator == "==")
-    return currentValue == compareValue
-  elseif (compareOperator == "!=")
-    return currentValue != compareValue
-  elseIf (compareOperator == ">")
-    return currentValue > compareValue
-  elseIf (compareOperator == ">=")
-    return currentValue >= compareValue
-  elseIf (compareOperator == "<")
-    return currentValue < compareValue
-  elseIf (compareOperator == "<=")
-    return currentValue <= compareValue
-  else 
-    return false  
-  endIf  
+  return compareFloatValues(currentValue, compareOperator, compareValue)
 endFunction
 
 ; Wait for the given objectReference to be at the desired destination
@@ -292,6 +278,7 @@ function waitForRefAt(                  \
     float destAZ = destination[5]
     while ( ! self.refAnglesAt(objectRef, destAx, destAy, destAz) )
       ; wait for object to finish translation
+      dd(self + "@ function: waitForRefAt | refAnglesAt: " + self.refAnglesAt(objectRef, destAx, destAy, destAz), enabled=self.showDebug)
     endWhile
   endIf
 endFunction
@@ -330,10 +317,15 @@ bool function refAnglesAt(              \
   objectReference objectRef,            \
   float posAx, float posAy, float posAz \
   )
+  float tolerance = 0.001
   float refAx = objectRef.getAngleX()
   float refAy = objectRef.getAngleY()
   float refAz = objectRef.getAngleZ()
-  if (refAx != posAx || refAy != posAy || refAz != posAz)
+  if (refAz >= 360.0)
+    refAz -= 360.0 * math.floor(math.ceiling(refAz)/360.0)
+  endIf
+  dd(self + "@ function: refAnglesAt | "+ refAX + "=" + posAx + " | " + refAY + "=" + posAy + " | " + refAz + "=" + posAz + " | realPosAz " + objectRef.getAngleZ(), enabled=self.showDebug)
+  if (!floatsWithin(posAx, refAx) || !floatsWithin(posAy, refAy) || !floatsWithin(posAz, refAz))
     return false
   endIf
   return true

@@ -21,7 +21,7 @@ int property skipCutSceneKeyId = 28 auto hidden
 { Key id used for skipping cutscenes }
 actor property cameraActor auto hidden
 { Reference to the actor used to view cutscenes through }
-int property cameraActorFormId = 0x00089A85 auto hidden ;0x0010D13E
+int property cameraActorFormId = 0x020239EA auto hidden ;0x020239EA;
 { Interal reference ID used as the camera actor }
 bool property cutSceneLocked = false auto hidden
 { Internal state of the cutscene creator, prevents starting and ending multiple times. }
@@ -73,7 +73,12 @@ bool property m_limitAY = false auto
 { Default: False - Prevent translation of the aY axis. }
 bool property m_limitAZ = false auto
 { Default: False - Prevent translation of the aZ axis. }
-
+bool property m_shakeCamera = false auto
+{ Default: False - Shake the player camera? }
+float property m_cameraShakeStrength = 0.5 auto
+{ Default: 0.5 - How strong should the camera shake? (Only used when the shakeCamera property is set to True) }
+float property m_cameraShakeDuration = 0.0 auto
+{ Default: 0.0 - How long should the camera shake? (Only used when the shakeCamera property is set to True) }
 bool property m_matchRotation = false auto
 { Default: False - Should the translating objects match the rotation of this marker when they arrive? }
 bool property m_toPlayer = false auto
@@ -112,6 +117,9 @@ function conformMarkerProperties(DivineCutsceneCreatorMarker markerRef)
   markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
   markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
+  markerRef.shakeCamera = conformBool(markerRef.shakeCamera, self.m_shakeCamera, false)
+  markerRef.cameraShakeStrength = conformFloat(markerRef.cameraShakeStrength, self.m_cameraShakeStrength, 0.5)
+  markerRef.cameraShakeDuration = conformFloat(markerRef.cameraShakeDuration, self.m_cameraShakeDuration, 0.0)
 endFunction
 
 ; Apply fadeTo imageSpaceModifier in the given number of seconds
@@ -146,8 +154,8 @@ endFunction
 ; Set which Actor reference should be used as our cutscene camera
 function setCameraTarget(actor actorRef)
   game.setCameraTarget(actorRef)
-  game.forceThirdPerson()
   game.forceFirstPerson()
+  game.forceThirdPerson()
 endFunction
 
 ; Start the cutscene
@@ -164,11 +172,11 @@ Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
     self.cameraActor = self.createCameraActor()
     utility.wait(1.0)
   endIf
+  self.cameraActor.enableAI(false)
+  self.cameraActor.setMotionType(Motion_Keyframed)
   if (self.nextMarker)
     self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
   endIf
-  self.cameraActor.enableAI(false)
-  self.cameraActor.setMotionType(Motion_Keyframed)
   self.setActorVisible(self.cameraActor, false)
   if (self.hidePlayer)
     self.setActorVisible(self.playerRef, false)
@@ -181,13 +189,14 @@ endFunction
 Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.ignoreBusy = true
   self.cutSceneLocked = true
+  dd("Ending Cutscene", enabled=true)
   self.fadeOut(fadeOutDelay)
   self.cameraActor.stopTranslation()
   utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
   utility.setIniBool("bDisablePlayerCollision:Havok", false)
-  debug.toggleCollisions()
   self.cameraActor.delete()
   self.cameraActor = None
+  debug.toggleCollisions()
   self.setCameraTarget(self.playerRef)
   if (self.hidePlayer)
     self.setActorVisible(self.playerRef, true)
@@ -237,6 +246,9 @@ function onSignalling()
       self.m_matchRotation,      \
       self.m_rotateOnArrival     \
     )
+    if (self.m_shakeCamera)
+       game.shakeCamera(self.playerRef, self.m_cameraShakeStrength, self.m_cameraShakeDuration)
+    endIf  
     if (self.relayActivation)
       self.setRefActivated(self.linkedRef, self)  
     endIf
@@ -267,6 +279,9 @@ function onSignalling()
       self.nextMarker.matchRotation,      \
       self.nextMarker.rotateOnArrival     \
     )
+    if (self.nextMarker.shakeCamera)
+      game.shakeCamera(self.playerRef, self.nextMarker.cameraShakeStrength, self.nextMarker.cameraShakeDuration)
+    endIf  
     self.setRefActivated(self.nextMarker, self)
     self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
   endIf

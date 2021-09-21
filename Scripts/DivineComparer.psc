@@ -24,9 +24,16 @@ bool property orCompare = false auto
   All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
 
+bool property xorCompare = false auto
+{ Default: False - Compare keyword-linked object references using the "XOR" boolean operator 
+  (examples: [1, 1] => False | [1, 0] => True | [0, 0] => False).
+  When comparison is successful an activation signal is sent to the non-keyword linked object reference.
+  All keyword-linked objects must be of type: DivineObjectRefernce. 
+  Must have at least 1 keyword object linked for comparisons. }
+
 function onSignalling()
   parent.onSignalling()
-  bool result = self.compareKeywordRefs(andCompare, notCompare, orCompare)
+  bool result = self.compareKeywordRefs(andCompare, notCompare, orCompare, xorCompare)
   dd(self + "@ function: compareKeywordRefs | result: " + result, enabled=self.showDebug)
   if (result)
     self.setRefActivated(self.linkedRef, self)
