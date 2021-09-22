@@ -38,6 +38,18 @@ function setKeywordRefs()
   endIf 
 endFunction
 
+; Clear all keyword-linked object references
+function  clearKeywordRefs()
+  int refIndex = self.keywordRefs.length - 1
+  while (refIndex >= 0)
+    objectReference ref = self.keywordRefs[refIndex]
+    if (ref)
+      self.keywordRefs[refIndex] = none
+    endIf
+    refIndex -= 1
+  endWhile
+endFunction
+
 ; Set the given objectReference active
 function setRefActivated(objectReference objectRef, objectReference activatorRef)
   if (objectRef && activatorRef)
@@ -341,8 +353,22 @@ bool function refPosAt(               \
   float refZ = objectRef.getPositionZ()
   if (refX != posX || refY != posY || refZ != posZ)
     return false
-  endIf
+  endIf 
   return true
+endFunction
+
+; Delete the given object reference
+function deleteRef(objectReference objectRef, bool whenAble)
+  DivineSignaler signalerRef = objectRef as DivineSignaler
+  if (signalerRef)
+    signalerRef.destroySelf()
+  endIf
+  if (whenAble)
+    objectRef.deleteWhenAble()
+  else
+    objectRef.delete()
+  endIf
+  objectRef.setDestroyed(true)  
 endFunction
 
 ; Toggle enabling of each keyword-linked object reference
@@ -838,6 +864,18 @@ function tranferItemsToKeywordRefsFrom(objectReference targetRef, bool keepOwner
       targetRef.removeAllItems(randRef, keepOwnership, transferQuestItems)
     endIf
   endIf 
+endFunction
+
+; Delete all keyword-linked object references
+function deleteKeywordRefs(bool whenAble)
+  int refIndex = self.keywordRefs.length - 1
+  while (refIndex >= 0)
+    objectReference ref = self.keywordRefs[refIndex]
+    if (ref)
+      self.deleteRef(ref, whenAble)
+    endIf
+    refIndex -= 1
+  endWhile    
 endFunction  
 
 ; Build an array of axis limits to pass to translation and warping functions

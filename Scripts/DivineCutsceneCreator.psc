@@ -1,6 +1,6 @@
 scriptName DivineCutsceneCreator extends DivineSignaler
 ; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man 
-;TODO: Figure out why actor is not rotating in angular axes
+;TODO: Figure out why actor is not rotating in angular axis, add moveTo marker instead of translate to, add fades to markers
 import DivineUtils
 
 DivineCutsceneCreatorMarker property nextMarker auto hidden
@@ -21,7 +21,7 @@ int property skipCutSceneKeyId = 28 auto hidden
 { Key id used for skipping cutscenes }
 actor property cameraActor auto hidden
 { Reference to the actor used to view cutscenes through }
-int property cameraActorFormId = 0x020239EA auto hidden ;0x020239EA;
+int property cameraActorFormId = 0x0010D13E auto hidden ;0x020239EA;
 { Interal reference ID used as the camera actor }
 bool property cutSceneLocked = false auto hidden
 { Internal state of the cutscene creator, prevents starting and ending multiple times. }
