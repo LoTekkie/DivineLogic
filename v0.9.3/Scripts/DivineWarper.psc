@@ -84,6 +84,7 @@ function conformMarkerProperties(DivineWarperMarker markerRef)
 endFunction
 
 function onSignalling()
+  parent.onSignalling()
   if ( ! self.nextMarker && self.noMarkersAttached )
     objectReference destinationRef = self
     if (self.m_toPlayer)
@@ -166,6 +167,8 @@ function onSignalling()
       )
     endIf
     self.setRefActivated(self.nextMarker, self)
-    self.nextMarker = self.nextMarker.linkedRef as DivineWarperMarker
+    if (self.nextMarker.linkedRef as DivineWarperMarker)
+      self.nextMarker = self.nextMarker.linkedRef as DivineWarperMarker
+    endIf
   endIf
 endFunction

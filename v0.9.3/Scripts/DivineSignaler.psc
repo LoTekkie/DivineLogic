@@ -187,6 +187,15 @@ float[] function getKeywordRefSpacingOffsets()
   return offsets
 endFunction
 
+; Redner this signaler useless
+function destroySelf()
+  self.linkedRef = none
+  self.clearKeywordRefs()
+  goToState("destroyed")
+  self.setRefEnabled(self, false)
+  self.onDestroyed()
+endFunction  
+
 ;/ Event method used to customize behavior within the "busy" state
 To be overriden within child scripts /;
 function onSignalling()
@@ -196,6 +205,11 @@ endFunction
 ;/ Event method used to customize behavior within the onUpdating event
 of both the busy and waiting states. To be overriden within child scripts /;
 function onUpdating()
+endFunction
+
+;/ Event method used to customize behavior when the signaler has been destroyed
+To be overriden within child scripts /;
+function onDestroyed()
 endFunction
 
 ; Ensure all rotation angles on this signaler are not 0 to allow for player activation 
