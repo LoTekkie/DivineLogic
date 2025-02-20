@@ -164,6 +164,7 @@ endFunction
 bool function floatsWithin(float value, float compareValue, float tolerance=0.01) global
   value = Math.abs(value)
   compareValue = Math.abs(compareValue)
+
   if (value == compareValue)
     return true
   elseif (value > compareValue)
