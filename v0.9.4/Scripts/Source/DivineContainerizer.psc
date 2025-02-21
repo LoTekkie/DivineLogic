@@ -3,6 +3,10 @@ scriptName DivineContainerizer extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 bool property transferFromContainer = false auto
 { Default: False - Transfers all items away from the non-keyword linked reference.
   By default, items are transferred to the non-keyword linked reference unless transferToPlayer is set to True. }

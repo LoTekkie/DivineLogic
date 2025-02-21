@@ -23,7 +23,7 @@ function onSignalling()
   if (self.scaleRandomly)
     newScale = utility.randomFloat(scaleMin, scaleMax)
   elseIf(self.toggleMinMax)
-    dd(self + "@ signaled: " + self.signaled, enabled=self.showDebug)
+    log(self + "@ signaled: " + self.signaled, enabled=self.showDebug)
     if ( ! self.signaled )
       newScale = scaleMax
     else

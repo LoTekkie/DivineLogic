@@ -3,67 +3,42 @@ scriptName DivineComparer extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 bool property andCompare = false auto
-{ Default: False - Compare keyword-linked object references using the "AND" boolean operator.
-  Example: [1, 1] => True | [1, 0] => False | [0, 0] => False.
+{ Default: False - Compare keyword-linked object references using the "AND" boolean operator 
+  (examples: [1, 1] => True | [1, 0] => False | [0, 0] => False).
+  When comparison is successful an activation signal is sent to the non-keyword linked object reference.
+  All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
 
 bool property notCompare = false auto
-{ Default: False - Compare keyword-linked object references using the "NOT" boolean operator.
-  Example: [0, 0] => True | [0, 1] => False | [1, 1] => False.
+{ Default: False - Compare keyword-linked object references using the "NOT" boolean operator 
+  (examples: [0, 0] => True | [0, 1] => False | [1, 1] => False).
+  When comparison is successful an activation signal is sent to the non-keyword linked object reference.
+  All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
 
 bool property orCompare = false auto
-{ Default: False - Compare keyword-linked object references using the "OR" boolean operator.
-  Example: [1, 1] => True | [1, 0] => True | [0, 0] => False.
+{ Default: False - Compare keyword-linked object references using the "OR" boolean operator 
+  (examples: [1, 1] => True | [1, 0] => True | [0, 0] => False).
+  When comparison is successful an activation signal is sent to the non-keyword linked object reference.
+  All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
 
 bool property xorCompare = false auto
-{ Default: False - Compare keyword-linked object references using the "XOR" boolean operator.
-  Example: [1, 1] => False | [1, 0] => True | [0, 0] => False.
+{ Default: False - Compare keyword-linked object references using the "XOR" boolean operator 
+  (examples: [1, 1] => False | [1, 0] => True | [0, 0] => False).
+  When comparison is successful an activation signal is sent to the non-keyword linked object reference.
+  All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
-
-; =========================
-;      MAIN FUNCTION
-; =========================
 
 function onSignalling()
   parent.onSignalling()
-  
-  ; Perform the boolean comparison based on properties
-  bool result = false
-  int trueCount = 0
-  int falseCount = 0
-
-  ; Iterate through all keyword-linked object references
-  int refIndex = self.keywordRefs.length - 1
-  while (refIndex >= 0)
-    DivineObjectReference ref = self.keywordRefs[refIndex] as DivineObjectReference
-    if (ref)
-      if (ref.signaled)
-        trueCount += 1
-      else
-        falseCount += 1
-      endIf
-    endIf
-    refIndex -= 1
-  endWhile
-
-  ; Perform comparisons based on properties
-  if (andCompare)
-    result = (trueCount == self.keywordRefs.length)
-  elseIf (notCompare)
-    result = (trueCount == 0)
-  elseIf (orCompare)
-    result = (trueCount > 0)
-  elseIf (xorCompare)
-    result = (trueCount == 1)
-  endIf
-
-  ; Debugging output
-  dd(self + "@ function: onSignalling | result: " + result, enabled=self.showDebug)
-
-  ; Activate linked reference if result is true
+  bool result = self.compareKeywordRefs(andCompare, notCompare, orCompare, xorCompare)
+  log(self + "@ function: compareKeywordRefs | result: " + result, enabled=self.showDebug)
   if (result)
     self.setRefActivated(self.linkedRef, self)
   endIf

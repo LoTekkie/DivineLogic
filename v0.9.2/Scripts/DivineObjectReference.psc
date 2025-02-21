@@ -34,7 +34,7 @@ endFunction
 function setKeywordRefs()
   if ( ! self.keywordRefs.length )
     self.keywordRefs = self.getKeywordRefs()
-    dd(self + "@ function: setKeywordRefs | refs: " + self.keywordRefs, enabled=self.showDebug)
+    log(self + "@ function: setKeywordRefs | refs: " + self.keywordRefs, enabled=self.showDebug)
   endIf 
 endFunction
 
@@ -46,7 +46,7 @@ function setRefActivated(objectReference objectRef, objectReference activatorRef
     else
       self.signaled = ! self.signaled
     endIf
-    dd(self + "@ signal: activate | ref: " + objectRef, enabled=self.showDebug)
+    log(self + "@ signal: activate | ref: " + objectRef, enabled=self.showDebug)
   endIf
 endFunction
 
@@ -58,7 +58,7 @@ function setRefEnabled(objectReference objectRef, bool enabled=true, bool allowF
     else
       objectRef.enable(allowFade)
     endIf
-    dd(objectRef + "@ signal: enable | enabled: " + ! objectRef.isDisabled(), enabled=self.showDebug)
+    log(objectRef + "@ signal: enable | enabled: " + ! objectRef.isDisabled(), enabled=self.showDebug)
   endIf
 endFunction 
 
@@ -97,7 +97,7 @@ function scaleRef(objectReference objectRef, float scale, bool withCollision=fal
   if (withCollision)
     ; TODO: is this needed?
   endIf
-  dd(self + "@ function: scaleRef | ref: " + objectRef + " scale: " + scale, enabled=self.showDebug)
+  log(self + "@ function: scaleRef | ref: " + objectRef + " scale: " + scale, enabled=self.showDebug)
 endFunction
 
 ; Scale the objectReference to a random scale between minScale and maxScale
@@ -278,7 +278,7 @@ function waitForRefAt(                  \
     float destAZ = destination[5]
     while ( ! self.refAnglesAt(objectRef, destAx, destAy, destAz) )
       ; wait for object to finish translation
-      dd(self + "@ function: waitForRefAt | refAnglesAt: " + self.refAnglesAt(objectRef, destAx, destAy, destAz), enabled=self.showDebug)
+      log(self + "@ function: waitForRefAt | refAnglesAt: " + self.refAnglesAt(objectRef, destAx, destAy, destAz), enabled=self.showDebug)
     endWhile
   endIf
 endFunction
@@ -324,7 +324,7 @@ bool function refAnglesAt(              \
   if (refAz >= 360.0)
     refAz -= 360.0 * math.floor(math.ceiling(refAz)/360.0)
   endIf
-  dd(self + "@ function: refAnglesAt | "+ refAX + "=" + posAx + " | " + refAY + "=" + posAy + " | " + refAz + "=" + posAz + " | realPosAz " + objectRef.getAngleZ(), enabled=self.showDebug)
+  log(self + "@ function: refAnglesAt | "+ refAX + "=" + posAx + " | " + refAY + "=" + posAy + " | " + refAz + "=" + posAz + " | realPosAz " + objectRef.getAngleZ(), enabled=self.showDebug)
   if (!floatsWithin(posAx, refAx) || !floatsWithin(posAy, refAy) || !floatsWithin(posAz, refAz))
     return false
   endIf
@@ -518,7 +518,7 @@ function translateRefTo(                                      \
   destination[3] = newAx
   destination[4] = newAy
   destination[5] = newAz
-  dd(self + "@ function: TranslateRefTo | destination: " + destination, enabled=self.showDebug)
+  log(self + "@ function: TranslateRefTo | destination: " + destination, enabled=self.showDebug)
   if (rotateOnArrival)
     newAx = objectRef.getAngleX()
     newAy = objectRef.getAngleY()
@@ -865,7 +865,7 @@ float[] function buildRefPositionsArray(objectReference objectRef)
 endFunction
 
 event onInit()
-  dd(self + "@ event: onInit", enabled=self.showDebug)
+  log(self + "@ event: onInit", enabled=self.showDebug)
   self.formName = self.getRefFormName(self) ; cached for later use
   self.playerRef = game.getPlayer()
   self.setLinkedRef()

@@ -67,7 +67,7 @@ function onSignalling()
     
     if(musicTypeObject)
     	if (self.addMusicType)
-    		self.musicTypeObject.add()
+    		self.musicTypeObject.alog()
     	elseIf (self.removeMusicType)
     		self.musicTypeObject.remove()	
     	endIf	

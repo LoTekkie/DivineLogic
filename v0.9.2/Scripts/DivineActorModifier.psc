@@ -105,7 +105,7 @@ function onSignalling()
       self.compareActorBaseValue,                         \
       self.compareActorValuePercentage                    \
     )
-    dd(self + "@ function: onSignalling" + " | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, enabled=self.showDebug)
+    log(self + "@ function: onSignalling" + " | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, enabled=self.showDebug)
     if (playerResult && keywordsResult)
       self.setRefActivated(self.linkedRef, self)
     endIf 

@@ -140,7 +140,7 @@ function handleComparisonMode()
         self.compareActorValuePercentage                  \
     )
 
-    dd(self + "@ function: onSignalling | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, \
+    log(self + "@ function: onSignalling | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, \
         enabled=self.showDebug)
 
     if (playerResult && keywordsResult)
