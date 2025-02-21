@@ -1,113 +1,155 @@
 scriptName DivineAnimator extends DivineSignaler
-; Lorkhan - the et'Ada most directly responsible for the existence of Nirn and is the god of all mortals.
+; Lorkhan - The et'Ada most directly responsible for the existence of Nirn and is the god of all mortals.
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 string property animationEvent = "" auto
-{ Default: "" - Event name of the animation to play or an animation variable name when one of the three SendEventAsVariable properties is set to True. }
+{ The name of the animation event to play, or an animation variable name when one of the three `sendEventAsVariable` properties is set to True. Default: "" }
+
 string property animationVariableValue = "" auto
-{ Default: "" - Value of the animation variable to send to the animation graph. (Used only when one of the three SendEventAsVariable properties is set to True) }
+{ The value of the animation variable to send to the animation graph. Used only when one of the three `sendEventAsVariable` properties is set to True. Default: "" }
+
 bool property toPlayer = false auto
-{ Default: False - Should the animation or variable be applied to the player also? }
+{ Determines if the animation or variable should be applied to the player. Default: False }
+
 bool property sendEventAsFloatVariable = false auto
-{ Default: False - Send the animationEvent string as a Float variable name to the animation graph. (Used with the animationVariableValue property)}
+{ If True, sends `animationEvent` as a Float variable name to the animation graph. Default: False }
+
 bool property sendEventAsBoolVariable = false auto
-{ Default: False - Send the animationEvent string as a Bool variable name to the animation graph. (Used with the animationVariableValue property)}
+{ If True, sends `animationEvent` as a Bool variable name to the animation graph. Default: False }
+
 bool property sendEventAsIntVariable = false auto
-{ Default: False - Send the animationEvent string as an Int variable name to the animation graph. (Used with the animationVariableValue property)}
+{ If True, sends `animationEvent` as an Int variable name to the animation graph. Default: False }
+
 bool property subGraphAnimation = false auto
-{ Default: False - Is this animation being applied to an object attached to an actor? }
+{ Determines if this animation is applied to an object attached to an actor. Default: False }
+
 bool property gameBryoAnimation = false auto
-{ Default: False - Is this a legacy GameBryo animation? }
+{ Determines if this is a legacy GameBryo animation. Default: False }
+
 bool property gameBryoStartOver = false auto
-{ Default: False - Should the animation start over from the begining? (Only applied if gameBryoAnimation is True) }
+{ If True, starts the GameBryo animation from the beginning. Only applied if `gameBryoAnimation` is True. Default: False }
+
 float property gameBryoEaseInTime = 0.0 auto
-{ Default: 0.0 - The amount of time to take to ease-in the animation, in seconds. (Only applied if gameBryoAnimation is True) }
+{ The duration (in seconds) for easing-in a GameBryo animation. Only applied if `gameBryoAnimation` is True. Default: 0.0 }
+
 bool property lookAtPlayer = false auto
-{ Default: False - Should actor based linked references look at the player? }
+{ If True, actor-based linked references will look at the player. Default: False }
+
 bool property lookAtPlayerWhilePathing = false auto
-{ Default: False - Should actor based linked references look at the player while moving? (If this property is set to True then the LookAtPlayer property will also be set to True regarless of its value in the editor) }
+{ If True, actor-based linked references will look at the player while moving. 
+  If this is set to True, `lookAtPlayer` will also be forced to True. Default: False }
+
 bool property clearLookAt = false auto
-{ Default: False - Should actor based linked references have their look at target cleared? (Overrides looking at player properties) }
+{ If True, actor-based linked references will have their LookAt target cleared. 
+  Overrides both `lookAtPlayer` and `lookAtPlayerWhilePathing`. Default: False }
+
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of an animation signal. }
+{ If True, sends an activation signal to the non-keyword linked reference instead of playing an animation. Default: False }
+
+; =========================
+;      MAIN FUNCTION
+; =========================
 
 function onSignalling()
-  parent.onSignalling()
-  bool sendAsVariable = self.sendEventAsBoolVariable  || \ 
-                        self.sendEventAsFloatVariable || \
-                        self.sendEventAsIntVariable
-  if ( ! self.relayActivation )
-    if ( ! sendAsVariable )
-      self.animateRef(          \
-        self.linkedRef,         \
-        self.animationEvent,    \
-        self.subGraphAnimation, \
-        self.gameBryoAnimation, \
-        self.gameBryoStartOver, \
-        self.gameBryoEaseInTime \
-      )
+    parent.onSignalling()
+
+    bool sendAsVariable = self.sendEventAsBoolVariable || \
+                          self.sendEventAsFloatVariable || \
+                          self.sendEventAsIntVariable
+
+    if (!self.relayActivation)
+        if (!sendAsVariable)
+            self.animateReference(self.linkedRef)
+        else
+            self.setReferenceAnimationVariable(self.linkedRef)
+        endIf
     else
-      self.setRefAnimationVariable(    \
-        self.linkedRef,                \
-        self.animationEvent,           \
-        self.animationVariableValue,   \
-        self.sendEventAsBoolVariable,  \
-        self.sendEventAsFloatVariable, \
-        self.sendEventAsIntVariable    \
-      )
-    endIf 
-  else
-    self.setRefActivated(self.linkedRef, self)  
-  endIf
-  if ( ! sendAsVariable )
-    self.animateKeywordRefs(   \
-      self.animationEvent,     \
-      self.subGraphAnimation,  \
-      self.gameBryoAnimation,  \
-      self.gameBryoStartOver,  \
-      self.gameBryoEaseInTime  \
-    )
-  else
-    self.setKeywordRefsAnimationVariable( \
-      self.animationEvent,                \
-      self.animationVariableValue,        \
-      self.sendEventAsBoolVariable,       \
-      self.sendEventAsFloatVariable,      \
-      self.sendEventAsIntVariable         \
-    )
-  endIf
-  if (self.toPlayer)
-    if ( ! sendAsVariable )
-      self.animateRef(          \
-        self.playerRef,         \
-        self.animationEvent,    \
-        self.subGraphAnimation, \
-        self.gameBryoAnimation, \
-        self.gameBryoStartOver, \
-        self.gameBryoEaseInTime \
-      )
+        self.setRefActivated(self.linkedRef, self)
+    endIf
+
+    if (!sendAsVariable)
+        self.animateKeywordRefs( \
+            self.animationEvent, \
+            self.subGraphAnimation, \
+            self.gameBryoAnimation, \
+            self.gameBryoStartOver, \
+            self.gameBryoEaseInTime \
+        )
     else
-      self.setRefAnimationVariable(    \
-        self.playerRef,                \
-        self.animationEvent,           \
-        self.animationVariableValue,   \
-        self.sendEventAsBoolVariable,  \
-        self.sendEventAsFloatVariable, \
-        self.sendEventAsIntVariable    \
-      )
-    endIf 
-  endIf
-  actor ref = self.linkedRef as actor
-  if ( self.lookAtPlayer || self.lookAtPlayerWhilePathing && ! self.clearLookAt )
-    if (ref)
-      ref.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+        self.setKeywordRefsAnimationVariable( \
+            self.animationEvent, \
+            self.animationVariableValue, \
+            self.sendEventAsBoolVariable, \
+            self.sendEventAsFloatVariable, \
+            self.sendEventAsIntVariable \
+        )
     endIf
-    self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
-  elseIf (self.clearLookAt)
-    if (ref)
-      ref.clearLookAt()
+
+    if (self.toPlayer)
+        if (!sendAsVariable)
+            self.animateReference(self.playerRef)
+        else
+            self.setReferenceAnimationVariable(self.playerRef)
+        endIf
     endIf
-    self.clearKeywordRefsLookAt()
-  endIf 
+
+    self.handleLookAtLogic()
+endFunction
+
+; =========================
+;   ANIMATION FUNCTIONS
+; =========================
+
+function animateReference(objectReference objectRef)
+    if (objectRef)
+        self.animateRef( \
+            objectRef, \
+            self.animationEvent, \
+            self.subGraphAnimation, \
+            self.gameBryoAnimation, \
+            self.gameBryoStartOver, \
+            self.gameBryoEaseInTime \
+        )
+    endIf
+endFunction
+
+function setReferenceAnimationVariable(objectReference objectRef)
+    if (objectRef)
+        self.setRefAnimationVariable( \
+            objectRef, \
+            self.animationEvent, \
+            self.animationVariableValue, \
+            self.sendEventAsBoolVariable, \
+            self.sendEventAsFloatVariable, \
+            self.sendEventAsIntVariable \
+        )
+    endIf
+endFunction
+
+; =========================
+;     LOOK-AT LOGIC
+; =========================
+
+function handleLookAtLogic()
+    actor refActor = self.linkedRef as actor
+
+    if (self.clearLookAt)
+        if (refActor)
+            refActor.clearLookAt()
+        endIf
+        self.clearKeywordRefsLookAt()
+        return
+    endIf
+
+    if (self.lookAtPlayer || self.lookAtPlayerWhilePathing)
+        if (refActor)
+            refActor.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+        endIf
+        self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+    endIf
 endFunction

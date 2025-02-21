@@ -3,111 +3,147 @@ scriptName DivineActorModifier extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 string property valueName = "" auto
-{ Default: "" - The name of the actor value to modify or compare. }
+{ The name of the actor value to modify or compare. Default: "". }
+
 float property value = 0.0 auto
-{ Default: 0.0 - The value to modify with or compare with. }
+{ The value to modify or compare against. Default: 0.0. }
+
 string property comparisonOperator = "==" auto
-{ Default: "==" - The operator used to compare the current actor value and the value property.
-  One of:
-  "==" - Is the current actor value equal to the value property? (Default)
-  "!=" - Is the current actor value not equal to the value property?
-  ">" - Is the current actor value greater than the value property?
-  ">=" - Is the current actor value greater than or equal to the value property?
-  "<" - Is the current actor value less than the value property?
-  "<=" - Is the current actor value less than or equal to the value property?
+{ The operator used for comparison in compare mode. Default: "==".
+  Options:
+  "=="  - Equal to value property.
+  "!="  - Not equal to value property.
+  ">"   - Greater than value property.
+  ">="  - Greater than or equal to value property.
+  "<"   - Less than value property.
+  "<="  - Less than or equal to value property.
 }
+
 bool property forceActorValue = false auto
-{ Default: False - Force the new actor value. (Modifies the permanent modifier as opposed to the base value) }
+{ Forces the actor value modification (permanently changes the value). Default: False. }
+
 bool property damageActorValue = false auto
-{ Default: False - Damage the current actor value. (Modifies the current value as opposed to the base value) }
+{ Damages the actor value (affects current value instead of base value). Default: False. }
+
 bool property modActorValue = false auto
-{ Default: False - Mod the current actor value. (Modifies the maxiumum value for the actor value as opposed to the base value) }
+{ Modifies the actor value cap. Default: False. }
+
 bool property restoreActorValue = false auto
-{ Default: False - Restore the current actor value. (Modifies the current value as opposed to the base value) }
+{ Restores the actor value to its base state. Default: False. }
+
 bool property setActorValue = true auto
-{ Default: Fasle - Set the new actor value. (Modifies the base actor value) }
+{ Sets the actor value directly. Default: True. }
+
 bool property compareActorValue = false auto
-{ Default: False - Enable Compare mode and ensure an actor value matches the value property. 
-(relayActivation is not used in compare mode. Activation of the non-keyword linked object reference only occurs when a comparsion results in True) }
+{ Enables Compare mode, checking if the actor value matches the provided value.
+  Activates linked reference only if the comparison is True. Default: False. }
+
 bool property compareActorBaseValue = false auto
-{ Default: False - Enable Compare mode and ensure a base actor value matches the value property. 
-(relayActivation is not used in compare mode. Activation of the non-keyword linked object reference only occurs when a comparsion results in True) }
+{ Enables Compare mode for base actor values. Activates linked reference if True. Default: False. }
+
 bool property compareActorValuePercentage = false auto
-{ Default: False - Enable Compare mode and ensure an actor value percentage matches the value property. 
-(relayActivation is not used in compare mode. Activation of the non-keyword linked object reference only occurs when a comparsion results in True) }
+{ Enables Compare mode for actor value percentage comparisons. Default: False. }
+
 bool property toPlayer = false auto
-{ Default: False - Set or compare an actor value to the player. }
+{ Determines whether the action applies to the player. Default: False. }
+
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instead of a modify signal. 
-(Only used when not comparing, otherwise activation out only occurs when comparisons result in True) }
+{ If enabled, activates the linked reference instead of modifying the actor value. 
+  Ignored in compare mode, where activation only occurs if the comparison is True. Default: False. }
+
+; =========================
+;      MAIN FUNCTION
+; =========================
 
 function onSignalling()
-  parent.onSignalling()
-  bool shouldCompare = self.compareActorValue     || \  
-                       self.compareActorBaseValue || \
-                       self.compareActorValuePercentage
-  if ( ! shouldCompare )
-    if ( ! self.relayActivation )
-      actor actorRef = self.linkedRef as actor
-      if (actorRef)
-        self.modifyActorValue(    \
-          actorRef,               \
-          self.valueName,         \
-          self.value,             \
-          self.forceActorValue,   \
-          self.damageActorValue,  \
-          self.modActorValue,     \
-          self.restoreActorValue, \
-          self.setActorValue      \
-        )
-      endIf 
+    parent.onSignalling()
+
+    bool shouldCompare = self.compareActorValue || \
+                         self.compareActorBaseValue || \
+                         self.compareActorValuePercentage
+
+    if (shouldCompare)
+        self.handleComparisonMode()
     else
-      self.setRefActivated(self.linkedRef, self)
+        self.handleModificationMode()
     endIf
-    if (toPlayer)
-      self.modifyActorValue(    \
-        self.playerRef,         \
-        self.valueName,         \
-        self.value,             \
-        self.forceActorValue,   \
-        self.damageActorValue,  \
-        self.modActorValue,     \
-        self.restoreActorValue, \
-        self.setActorValue      \
-      )
+endFunction
+
+; =========================
+;  ACTOR VALUE MODIFICATION
+; =========================
+
+function handleModificationMode()
+    if (!self.relayActivation)
+        self.modifyActor(self.linkedRef as actor)
+    else
+        self.setRefActivated(self.linkedRef, self)
     endIf
+
+    if (self.toPlayer)
+        self.modifyActor(self.playerRef)
+    endIf
+
     self.modifyKeywordActorsValue( \
-      self.valueName,              \
-      self.value,                  \
-      self.forceActorValue,        \
-      self.damageActorValue,       \
-      self.modActorValue,          \
-      self.restoreActorValue,      \
-      self.setActorValue           \
+        self.valueName,            \
+        self.value,                \
+        self.forceActorValue,      \
+        self.damageActorValue,     \
+        self.modActorValue,        \
+        self.restoreActorValue,    \
+        self.setActorValue         \
     )
-  else ; compare mode
+endFunction
+
+function modifyActor(actor actorRef)
+    if (actorRef)
+        self.modifyActorValue(    \
+            actorRef,             \
+            self.valueName,       \
+            self.value,           \
+            self.forceActorValue, \
+            self.damageActorValue,\
+            self.modActorValue,   \
+            self.restoreActorValue,\
+            self.setActorValue    \
+        )
+    endIf
+endFunction
+
+; =========================
+;     COMPARISON MODE
+; =========================
+
+function handleComparisonMode()
     bool playerResult = true
-    if (toPlayer)
-      playerResult = self.compareActorValue( \
-        self.playerRef,                      \
-        self.valueName,                      \
-        self.value,                          \
-        self.comparisonOperator,             \
-        self.compareActorBaseValue,          \
-        self.compareActorValuePercentage     \
-      )
+    if (self.toPlayer)
+        playerResult = self.compareActorValue( \
+            self.playerRef,                    \
+            self.valueName,                    \
+            self.value,                        \
+            self.comparisonOperator,           \
+            self.compareActorBaseValue,        \
+            self.compareActorValuePercentage   \
+        )
     endIf 
+
     bool keywordsResult = self.compareKeywordActorsValue( \
-      self.valueName,                                     \
-      self.value,                                         \
-      self.comparisonOperator,                            \
-      self.compareActorBaseValue,                         \
-      self.compareActorValuePercentage                    \
+        self.valueName,                                   \
+        self.value,                                       \
+        self.comparisonOperator,                          \
+        self.compareActorBaseValue,                       \
+        self.compareActorValuePercentage                  \
     )
-    dd(self + "@ function: onSignalling" + " | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, enabled=self.showDebug)
+
+    dd(self + "@ function: onSignalling | playerResult: " + playerResult + " | keywordsResult: " + keywordsResult, \
+        enabled=self.showDebug)
+
     if (playerResult && keywordsResult)
-      self.setRefActivated(self.linkedRef, self)
+        self.setRefActivated(self.linkedRef, self)
     endIf 
-  endIf 
 endFunction

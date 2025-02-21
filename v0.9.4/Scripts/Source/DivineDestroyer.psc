@@ -1,20 +1,49 @@
 scriptName DivineDestroyer extends DivineSignaler
-; Arkay – God of the Cycle of Life and Death, and Mortals burials and funeral rites
+; Arkay – God of the Cycle of Life and Death, overseeing mortal burials and funeral rites.
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 bool property whenAble = false auto
-{ Default: False - Wait for linked references to lose their parent cell or for their parent cell to become detached before deleting. }
+{ Determines whether deletion should wait for linked references to lose their parent cell 
+  or for their parent cell to become detached before deletion. Default: False. }
 
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of an destroy signal. }
+{ If enabled, sends an activation signal to the linked reference instead of deleting it. 
+  Default: False. }
+
+; =========================
+;      MAIN FUNCTION
+; =========================
 
 function onSignalling()
-  parent.onSignalling()
-  if ( ! self.relayActivation )
-  	self.deleteRef(self.linkedRef, self.whenAble)
-  else
-    self.setRefActivated(self.linkedRef, self)  
-  endIf
-  self.deleteKeywordRefs(self.whenAble)
+    parent.onSignalling()
+
+    if (self.relayActivation)
+        self.handleRelayActivation()
+    else
+        self.handleDestruction()
+    endIf
+
+    ; Always delete keyword-linked references
+    self.deleteKeywordRefs(self.whenAble)
+endFunction
+
+; =========================
+;   HANDLING RELAY ACTIVATION
+; =========================
+
+function handleRelayActivation()
+    self.setRefActivated(self.linkedRef, self)
+endFunction
+
+; =========================
+;  HANDLING DESTRUCTION LOGIC
+; =========================
+
+function handleDestruction()
+    self.deleteRef(self.linkedRef, self.whenAble)
 endFunction
