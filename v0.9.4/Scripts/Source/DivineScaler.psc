@@ -3,48 +3,115 @@ scriptName DivineScaler extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 float property scaleMin = 1.0 auto
-{ Default: 1.0 - Minium scale to set the object to when activated. }
+{ Minimum scale value when the object is activated. }
+
 float property scaleMax = 1.0 auto
-{ Default: 1.0 - Maximum scale to set the object to if "scaleRandomly" is set to True. }
+{ Maximum scale value if "scaleRandomly" is enabled. }
+
+bool property linearScale = false auto
+{ Enables gradual scaling over time between "scaleMin" and "scaleMax". }
+
+float property scaleInterval = 0.1 auto
+{ Incremental scale adjustment per activation if "linearScale" is enabled. }
+
 bool property scaleRandomly = false auto
-{ Default: False - Scale to a random size between "scaleMin" and "scaleMax" property values when activated. 
-  Overrides "toggleMinMax" setting when set to True. }
+{ If enabled, scales to a random value between "scaleMin" and "scaleMax".
+  Overrides "toggleMinMax" when active. }
+
 bool property scaleSync = true auto
-{ Default: True - Ensure all objects are the same scale when "scaleRandomly" is selected. }
+{ Ensures all objects scale uniformly when "scaleRandomly" is enabled. }
+
 bool property toggleMinMax = false auto
-{ Default: False - Cycle between "scaleMin" and "scaleMax" property values on each activation. Scaling will start with the "scaleMin" value. }
+{ Cycles between "scaleMin" and "scaleMax" on each activation. 
+  Starts with "scaleMin". }
+
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of a scale signal. }
+{ Sends an activation signal to the linked reference instead of scaling it. }
+
+float property currentScale auto hidden
+{ Tracks the current scale for linear scaling purposes. }
+
+; =========================
+;      MAIN FUNCTION
+; =========================
 
 function onSignalling()
-  parent.onSignalling()
-  float newScale = scaleMin
-  if (self.scaleRandomly)
-    newScale = utility.randomFloat(scaleMin, scaleMax)
-  elseIf(self.toggleMinMax)
-    dd(self + "@ signaled: " + self.signaled, enabled=self.showDebug)
-    if ( ! self.signaled )
-      newScale = scaleMax
+    parent.onSignalling()
+
+    if (self.relayActivation)
+        self.handleRelayActivation()
     else
-      newScale = scaleMin
+        self.handleScaling()
     endIf
-  endIf
-  if ( ! self.relayActivation )
-    if ((self.scaleRandomly && ! self.scaleSync))
-      self.scaleRefBetween(self.linkedRef, scaleMin, scaleMax, true)
-      self.scaleKeywordRefsBetween(scaleMin, scaleMax, true)  
+endFunction
+
+; =========================
+;  HANDLING RELAY ACTIVATION
+; =========================
+
+function handleRelayActivation()
+    self.setRefActivated(self.linkedRef, self)
+
+    if (self.scaleRandomly && !self.scaleSync)
+        self.scaleKeywordRefsBetween(self.scaleMin, self.scaleMax, true)
     else
-      self.scaleRef(self.linkedRef, newScale, true)
-      self.scaleKeywordRefs(newScale, true)
+        float newScale = self.getNewScale()
+        self.scaleKeywordRefs(newScale, true)
     endIf
-  else
-    if ((self.scaleRandomly && ! self.scaleSync))
-      self.setRefActivated(self.linkedRef, self)
-      self.scaleKeywordRefsBetween(scaleMin, scaleMax, true)
+endFunction
+
+; =========================
+;   SCALING LOGIC HANDLING
+; =========================
+
+function handleScaling()
+    float newScale = self.getNewScale()
+
+    if (self.scaleRandomly && !self.scaleSync)
+        self.scaleRefBetween(self.linkedRef, self.scaleMin, self.scaleMax, true)
+        self.scaleKeywordRefsBetween(self.scaleMin, self.scaleMax, true)
     else
-      self.setRefActivated(self.linkedRef, self)
-      self.scaleKeywordRefs(newScale, true)
+        self.scaleRef(self.linkedRef, newScale, true)
+        self.scaleKeywordRefs(newScale, true)
     endIf
-  endIf
+endFunction
+
+; Determines the new scale based on properties
+float function getNewScale()
+    float newScale = self.scaleMin
+
+    if (self.scaleRandomly)
+        newScale = utility.randomFloat(self.scaleMin, self.scaleMax)
+    elseIf (self.toggleMinMax)
+        if (self.signaled)
+            newScale = self.scaleMin
+        else
+            newScale = self.scaleMax
+        endIf
+    elseIf (self.linearScale)
+        newScale = self.getNextLinearScale()
+    endIf
+
+    return newScale
+endFunction
+
+; Handles incremental scaling for linear scaling mode
+float function getNextLinearScale()
+    if (self.currentScale == 0.0)
+        self.currentScale = self.scaleMax
+    endIf
+
+    float newScale = self.currentScale - self.scaleInterval
+
+    if (newScale < self.scaleMin)
+        newScale = self.scaleMax
+    endIf
+
+    self.currentScale = newScale
+    return newScale
 endFunction
