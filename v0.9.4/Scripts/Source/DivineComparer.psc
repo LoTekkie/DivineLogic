@@ -38,7 +38,7 @@ bool property xorCompare = false auto
 function onSignalling()
   parent.onSignalling()
   bool result = self.compareKeywordRefs(andCompare, notCompare, orCompare, xorCompare)
-  log(self + "@ function: compareKeywordRefs | result: " + result, enabled=self.showDebug)
+  info(self + "@ function: compareKeywordRefs | result: " + result, enabled=self.showDebug)
   if (result)
     self.setRefActivated(self.linkedRef, self)
   endIf

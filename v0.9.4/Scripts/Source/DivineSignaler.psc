@@ -90,14 +90,14 @@ Pausing prevents any input and disables activation/signalling until unpaused /;
 function setRefPaused(DivineSignaler divineRef, bool pause=true)
   divineRef.paused = pause
   divineRef.setActivationBlocked(pause)
-  log(self + "@ signal: pause | ref: " + divineRef + " | paused: " + divineRef.paused, enabled=self.showDebug)
+  info(self + "@ signal: pause | ref: " + divineRef + " | paused: " + divineRef.paused, enabled=self.showDebug)
 endFunction
 
 ; Set the keywordRefSpacingOffsets property
 function setKeywordRefSpacingOffsets()
   if ( ! self.keywordRefSpacingOffsets.length )
     self.keywordRefSpacingOffsets = self.getKeywordRefSpacingOffsets()
-    log(self + "@ function: setKeywordRefSpacingOffsets | offsets: " + self.keywordRefSpacingOffsets, enabled=self.showDebug)
+    info(self + "@ function: setKeywordRefSpacingOffsets | offsets: " + self.keywordRefSpacingOffsets, enabled=self.showDebug)
   endIf
 endFunction
 
@@ -220,7 +220,7 @@ endFunction
 ;/ Event method used to customize behavior within the "busy" state
 To be overriden within child scripts /;
 function onSignalling()
-  log(self + "@ eventHandler: onSignalling", enabled=self.showDebug)
+  info(self + "@ eventHandler: onSignalling", enabled=self.showDebug)
 endFunction
 
 ;/ Event method used to customize behavior within the onUpdating event
@@ -257,7 +257,7 @@ endEvent
 ; Wait for and detect player input
 state waiting
   event onBeginState()
-    log(self + "@ state: waiting", enabled=self.showDebug)
+    info(self + "@ state: waiting", enabled=self.showDebug)
   endEvent
   event onActivate (objectReference triggerRef)
     goToState("busy")
@@ -270,7 +270,7 @@ state waiting
     bool hitBlocked                                      \
     )
     if (self.detectHit)
-      log(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName() + " | projectile: " + akProjectile.getName(),  enabled=self.showDebug)
+      info(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName() + " | projectile: " + akProjectile.getName(),  enabled=self.showDebug)
       if (self.detectHitSource != "")
         if (self.detectHitSource == source.getName() || self.detectHitSource == akProjectile.getName())
           goToState("busy")
@@ -288,7 +288,7 @@ state waiting
     if (objectRef as actor != self.playerRef as actor && self.detectNPC)
       signal = true
     endIf
-    log(self + "@ event: onTriggerEnter | signal:" + signal, enabled=self.showDebug)
+    info(self + "@ event: onTriggerEnter | signal:" + signal, enabled=self.showDebug)
     if (signal)
       goToState("busy")
     endIf
@@ -301,7 +301,7 @@ endState
 ; Attempt to send signal to attached objects
 state busy
   event onBeginState()
-    log(self + "@ state: busy", enabled=self.showDebug)
+    info(self + "@ state: busy", enabled=self.showDebug)
     if (self.paused || self.ignoreBusy)
       goToState("waiting")
       return
@@ -331,7 +331,7 @@ state busy
       utility.wait(self.postSignalDelay)
     endIf
     self.setActivationBlocked(false)
-    log(self + "@ state: busy | signalLimit:" + self.signalLimit + " | signalCount: " + self.signalCount, enabled=self.showDebug)
+    info(self + "@ state: busy | signalLimit:" + self.signalLimit + " | signalCount: " + self.signalCount, enabled=self.showDebug)
     if ( ! self.signalOnce && ternaryBool(self.signalLimit == 0, true, self.signalCount + 1 <= self.signalLimit) )
       if ( ! self.signalContinuously || self.paused || self.ignoreBusy )
         goToState("waiting")

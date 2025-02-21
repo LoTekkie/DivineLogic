@@ -5,18 +5,18 @@ import Utility
 Import Math
 
 ; Log a debug message
-function log(string msg, string prefix="[DL:*] > ", bool enabled=true) global
+function info(string msg, string prefix="[DL:*] > ", bool enabled=true) global
   Debug.traceConditional(prefix + msg, enabled)
 endFunction
 
 ; Log an error message
 function err(string msg) global
-  log(msg, "[DL:ERR] > ", true)
+  info(msg, "[DL:ERR] > ", true)
 endFunction
 
 ; Log a warning message
 function wrn(string msg) global
-  log(msg, "[DL:WARN] > ", true)
+  info(msg, "[DL:WARN] > ", true)
 endFunction
 
 ; Clamp the given float value between min and max

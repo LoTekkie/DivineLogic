@@ -251,7 +251,7 @@ endFunction
 Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.ignoreBusy = true
   self.cutSceneLocked = true
-  log("Ending Cutscene", enabled=true)
+  info("Ending Cutscene", enabled=true)
   self.fadeOut(fadeOutDelay)
   self.cameraActor.stopTranslation()
   utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
