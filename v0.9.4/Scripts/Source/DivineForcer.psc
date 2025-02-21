@@ -4,7 +4,7 @@ scriptName DivineForcer extends DivineSignaler
 import DivineUtils
 
 ; =========================
-;      FORCE PROPERTIES
+;        PROPERTIES
 ; =========================
 
 bool property heartbeat = false auto hidden
@@ -49,7 +49,7 @@ event onInit()
 endEvent
 
 ; =========================
-;      FORCE APPLICATION
+;      MAIN FUNCTION
 ; =========================
 
 function onSignalling()

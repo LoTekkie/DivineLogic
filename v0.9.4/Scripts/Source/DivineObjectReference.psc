@@ -3,23 +3,35 @@ scriptName DivineObjectReference extends ObjectReference
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 bool property signaled = false auto hidden
 { The current state of this object, used for communication between DivineObjectReferences. }
+
 bool property linkedRefSignaled = false auto hidden
 { The current state of the non-keyword linked object reference, used for 
 communication between DivineObjectReferences. }
+
 objectReference property linkedRef auto hidden
 { The non-keyword linked object reference. }
+
 objectReference[] property keywordRefs auto hidden
 { All keyword-linked object references that are attached with the "DivineRef" keyword. }
+
 int property maxKeywordRefs = 9 auto hidden
 { The maxiumum number of keyword-linked references allowed to be attached to this object. }
+
 string property keywordRefSignature = "DivineRef" auto hidden
 { The base keyword signature used to identify objects available to enter the keywordRefs property. }
+
 string property formName auto hidden
 { A reference to the form name of this object when it's loaded. }
+
 actor property playerRef auto hidden
 { A reference to the Player object. }
+
 bool property showDebug = false auto
 { Default: False - Output divine logic debug messages to logs. }
 

@@ -3,12 +3,19 @@ scriptName DivineWarper extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 DivineWarperMarker property nextMarker auto hidden
 { Refernce to the current DivineWarperMarker object being processed. }
+
 bool property noMarkersAttached = true auto hidden
 { Does this singaler have any markers attached when it's initializing? }
+
 bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instad of a warp signal. }
+
 float property individualDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait between warping of each keyword-linked object reference. 
 (A non-zero value will cause each object to translate one at a time) }
@@ -16,37 +23,52 @@ float property individualDelay = 0.0 auto
 ; Marker Properties m_*
 bool property m_warpPlayer = false auto
 { Default: false - Should the player be warped to this marker? }
+
 float property m_delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references warp to this marker. }
+
 bool property m_collapseSpacing = false auto
 { Defualt: false - Should warped objects ignore original spacing and meet at the same postion on this marker? }
+
 float property m_offsetX = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects positions in the X direction. }
+
 float property m_offsetY = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects positions in the Y direction. }
+
 float property m_offsetZ = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects positions in the Z direction. }
+
 float property m_offsetAX = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects angles in the X direction. }
+
 float property m_offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects angles in the Y direction. }
+
 float property m_offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the warped objects angles in the Z direction. }
+
 bool property m_limitX = false auto
 { Default: False - Prevent translation of the x axis. }
+
 bool property m_limitY = false auto
 { Default: False - Prevent translation of the y axis. }
+
 bool property m_limitZ = false auto
 { Default: False - Prevent translation of the z axis. }
+
 bool property m_limitAX = false auto
 { Default: False - Prevent translation of the aX axis. }
+
 bool property m_limitAY = false auto
 { Default: False - Prevent translation of the aY axis. }
+
 bool property m_limitAZ = false auto
 { Default: False - Prevent translation of the aZ axis. }
 
 bool property m_matchRotation = false auto
 { Default: false - Should the warping objects match the rotation of this marker when they arrive? }
+
 bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 

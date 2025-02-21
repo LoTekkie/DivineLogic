@@ -4,23 +4,35 @@ scriptName DivineSignaler extends DivineObjectReference
 import DivineUtils
 import Math
 
+; =========================
+;        PROPERTIES
+; =========================
+
 bool property signalOnStart = false auto
 { Default: False - Send a signal to all attached objects when the game is loaded. }
+
 bool property signalOnce = false auto
 { Default: False - Send a signal only once for the lifetime of the trigger. }
+
 int property signalLimit = 0 auto
 { Default: 0 - How many times total should this trigger signal? (Overridden when setting signalOnce to True, values less than 0 will signal once) }
+
 bool property signalContinuously = false auto
 { Default: False - Send a signal every x number of seconds where x is the value of "signalDelay".
 Combine this with "signalOnStart" to automatically signal forever once the game is loaded. }
+
 bool property detectHit = false auto
 { Default: False - Should this trigger send a signal when hit? }
+
 string property detectHitSource = "" auto
 { Default: "" - Name of the source to filter detectHit by. (Only used when detectHit is True)} 
+
 bool property detectPlayer = false auto
 { Default: False - Should this trigger send a signal when the Player enters it? }
+
 bool property detectNPC = false auto
 { Default: False - Should this trigger send a signal when an NPC enters it? }
+
 int property detectEquippedItemType = -1 auto
 { Default: -1 (Don't Detect) - Should this trigger require an equipped item type before it signals? 
 Detected item types can be one of:
@@ -38,24 +50,33 @@ Detected item types can be one of:
 10: Shield
 11: Torch
 12: Crossbow }
+
 bool property paused = false auto hidden
 { Default: False - Prevent any input to or signaling from this trigger. }
+
 bool property ignoreBusy = false auto hidden
 { Should we prevent reaching the busy state? }
+
 bool property sendTogglePauseSignal = false auto
 { Default: False - Pause all attached signalers when this one sends a signal. }
+
 bool property preventDefaultSignal = false auto
 { Default: False - Prevent the default signal behavior from occuring.
 Pause signals will still be sent when this trigger signals. }
+
 float property signalDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait before a signal is sent after activation. }
+
 float property postSignalDelay = 2.0 auto
 { Default: 2.0 - Seconds to wait after a signal is sent before the trigger
 accepts input or sends signals again. }
+
 float[] property keywordRefSpacingOffsets auto hidden; x, y, z for each of the 9 keyword-linked object references
 { Reference to offsets from the calculated collective center of all attched object references. }
+
 float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 { Minimum value for the user set delay when the signalContinuously property value is set to true. }
+
 int property signalCount = 0 auto hidden
 { How many times has this signaled? }
 

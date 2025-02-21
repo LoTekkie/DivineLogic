@@ -1,122 +1,184 @@
 scriptName DivineCutsceneCreator extends DivineSignaler
-; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man 
-;TODO: Figure out why actor is not rotating in angular axis, add moveTo marker instead of translate to, add fades to markers
+; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man
+; Controls the flow and behavior of in-game cutscenes.
+
 import DivineUtils
 
+; =========================
+;       PROPERTIES
+; =========================
+
 DivineCutsceneCreatorMarker property nextMarker auto hidden
-{ Refernce to the current DivineCutsceneCreatorMarker object being processed. }
+{ Reference to the current DivineCutsceneCreatorMarker object being processed. }
+
 DivineCutsceneCreatorMarker property cameraActorHomeMarker auto hidden
-{ Refernce to the first marker in the chain, used as a starting point for the cutscene. }
+{ Reference to the first marker in the chain, used as a starting point for the cutscene. }
+
 bool property noMarkersAttached = true auto hidden
-{ Does this singaler have any markers attached when it's initializing? }
+{ Default: True - Does this signaler have any markers attached when initializing? }
+
 bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instead of a translate signal. }
+
 imageSpaceModifier property fadeTo auto hidden
-{ Screen effect used for fading in/out }
+{ Screen effect used for fading in/out. }
+
 imageSpaceModifier property fadeFrom auto hidden
-{ Screen effect used for fading in/out }
+{ Screen effect used for fading in/out. }
+
 bool property inCutScene = false auto hidden
-{ Are we currently in a custscene? }
+{ Are we currently in a cutscene? }
+
 int property skipCutSceneKeyId = 28 auto hidden
-{ Key id used for skipping cutscenes }
+{ Key ID used for skipping cutscenes. }
+
 actor property cameraActor auto hidden
-{ Reference to the actor used to view cutscenes through }
-int property cameraActorFormId = 0x0010D13E auto hidden ;0x020239EA;
-{ Interal reference ID used as the camera actor }
+{ Reference to the actor used to view cutscenes through. }
+
+int property cameraActorFormId = 0x0010D13E auto hidden ; 0x020239EA
+{ Internal reference ID used as the camera actor. }
+
 bool property cutSceneLocked = false auto hidden
 { Internal state of the cutscene creator, prevents starting and ending multiple times. }
+
 bool property hidePlayer = true auto
 { Default: True - Should the player be hidden when the cutscene starts? }
+
 float property fadeOutDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the scene fades out. }
+
 float property fadeInDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the scene fades in. }
+
 float property cutsceneEndDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the cutscene ends after reaching the final marker. }
+
 bool property cutsceneEndPause = false auto
-{ Default: False - Should this signaler be paused when the cutscene has eneded? }
+{ Default: False - Should this signaler be paused when the cutscene has ended? }
+
 bool property allowSkip = true auto
 { Default: True - Should the player be able to skip this cutscene? }
 
-; Marker Properties m_*
+; =========================
+;    MARKER PROPERTIES
+; =========================
+
 float property m_delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references translate to this marker. }
+
 float property m_speed = 100.0 auto
 { Default: 100.0 - Speed at which the keyword-linked object references will translate to this marker. }
+
 float property m_rotationSpeedClamp = 0.0 auto
-{ Default: 0.0 - Amount of rotation speed clamping applied to translating objects. (0.0 means don't clamp rotation speed) }
+{ Default: 0.0 - Amount of rotation speed clamping applied to translating objects (0.0 means no clamp). }
+
 bool property m_rotateOnArrival = false auto
-{ Default: false - Should rotation of the translating objects be prevented until they arrive at this marker? }
+{ Default: False - Should rotation of the translating objects be prevented until they arrive at this marker? }
+
 float property m_tangentMagnitude = 0.0 auto
-{ Default: 0.0 - Magnitude of the spline tangents. If this value is 0.0 no splines will be created. }
+{ Default: 0.0 - Magnitude of the spline tangents. If this value is 0.0, no splines will be created. }
+
 float property m_offsetX = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects positions in the X direction. }
+{ Default: 0.0 - How much to offset the translated objects' positions in the X direction. }
+
 float property m_offsetY = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects positions in the Y direction. }
+{ Default: 0.0 - How much to offset the translated objects' positions in the Y direction. }
+
 float property m_offsetZ = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects positions in the Z direction. }
+{ Default: 0.0 - How much to offset the translated objects' positions in the Z direction. }
+
 float property m_offsetAX = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects angles in the X direction. }
+{ Default: 0.0 - How much to offset the translated objects' angles in the X direction. }
+
 float property m_offsetAY = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects angles in the Y direction. }
+{ Default: 0.0 - How much to offset the translated objects' angles in the Y direction. }
+
 float property m_offsetAZ = 0.0 auto
-{ Default: 0.0 - How much to offset the translated objects angles in the Z direction. }
+{ Default: 0.0 - How much to offset the translated objects' angles in the Z direction. }
+
 bool property m_limitX = false auto
-{ Default: False - Prevent translation of the x axis. }
+{ Default: False - Prevents translation on the X axis. }
+
 bool property m_limitY = false auto
-{ Default: False - Prevent translation of the y axis. }
+{ Default: False - Prevents translation on the Y axis. }
+
 bool property m_limitZ = false auto
-{ Default: False - Prevent translation of the z axis. }
+{ Default: False - Prevents translation on the Z axis. }
+
 bool property m_limitAX = false auto
-{ Default: False - Prevent translation of the aX axis. }
+{ Default: False - Prevents rotation on the X axis. }
+
 bool property m_limitAY = false auto
-{ Default: False - Prevent translation of the aY axis. }
+{ Default: False - Prevents rotation on the Y axis. }
+
 bool property m_limitAZ = false auto
-{ Default: False - Prevent translation of the aZ axis. }
-bool property m_shakeCamera = false auto
-{ Default: False - Shake the player camera? }
-float property m_cameraShakeStrength = 0.5 auto
-{ Default: 0.5 - How strong should the camera shake? (Only used when the shakeCamera property is set to True) }
-float property m_cameraShakeDuration = 0.0 auto
-{ Default: 0.0 - How long should the camera shake? (Only used when the shakeCamera property is set to True) }
+{ Default: False - Prevents rotation on the Z axis. }
+
 bool property m_matchRotation = false auto
 { Default: False - Should the translating objects match the rotation of this marker when they arrive? }
+
 bool property m_toPlayer = false auto
-{ Default: False - Should the translating objects move to the player? }
+{ Default: False - Should the translating objects move to the player's location instead of this marker? }
+
+bool property m_shakeCamera = false auto
+{ Default: False - Should the camera shake upon arrival? }
+
+float property m_cameraShakeStrength = 0.5 auto
+{ Default: 0.5 - Strength of the camera shake (only used if shakeCamera is True). }
+
+float property m_cameraShakeDuration = 0.0 auto
+{ Default: 0.0 - Duration of the camera shake (only used if shakeCamera is True). }
+
+; =========================
+;     INITIALIZATION
+; =========================
 
 event onInit()
+  ; Call the parent class's initialization function
   parent.onInit()
-  if ( ! self.nextMarker )
-    DivineCutsceneCreatorMarker linkedMarker = self.getLinkedRef() as DivineCutsceneCreatorMarker
-    if (linkedMarker)
-      self.nextMarker = linkedMarker
-      self.noMarkersAttached = false
-    endIf
+
+  ; Check if there is no next marker assigned
+  if (!self.nextMarker)
+      DivineCutsceneCreatorMarker linkedMarker = self.getLinkedRef() as DivineCutsceneCreatorMarker
+
+      ; If a linked marker is found, assign it as the next marker
+      if (linkedMarker)
+          self.nextMarker = linkedMarker
+          self.noMarkersAttached = false
+      endIf
   endIf
 endEvent
 
-;/ Make the given DivineCutsceneCreatorMarker object property values conform to 
-this objects values of the same property name if those values are not default /; 
 function conformMarkerProperties(DivineCutsceneCreatorMarker markerRef)
   markerRef.delay = conformFloat(markerRef.delay, self.m_delay, 0.0)
   markerRef.speed = conformFloat(markerRef.speed, self.m_speed, 100.0)
   markerRef.rotationSpeedClamp = clampf(conformFloat(markerRef.rotationSpeedClamp, self.m_rotationSpeedClamp, 0.0), 0, 100)
   markerRef.tangentMagnitude = conformFloat(markerRef.tangentMagnitude, self.m_tangentMagnitude, 0.0)
+  
+  ; Apply positional offsets
   markerRef.offsetX = conformFloat(markerRef.offsetX, self.m_offsetX, 0.0)
   markerRef.offsetY = conformFloat(markerRef.offsetY, self.m_offsetY, 0.0)
   markerRef.offsetZ = conformFloat(markerRef.offsetZ, self.m_offsetZ, 0.0)
+
+  ; Apply rotational offsets
   markerRef.offsetAX = conformFloat(markerRef.offsetAX, self.m_offsetAX, 0.0)
   markerRef.offsetAY = conformFloat(markerRef.offsetAY, self.m_offsetAY, 0.0)
   markerRef.offsetAZ = conformFloat(markerRef.offsetAZ, self.m_offsetAZ, 0.0)
+
+  ; Apply movement restrictions
   markerRef.limitX = conformBool(markerRef.limitX, self.m_limitX, false)
   markerRef.limitY = conformBool(markerRef.limitY, self.m_limitY, false)
   markerRef.limitZ = conformBool(markerRef.limitZ, self.m_limitZ, false)
   markerRef.limitAX = conformBool(markerRef.limitAX, self.m_limitAX, false)
   markerRef.limitAY = conformBool(markerRef.limitAY, self.m_limitAY, false)
   markerRef.limitAZ = conformBool(markerRef.limitAZ, self.m_limitAZ, false)
+
+  ; Apply additional movement behavior settings
   markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
   markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
+
+  ; Apply camera shake effects
   markerRef.shakeCamera = conformBool(markerRef.shakeCamera, self.m_shakeCamera, false)
   markerRef.cameraShakeStrength = conformFloat(markerRef.cameraShakeStrength, self.m_cameraShakeStrength, 0.5)
   markerRef.cameraShakeDuration = conformFloat(markerRef.cameraShakeDuration, self.m_cameraShakeDuration, 0.0)
@@ -126,14 +188,14 @@ endFunction
 function fadeOut(float delay)
   utility.wait(delay)
   fadeTo.apply()
-  game.fadeOutGame(false, true, 50, 1)
+  game.fadeOutGame(false, true, 50, 1)  ; Gradual fade to black
 endFunction
 
 ; Apply the fadeFrom imageSpaceModifier in the given number of seconds
 function fadeIn(float delay)
   utility.wait(delay)
-  game.fadeOutGame(false, true, 0.1, 0.1)
-  fadeTo.popTo(fadeFrom)
+  game.fadeOutGame(false, true, 0.1, 0.1)  ; Quick fade back in
+  fadeTo.popTo(fadeFrom)  ; Restore original screen state
 endFunction
 
 ; Set the given Actor reference visibility

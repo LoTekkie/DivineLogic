@@ -3,52 +3,76 @@ scriptName DivineSpawner extends DivineSignaler
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 DivineSpawnerMarker property nextMarker auto hidden
 { Refernce to the current DivineSpawnerMarker object being processed. }
+
 bool property noMarkersAttached = true auto hidden
 { Does this singaler have any markers attached when it's initializing? }
+
 int property totalSpawns = 0 auto hidden
 { Total number of spawns this signaler has performed. }
+
 bool property relayActivation = false auto
 { Default: False - Send an activation signal to the non-keyword linked reference instad of a spawn signal. }
+
 float property individualDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait between spawning of each keyword-linked object reference. 
 (A non-zero value will cause each object to spawn one at a time) }
+
 int property maxSpawns = 0 auto
 { Default: 0 - Maximum number of times spawning will occur. (Default value of 0 is equivalent to infinity) }
 
 ; Marker Properties m_*
+
 float property m_delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references spawn at this marker. }
+
 bool property m_collapseSpacing = false auto
 { Defualt: false - Should spawning objects ignore original spacing and meet at the same postion on this marker? }
+
 float property m_offsetX = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects positions in the X direction. }
+
 float property m_offsetY = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects positions in the Y direction. }
+
 float property m_offsetZ = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects positions in the Z direction. }
+
 float property m_offsetAX = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects angles in the X direction. }
+
 float property m_offsetAY = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects angles in the Y direction. }
+
 float property m_offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the spawned objects angles in the Z direction. }
+
 bool property m_limitX = false auto
 { Default: False - Prevent translation of the x axis. }
+
 bool property m_limitY = false auto
 { Default: False - Prevent translation of the y axis. }
+
 bool property m_limitZ = false auto
 { Default: False - Prevent translation of the z axis. }
+
 bool property m_limitAX = false auto
 { Default: False - Prevent translation of the aX axis. }
+
 bool property m_limitAY = false auto
 { Default: False - Prevent translation of the aY axis. }
+
 bool property m_limitAZ = false auto
 { Default: False - Prevent translation of the aZ axis. }
 
 bool property m_matchRotation = false auto
 { Default: false - Should the spawning objects match the rotation of this marker when they arrive? }
+
 bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 
