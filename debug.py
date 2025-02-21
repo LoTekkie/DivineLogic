@@ -4,11 +4,12 @@ from threading import Thread
 from os.path import expanduser, splitdrive
 
 BASE_DIR = os.path.dirname(os.path.realpath(__file__))
+
 HOME_DIR = HOME_PATH = expanduser("~")
-MAIN_DRIVE, _ = splitdrive(HOME_DIR)
-SKYRIM_DIR = os.path.join(MAIN_DRIVE + "\\", "Program Files (x86)", "Steam", "steamapps", "common", "Skyrim Special Edition")
-LOGDIR = os.path.join(SKYRIM_DIR, "Logs", "Script", "EditorPapyrus.0.log")
-INIDIR = os.path.join(SKYRIM_DIR, "Skyrim", "SkyrimPrefs.ini")
+
+SKYRIM_DIR = os.path.join(HOME_DIR, "Documents", "My Games", "Skyrim Special Edition")
+LOGDIR = os.path.join(SKYRIM_DIR, "Logs", "Script", "Papyrus.0.log")
+INIDIR = os.path.join(SKYRIM_DIR, "Skyrim.ini")
 
 SETTING_ENABLE_FILTERS = 'bEnableFilters'
 SETTING_FILTER_CHARS = 'sFilterChars'

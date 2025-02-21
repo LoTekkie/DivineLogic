@@ -109,7 +109,7 @@ float function getNextLinearScale()
     float newScale = self.currentScale - self.scaleInterval
 
     if (newScale < self.scaleMin)
-        newScale = self.scaleMax
+        newScale = self.scaleMin
     endIf
 
     self.currentScale = newScale
