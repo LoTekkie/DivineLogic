@@ -17,7 +17,7 @@ bool property linearScale = false auto
 { Enables gradual scaling over time between "scaleMin" and "scaleMax". }
 
 float property scaleInterval = 0.1 auto
-{ Incremental scale adjustment per activation if "linearScale" is enabled. }
+{ Default: 0.1 - Incremental scale adjustment per activation if "linearScale" is enabled. }
 
 bool property scaleRandomly = false auto
 { If enabled, scales to a random value between "scaleMin" and "scaleMax".

@@ -77,9 +77,6 @@ bool property activateKeywordRefs = false auto
 int property triggerScreenBloodAmount = 0 auto
 { Triggers on-screen blood splatter when greater than 0. }
 
-bool property enableBeastForm = false auto
-{ [Toggleable] Forces the player into beast form. }
-
 bool property toggleSettingsReady = false auto hidden
 { Internal state for toggling control settings. }
 
@@ -169,6 +166,30 @@ function transferControlToLinkedRef()
     ;utility.setIniBool("bDisablePlayerCollision:Havok", true)
     self.playerRef.MoveTo(self)
     
+    ; Unequip left-hand
+    Form rightHand = self.playerRef.GetEquippedObject(0)  ; 1 = Left hand slot
+    if (rightHand)
+        self.playerRef.UnequipItem(rightHand, false, true)
+    endif
+
+    ; Unequip right-hand spell
+    Form leftHand = self.playerRef.GetEquippedObject(1)  ; 1 = Left hand slot
+    if (leftHand)
+        self.playerRef.UnequipItem(leftHand, false, true)
+    endif
+
+    ; Unequip left-hand spell
+    Form spellL = self.playerRef.GetEquippedSpell(0)  ; 0 = left hand
+    if (spellL)
+        self.playerRef.UnequipItem(spellL, false, true)
+    endif
+
+    ; Unequip right-hand spell
+    Form spellR = self.playerRef.GetEquippedSpell(1)  ; 1 = right hand
+    if (spellR)
+        self.playerRef.UnequipItem(spellR, false, true)
+    endif
+
     actorRef.setPlayerControls(true)
     actorRef.enableAI(true)
 
@@ -188,10 +209,11 @@ function revertPlayerControlSettings()
     actorRef.setPlayerControls(false)
     self.setRefEnabled(actorRef, false)
     self.playerRef.MoveTo(actorRef)
+    actorRef.MoveTo(self)
     ;diabled because this causes issues
     ;self.playerRef.setMotionType(Motion_Dynamic)
     ;utility.setIniBool("bDisablePlayerCollision:Havok", false)
-    self.animateRef(self.playerRef, "IdleForceDefaultState")
+    ;self.animateRef(self.playerRef, "IdleForceDefaultState")
     self.playerRef.clearLookAt()
     self.setActorVisible(self.playerRef, true)
 
@@ -257,14 +279,12 @@ function handlePlayerSettings()
         endIf
 
         game.enableFastTravel(!self.disablePlayerFastTravel)
-        game.setBeastForm(self.enableBeastForm)
         debug.setGodMode(self.enableGodMode)
 
     elseIf (self.toggleControlSettings) ; Revert settings
         game.enablePlayerControls()
         self.setActorVisible(self.playerRef, true)
         game.enableFastTravel(true)
-        game.setBeastForm(false)
         debug.setGodMode(false)
     endIf
 endFunction
