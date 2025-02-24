@@ -120,9 +120,9 @@ endFunction
 ; Get an array of keyword-linked object references attached with the "DivineRef" keyword signature
 objectReference[] function getKeywordRefs()
   objectReference[] refs = new objectReference[9] ; int matches self.KEYWORD_REFS_MAX
-  int refIndex = self.KEYWORD_REFS_MAX
+  int refIndex = KEYWORD_REFS_MAX
   while(refIndex > 0)
-    string kwName = self.KEYWORD_REFS_SIGNATURE + "0" + refIndex
+    string kwName = KEYWORD_REFS_SIGNATURE + "0" + refIndex
     keyword kw = keyword.getKeyword(kwName)
     objectReference ref = self.getLinkedRef(kw)
     if (ref != self.linkedRef)
