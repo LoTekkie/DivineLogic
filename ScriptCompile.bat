@@ -13,9 +13,6 @@ SET compiler="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Editi
 REM 2️⃣ Set the location of the Papyrus source scripts in Skyrim's Data folder
 SET source="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source"
 
-REM 3️⃣ Define the current working version of the mod (Update this before running)
-SET version=0.9.4
-
 REM 4️⃣ Set the path to the mod's scripts being worked on
 SET compile="C:\Users\Sjsho\Github\DivineLogic\Scripts\Source"
 
