@@ -1,5 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
+; v1.0
 
 scriptName DivineTranslator extends DivineSignaler
 ; Zenithar - God of Work and Commerce, Trader God

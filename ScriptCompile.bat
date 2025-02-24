@@ -1,5 +1,6 @@
 REM Divine Logic (c) 2019, Sjshovan (LoTekkie) 
 REM Licensed under BSD 3-Clause (see main file or LICENSE)
+REM v1.0
 
 REM ################################################################################
 REM # This script compiles all Papyrus scripts for Divine Logic using Bethesda's  #
