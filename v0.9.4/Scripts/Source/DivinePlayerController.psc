@@ -1,6 +1,8 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivinePlayerController extends DivineSignaler
-; Morihaus (First Breath of Man) – ancient hero god of the Cyro-Nordics,
-; associated with the Thu'um and Kynareth.
+; Morihaus (First Breath of Man) – ancient hero god of the Cyro-Nordics, associated with the Thu'um and Kynareth.
 
 import DivineUtils
 
@@ -81,7 +83,7 @@ bool property toggleSettingsReady = false auto hidden
 { Internal state for toggling control settings. }
 
 ; =========================
-;      UTILITY FUNCTIONS
+;         METHODS
 ; =========================
 
 ; Sets actor visibility and ghost status
@@ -94,51 +96,7 @@ function setActorVisible(actor actorRef, bool visible=true)
     actorRef.setGhost(!visible)
 endFunction
 
-; =========================
-;    MAIN SIGNAL HANDLING
-; =========================
-
-function onSignalling()
-    parent.onSignalling()
-
-    if (self.triggerScreenBloodAmount > 0)
-        game.triggerScreenBlood(self.triggerScreenBloodAmount)
-    endIf
-
-    if (!self.relayActivation)
-        self.handlePlayerControlTransfer()
-    else
-        self.setRefActivated(self.linkedRef, self)
-    endIf
-
-    if (self.stopPlayerCombat)
-        self.playerRef.stopCombat()
-    endIf
-
-    self.handlePlayerSettings()
-
-    if (self.forceFirstPersonCamera)
-        game.forceFirstPerson()
-    elseIf (self.forceThirdPersonCamera)
-        game.forceThirdPerson()
-    endIf
-
-    self.toggleSettingsReady = !self.toggleSettingsReady
-
-    if (self.activateKeywordRefs)
-        self.setKeywordRefsActivated()
-    endIf
-
-    if (self.killPlayer)
-        debug.setGodMode(false)
-        self.playerRef.kill(self.playerRef)
-    endIf
-endFunction
-
-; =========================
-;    PLAYER CONTROL HANDLING
-; =========================
-
+; Handles player control transfer
 function handlePlayerControlTransfer()
     if (self.transferPlayerControls && self.playerRef.getPlayerControls())
         self.transferControlToLinkedRef()
@@ -239,10 +197,7 @@ function handleCameraTransfer()
     endIf
 endFunction
 
-; =========================
-;    PLAYER SETTINGS HANDLING
-; =========================
-
+; Handles player settings 
 function handlePlayerSettings()
     bool individualControlsDisabled = \
         self.disablePlayerMovement     || \
@@ -286,5 +241,46 @@ function handlePlayerSettings()
         self.setActorVisible(self.playerRef, true)
         game.enableFastTravel(true)
         debug.setGodMode(false)
+    endIf
+endFunction
+
+; =========================
+;     LIFECYCYLE HOOKS
+; =========================
+
+function onSignalling()
+    parent.onSignalling()
+
+    if (self.triggerScreenBloodAmount > 0)
+        game.triggerScreenBlood(self.triggerScreenBloodAmount)
+    endIf
+
+    if (!self.relayActivation)
+        self.handlePlayerControlTransfer()
+    else
+        self.setRefActivated(self.linkedRef, self)
+    endIf
+
+    if (self.stopPlayerCombat)
+        self.playerRef.stopCombat()
+    endIf
+
+    self.handlePlayerSettings()
+
+    if (self.forceFirstPersonCamera)
+        game.forceFirstPerson()
+    elseIf (self.forceThirdPersonCamera)
+        game.forceThirdPerson()
+    endIf
+
+    self.toggleSettingsReady = !self.toggleSettingsReady
+
+    if (self.activateKeywordRefs)
+        self.setKeywordRefsActivated()
+    endIf
+
+    if (self.killPlayer)
+        debug.setGodMode(false)
+        self.playerRef.kill(self.playerRef)
     endIf
 endFunction

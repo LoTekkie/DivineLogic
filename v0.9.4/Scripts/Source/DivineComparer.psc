@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineComparer extends DivineSignaler
 ; Julianos – God of Wisdom and Logic
 
@@ -34,6 +37,10 @@ bool property xorCompare = false auto
   When comparison is successful an activation signal is sent to the non-keyword linked object reference.
   All keyword-linked objects must be of type: DivineObjectRefernce. 
   Must have at least 1 keyword object linked for comparisons. }
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   parent.onSignalling()

@@ -1,11 +1,7 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineMarker extends DivineObjectReference
-; ===================================
-;        DivineMarker Script
-; ===================================
-; Base class for all Divine logic markers.
-; This marker can activate keyword-linked object references 
-; and toggle their enabled state when activated.
-; ===================================
 
 import DivineUtils
 

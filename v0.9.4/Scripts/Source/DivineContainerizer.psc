@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineContainerizer extends DivineSignaler
 ; Zenithar - God of Work and Commerce, Trader God
 
@@ -27,13 +30,50 @@ bool property keepOwnership = false auto
 
 bool property randomizeDestinationContainer = false auto
 { Default: False - Randomizes which keyword-linked container receives the items.
-  (Used only if transferFromContainer is True and transferToPlayer is False.) }
+(Used only if transferFromContainer is True and transferToPlayer is False.) }
 
 bool property relayActivation = false auto
 { Default: False - Sends an activation signal to the non-keyword linked reference instead of a transfer signal. }
 
 ; =========================
-;      MAIN FUNCTION
+;         METHODS
+; =========================
+
+function transferToContainers()
+  if (self.transferToPlayer)
+    ; Transfer all keyword-linked container items to the player
+    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
+  else
+    ; Transfer all keyword-linked container items to the linkedRef
+    self.transferKeywordRefsItemsTo(self.linkedRef, self.keepOwnership, self.transferQuestItems)
+    if (self.transferFromPlayer)
+      self.playerRef.removeAllItems(self.linkedRef, self.keepOwnership, self.transferQuestItems)
+    endIf
+  endIf
+endFunction
+
+function transferFromContainers()
+  if (self.transferToPlayer)
+    ; Transfer all keyword-linked container items to the player
+    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
+  else
+    ; Transfer from linkedRef to keyword-linked references
+    self.tranferItemsToKeywordRefsFrom(self.linkedRef, self.keepOwnership, self.transferQuestItems, self.randomizeDestinationContainer)
+    
+    if (self.transferFromPlayer)
+      self.transferItemsFromPlayer()
+    endIf
+  endIf
+endFunction
+
+function transferItemsFromPlayer()
+  self.tranferItemsToKeywordRefsFrom(self.playerRef, self.keepOwnership, self.transferQuestItems, self.randomizeDestinationContainer)
+endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
@@ -55,49 +95,4 @@ function onSignalling()
   else
     self.transferToContainers()
   endIf
-endFunction
-
-; =========================
-;  TRANSFER TO CONTAINERS
-; =========================
-
-function transferToContainers()
-  if (self.transferToPlayer)
-    ; Transfer all keyword-linked container items to the player
-    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
-    self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
-  else
-    ; Transfer all keyword-linked container items to the linkedRef
-    self.transferKeywordRefsItemsTo(self.linkedRef, self.keepOwnership, self.transferQuestItems)
-    if (self.transferFromPlayer)
-      self.playerRef.removeAllItems(self.linkedRef, self.keepOwnership, self.transferQuestItems)
-    endIf
-  endIf
-endFunction
-
-; =========================
-;  TRANSFER FROM CONTAINERS
-; =========================
-
-function transferFromContainers()
-  if (self.transferToPlayer)
-    ; Transfer all keyword-linked container items to the player
-    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
-    self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
-  else
-    ; Transfer from linkedRef to keyword-linked references
-    self.tranferItemsToKeywordRefsFrom(self.linkedRef, self.keepOwnership, self.transferQuestItems, self.randomizeDestinationContainer)
-    
-    if (self.transferFromPlayer)
-      self.transferItemsFromPlayer()
-    endIf
-  endIf
-endFunction
-
-; =========================
-;   TRANSFER FROM PLAYER
-; =========================
-
-function transferItemsFromPlayer()
-  self.tranferItemsToKeywordRefsFrom(self.playerRef, self.keepOwnership, self.transferQuestItems, self.randomizeDestinationContainer)
 endFunction

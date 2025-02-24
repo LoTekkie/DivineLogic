@@ -1,10 +1,13 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineActivator extends DivineSignaler
 ; Stendarr – God of Compassion, Mercy, Justice, Charity, Luck, and Righteous Rule by Might and Merciful Forbearance.
 
 import DivineUtils
 
 ; =========================
-;      MAIN FUNCTION
+;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()

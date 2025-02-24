@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineGlobalModifier extends DivineSignaler
 ; Julianos – God of Wisdom and Logic
 
@@ -40,6 +43,10 @@ bool property relayActivation = false auto
 bool property activateKeywordRefs = false auto
 { Default: False - Send an activation to all keyword-linked object references. 
 (If the compareVariable property is set to True, activation will only occurr if the comparison results in True) }
+
+; =========================
+;      LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   parent.onSignalling()

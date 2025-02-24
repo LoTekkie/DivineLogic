@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineActorModifier extends DivineSignaler
 ; Julianos – God of Wisdom and Logic
 
@@ -53,29 +56,10 @@ bool property toPlayer = false auto
 { Determines whether the action applies to the player. Default: False. }
 
 bool property relayActivation = false auto
-{ If enabled, activates the linked reference instead of modifying the actor value. 
-  Ignored in compare mode, where activation only occurs if the comparison is True. Default: False. }
+{ If enabled, activates the linked reference instead of modifying the actor value. Ignored in compare mode, where activation only occurs if the comparison is True. Default: False. }
 
 ; =========================
-;      MAIN FUNCTION
-; =========================
-
-function onSignalling()
-    parent.onSignalling()
-
-    bool shouldCompare = self.compareActorValue || \
-                         self.compareActorBaseValue || \
-                         self.compareActorValuePercentage
-
-    if (shouldCompare)
-        self.handleComparisonMode()
-    else
-        self.handleModificationMode()
-    endIf
-endFunction
-
-; =========================
-;  ACTOR VALUE MODIFICATION
+;         METHODS
 ; =========================
 
 function handleModificationMode()
@@ -115,10 +99,6 @@ function modifyActor(actor actorRef)
     endIf
 endFunction
 
-; =========================
-;     COMPARISON MODE
-; =========================
-
 function handleComparisonMode()
     bool playerResult = true
     if (self.toPlayer)
@@ -146,4 +126,22 @@ function handleComparisonMode()
     if (playerResult && keywordsResult)
         self.setRefActivated(self.linkedRef, self)
     endIf 
+endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
+
+function onSignalling()
+    parent.onSignalling()
+
+    bool shouldCompare = self.compareActorValue || \
+                         self.compareActorBaseValue || \
+                         self.compareActorValuePercentage
+
+    if (shouldCompare)
+        self.handleComparisonMode()
+    else
+        self.handleModificationMode()
+    endIf
 endFunction

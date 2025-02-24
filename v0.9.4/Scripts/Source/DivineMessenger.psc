@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineMessenger extends DivineSignaler
 ; Reman – culture god-hero of the Second Empire.
 
@@ -66,7 +69,7 @@ bool property asHelpMessage = false auto
 
 string property helpMessageEvent = "" auto
 { Default: "" - Which event should the help message be applied to?
-  (Only used if `messageObject` is not None and `asHelpMessage` is True). }
+(Only used if `messageObject` is not None and `asHelpMessage` is True). }
 
 float property helpMessageDuration = 0.0 auto
 { Default: 0.0 - How long should the help message appear before going away? A value <= 0 means no time limit.
@@ -85,7 +88,7 @@ bool property resetHelpMessage = false auto
 { Default: False - Resets the status of the help message event, allowing a message to be displayed for that input event. }
 
 ; =========================
-;      MAIN FUNCTION
+;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()

@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineScaler extends DivineSignaler
 ; Dibella – Goddess of Beauty and Love
 
@@ -37,23 +40,10 @@ float property currentScale auto hidden
 { Tracks the current scale for linear scaling purposes. }
 
 ; =========================
-;      MAIN FUNCTION
+;         METHODS
 ; =========================
 
-function onSignalling()
-    parent.onSignalling()
-
-    if (self.relayActivation)
-        self.handleRelayActivation()
-    else
-        self.handleScaling()
-    endIf
-endFunction
-
-; =========================
-;  HANDLING RELAY ACTIVATION
-; =========================
-
+; Handle relaying activation to linked references
 function handleRelayActivation()
     self.setRefActivated(self.linkedRef, self)
 
@@ -65,10 +55,7 @@ function handleRelayActivation()
     endIf
 endFunction
 
-; =========================
-;   SCALING LOGIC HANDLING
-; =========================
-
+; Handle scaling the linked references
 function handleScaling()
     float newScale = self.getNewScale()
 
@@ -114,4 +101,18 @@ float function getNextLinearScale()
 
     self.currentScale = newScale
     return newScale
+endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
+
+function onSignalling()
+    parent.onSignalling()
+
+    if (self.relayActivation)
+        self.handleRelayActivation()
+    else
+        self.handleScaling()
+    endIf
 endFunction

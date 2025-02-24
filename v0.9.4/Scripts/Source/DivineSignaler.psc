@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineSignaler extends DivineObjectReference
 ; Base class for all Divine Logic signalers
 
@@ -79,6 +82,27 @@ float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 
 int property signalCount = 0 auto hidden
 { How many times has this signaled? }
+
+; =========================
+;         EVENTS
+; =========================
+
+event onInit()
+  parent.onInit()
+  self.initRotation()
+  self.setKeywordRefSpacingOffsets()
+endEvent
+
+event onLoad()
+  parent.onLoad()
+  if (self.signalOnStart)
+    self.activate(self)
+  endIf
+endEvent
+
+; =========================
+;         METHODS
+; =========================
 
 ; Set whether or not activation should be blocked
 function setActivationBlocked(bool blocked=true)
@@ -241,18 +265,9 @@ function initRotation()
   self.setAngle(0.00, 0.00, 0.0000001)
 endFunction
 
-event onInit()
-  parent.onInit()
-  self.initRotation()
-  self.setKeywordRefSpacingOffsets()
-endEvent
-
-event onLoad()
-  parent.onLoad()
-  if (self.signalOnStart)
-    self.activate(self)
-  endIf
-endEvent
+; =========================
+;         STATES
+; =========================
 
 ; Wait for and detect player input
 state waiting
@@ -279,7 +294,8 @@ state waiting
         goToState("busy")
       endIf 
     endIf
-  endEvent  
+  endEvent
+
   event onTriggerEnter(objectReference objectRef)
     bool signal = false
     if (objectRef as actor == self.playerRef as actor && self.detectPlayer)
@@ -346,6 +362,7 @@ state busy
       endIf 
     endIf
   endEvent
+
   event onUpdate()
     self.onUpdating()
   endEVent

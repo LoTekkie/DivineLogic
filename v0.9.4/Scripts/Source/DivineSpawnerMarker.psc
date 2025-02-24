@@ -3,6 +3,10 @@ scriptName DivineSpawnerMarker extends DivineMarker
 
 import DivineUtils
 
+; =========================
+;        PROPERTIES
+; =========================
+
 float property delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references spawn to this marker. }
 bool property collapseSpacing = false auto

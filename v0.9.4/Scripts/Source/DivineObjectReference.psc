@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineObjectReference extends ObjectReference
 ; Divinity itself
 
@@ -34,6 +37,26 @@ actor property playerRef auto hidden
 
 bool property showDebug = false auto
 { Default: False - Output divine logic debug messages to logs. }
+
+; =========================
+;       EVENTS
+; =========================
+
+event onInit()
+  info(self + "@ event: onInit", enabled=self.showDebug)
+  self.formName = self.getRefFormName(self) ; cached for later use
+  self.playerRef = game.getPlayer()
+  self.setLinkedRef()
+  self.setKeywordRefs()
+endEvent
+
+event onLoad()
+  ; Do something
+endEvent
+
+; =========================
+;         METHODS
+; =========================
 
 ; Set the "linkedRef" property
 function setLinkedRef()
@@ -915,17 +938,9 @@ float[] function buildRefPositionsArray(objectReference objectRef)
   return positions
 endFunction
 
-event onInit()
-  info(self + "@ event: onInit", enabled=self.showDebug)
-  self.formName = self.getRefFormName(self) ; cached for later use
-  self.playerRef = game.getPlayer()
-  self.setLinkedRef()
-  self.setKeywordRefs()
-endEvent
-
-event onLoad()
-  ; Do something
-endEvent
+; =========================
+;        STATES
+; =========================
 
 auto state waiting
   event onActivate (objectReference triggerRef)

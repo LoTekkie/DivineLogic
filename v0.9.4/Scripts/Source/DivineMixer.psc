@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineMixer extends DivineSignaler
 ; Dibella – Goddess of Beauty and Love
 
@@ -56,15 +59,13 @@ bool property activateKeywordRefs = false auto
 { Default: False - Activate all keyword-linked object references. }
 
 ; =========================
-;      MAIN FUNCTION
+;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
     parent.onSignalling()
 
-    ; =========================
-    ;      SOUND HANDLING
-    ; =========================
+    ; Sound handling
     if (self.soundObject)
         objectReference source = self
         if (self.playSoundFromPlayer)
@@ -78,9 +79,7 @@ function onSignalling()
         endIf
     endIf
 
-    ; =========================
-    ;  SOUND CATEGORY CONTROL
-    ; =========================
+    ; Sound Category Control
     if (self.soundCategoryObject)
         self.soundCategoryObject.setFrequency(self.soundCategoryFrequency)
         self.soundCategoryObject.setVolume(self.soundCategoryVolume)
@@ -98,9 +97,7 @@ function onSignalling()
         endIf
     endIf
 
-    ; =========================
-    ;     MUSIC CONTROL
-    ; =========================
+    ; Music Control
     if (self.musicTypeObject)
         if (self.addMusicType)
             self.musicTypeObject.add()
@@ -109,9 +106,7 @@ function onSignalling()
         endIf
     endIf
 
-    ; =========================
-    ;  ACTIVATION HANDLING
-    ; =========================
+    ; Activation Handling
     if (self.relayActivation)
         self.setRefActivated(self.linkedRef, self)
     endIf

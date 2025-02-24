@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineTranslatorMarker extends DivineMarker
 ; Zenithar - God of Work and Commerce, Trader God
 

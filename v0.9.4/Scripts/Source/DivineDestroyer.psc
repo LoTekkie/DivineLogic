@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineDestroyer extends DivineSignaler
 ; Arkay – God of the Cycle of Life and Death, overseeing mortal burials and funeral rites.
 
@@ -16,7 +19,19 @@ bool property relayActivation = false auto
   Default: False. }
 
 ; =========================
-;      MAIN FUNCTION
+;         METHODS
+; =========================
+
+function handleRelayActivation()
+    self.setRefActivated(self.linkedRef, self)
+endFunction
+
+function handleDestruction()
+    self.deleteRef(self.linkedRef, self.whenAble)
+endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
@@ -30,20 +45,4 @@ function onSignalling()
 
     ; Always delete keyword-linked references
     self.deleteKeywordRefs(self.whenAble)
-endFunction
-
-; =========================
-;   HANDLING RELAY ACTIVATION
-; =========================
-
-function handleRelayActivation()
-    self.setRefActivated(self.linkedRef, self)
-endFunction
-
-; =========================
-;  HANDLING DESTRUCTION LOGIC
-; =========================
-
-function handleDestruction()
-    self.deleteRef(self.linkedRef, self.whenAble)
 endFunction

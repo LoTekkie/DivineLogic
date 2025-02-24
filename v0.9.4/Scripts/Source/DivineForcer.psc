@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineForcer extends DivineSignaler
 ; Kynareth - Goddess of Air, Wind, Sky, and the Elements
 
@@ -35,7 +38,7 @@ bool property implode = false auto
 { Default: False - Pulls all linked object references **toward** this object. }
 
 ; =========================
-;      INITIALIZATION
+;        EVENTS
 ; =========================
 
 event onInit()
@@ -49,7 +52,7 @@ event onInit()
 endEvent
 
 ; =========================
-;      MAIN FUNCTION
+;      LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()

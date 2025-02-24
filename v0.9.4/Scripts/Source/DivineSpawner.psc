@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineSpawner extends DivineSignaler
 ; Mara - Goddess of Love and compassion, the Mother Goddess
 
@@ -26,7 +29,9 @@ float property individualDelay = 0.0 auto
 int property maxSpawns = 0 auto
 { Default: 0 - Maximum number of times spawning will occur. (Default value of 0 is equivalent to infinity) }
 
-; Marker Properties m_*
+; =========================
+;    MARKER PROPERTIES
+; =========================
 
 float property m_delay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the keyword-linked object references spawn at this marker. }
@@ -76,6 +81,10 @@ bool property m_matchRotation = false auto
 bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 
+; =========================
+;         EVENTS
+; =========================
+
 event onInit()
   parent.onInit()
   if ( ! self.nextMarker )
@@ -90,6 +99,10 @@ event onInit()
     self.totalSpawns += 1
   endIf
 endEvent
+
+; =========================
+;         METHODS
+; =========================
 
 ;/ Make the given DivineSpawnerMarker object property values conform to 
 this objects values of the same property name if those values are not default /; 
@@ -111,6 +124,10 @@ function conformMarkerProperties(DivineSpawnerMarker markerRef)
   markerRef.matchRotation = conformBool(markerRef.matchRotation, self.m_matchRotation, false)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   if ( ! self.nextMarker && self.noMarkersAttached )

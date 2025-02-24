@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineAnimator extends DivineSignaler
 ; Lorkhan - The et'Ada most directly responsible for the existence of Nirn and is the god of all mortals.
 
@@ -52,7 +55,56 @@ bool property relayActivation = false auto
 { If True, sends an activation signal to the non-keyword linked reference instead of playing an animation. Default: False }
 
 ; =========================
-;      MAIN FUNCTION
+;          METHODS
+; =========================
+
+function animateReference(objectReference objectRef)
+    if (objectRef)
+        self.animateRef( \
+            objectRef, \
+            self.animationEvent, \
+            self.subGraphAnimation, \
+            self.gameBryoAnimation, \
+            self.gameBryoStartOver, \
+            self.gameBryoEaseInTime \
+        )
+    endIf
+endFunction
+
+function setReferenceAnimationVariable(objectReference objectRef)
+    if (objectRef)
+        self.setRefAnimationVariable( \
+            objectRef, \
+            self.animationEvent, \
+            self.animationVariableValue, \
+            self.sendEventAsBoolVariable, \
+            self.sendEventAsFloatVariable, \
+            self.sendEventAsIntVariable \
+        )
+    endIf
+endFunction
+
+function handleLookAtLogic()
+    actor refActor = self.linkedRef as actor
+
+    if (self.clearLookAt)
+        if (refActor)
+            refActor.clearLookAt()
+        endIf
+        self.clearKeywordRefsLookAt()
+        return
+    endIf
+
+    if (self.lookAtPlayer || self.lookAtPlayerWhilePathing)
+        if (refActor)
+            refActor.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+        endIf
+        self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
+    endIf
+endFunction
+
+; =========================
+;      LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
@@ -99,57 +151,4 @@ function onSignalling()
     endIf
 
     self.handleLookAtLogic()
-endFunction
-
-; =========================
-;   ANIMATION FUNCTIONS
-; =========================
-
-function animateReference(objectReference objectRef)
-    if (objectRef)
-        self.animateRef( \
-            objectRef, \
-            self.animationEvent, \
-            self.subGraphAnimation, \
-            self.gameBryoAnimation, \
-            self.gameBryoStartOver, \
-            self.gameBryoEaseInTime \
-        )
-    endIf
-endFunction
-
-function setReferenceAnimationVariable(objectReference objectRef)
-    if (objectRef)
-        self.setRefAnimationVariable( \
-            objectRef, \
-            self.animationEvent, \
-            self.animationVariableValue, \
-            self.sendEventAsBoolVariable, \
-            self.sendEventAsFloatVariable, \
-            self.sendEventAsIntVariable \
-        )
-    endIf
-endFunction
-
-; =========================
-;     LOOK-AT LOGIC
-; =========================
-
-function handleLookAtLogic()
-    actor refActor = self.linkedRef as actor
-
-    if (self.clearLookAt)
-        if (refActor)
-            refActor.clearLookAt()
-        endIf
-        self.clearKeywordRefsLookAt()
-        return
-    endIf
-
-    if (self.lookAtPlayer || self.lookAtPlayerWhilePathing)
-        if (refActor)
-            refActor.setLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
-        endIf
-        self.setKeywordRefsLookAt(self.playerRef, self.lookAtPlayerWhilePathing)
-    endIf
 endFunction

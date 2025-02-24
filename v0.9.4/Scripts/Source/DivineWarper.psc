@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineWarper extends DivineSignaler
 ; Akatosh – The Dragon God of Time and chief god of the pantheon
 
@@ -72,6 +75,10 @@ bool property m_matchRotation = false auto
 bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 
+; =========================
+;         EVENTS
+; =========================
+
 event onInit()
   parent.onInit()
   if ( ! self.nextMarker )
@@ -82,6 +89,10 @@ event onInit()
     endIf
   endIf
 endEvent
+
+; =========================
+;          METHODS
+; =========================
 
 ;/ Make the given DivineWarperMarker object property values conform to 
 this objects values of the same property name if those values are not default /; 
@@ -104,6 +115,10 @@ function conformMarkerProperties(DivineWarperMarker markerRef)
   markerRef.warpPlayer = conformBool(markerRef.warpPlayer, self.m_warpPlayer, false)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   parent.onSignalling()

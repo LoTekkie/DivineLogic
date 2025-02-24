@@ -1,6 +1,8 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineCutsceneCreator extends DivineSignaler
 ; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man
-; Controls the flow and behavior of in-game cutscenes.
 
 import DivineUtils
 
@@ -130,7 +132,7 @@ float property m_cameraShakeDuration = 0.0 auto
 { Default: 0.0 - Duration of the camera shake (only used if shakeCamera is True). }
 
 ; =========================
-;     INITIALIZATION
+;     EVENTS
 ; =========================
 
 event onInit()
@@ -148,6 +150,10 @@ event onInit()
       endIf
   endIf
 endEvent
+
+; =========================
+;     METHODS
+; =========================
 
 function conformMarkerProperties(DivineCutsceneCreatorMarker markerRef)
   markerRef.delay = conformFloat(markerRef.delay, self.m_delay, 0.0)
@@ -221,7 +227,7 @@ function setCameraTarget(actor actorRef)
 endFunction
 
 ; Start the cutscene
-Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
+function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.inCutScene = true
   debug.setGodMode(true)
   self.playerRef.stopCombat()
@@ -248,7 +254,7 @@ Function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
 endFunction
 
 ; End the cutscene
-Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
+function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.ignoreBusy = true
   self.cutSceneLocked = true
   info("Ending Cutscene", enabled=true)
@@ -272,6 +278,10 @@ Function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
     self.paused = true
   endIf
 endFunction
+
+; =========================
+;     LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   if ( ! self.inCutScene && ! self.cutSceneLocked )
@@ -355,15 +365,6 @@ function onSignalling()
   endIf
 endFunction
 
-state waiting
-  event onEndState()
-    if ( ! self.inCutScene && self.cutSceneLocked )
-      self.ignoreBusy = false
-      self.cutSceneLocked = false
-    endIF
-  endEvent
-endState
-
 function onUpdating()
   if (self.inCutScene)
     if (self.allowSkip)
@@ -380,3 +381,16 @@ function onUpdating()
     registerForSingleUpdate(0.25)
   endIf
 endFunction
+
+; =========================
+;        STATES
+; =========================
+
+state waiting
+  event onEndState()
+    if ( ! self.inCutScene && self.cutSceneLocked )
+      self.ignoreBusy = false
+      self.cutSceneLocked = false
+    endIF
+  endEvent
+endState

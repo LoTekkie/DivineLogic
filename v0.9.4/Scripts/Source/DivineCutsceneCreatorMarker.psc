@@ -1,6 +1,8 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineCutsceneCreatorMarker extends DivineMarker
 ; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man
-; Defines a marker used in cutscenes for positioning, movement, and camera effects.
 
 import DivineUtils
 
@@ -23,10 +25,6 @@ bool property rotateOnArrival = false auto
 float property tangentMagnitude = 0.0 auto
 { Default: 0.0 - Magnitude of the spline tangents. If this value is 0.0, no splines will be created. }
 
-; =========================
-;     POSITION OFFSETS
-; =========================
-
 float property offsetX = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects' positions in the X direction. }
 
@@ -45,10 +43,6 @@ float property offsetAY = 0.0 auto
 float property offsetAZ = 0.0 auto
 { Default: 0.0 - How much to offset the translated objects' angles in the Z direction. }
 
-; =========================
-;  MOVEMENT RESTRICTIONS
-; =========================
-
 bool property limitX = false auto
 { Default: False - Prevents translation on the X axis. }
 
@@ -66,10 +60,6 @@ bool property limitAY = false auto
 
 bool property limitAZ = false auto
 { Default: False - Prevents rotation on the Z axis. }
-
-; =========================
-;   TARGETING & EFFECTS
-; =========================
 
 bool property matchRotation = false auto
 { Default: False - Should the translating objects match the rotation of this marker when they arrive? }

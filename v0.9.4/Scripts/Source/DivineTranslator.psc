@@ -1,3 +1,6 @@
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
+; Licensed under BSD 3-Clause (see main file or LICENSE)
+
 scriptName DivineTranslator extends DivineSignaler
 ; Zenithar - God of Work and Commerce, Trader God
 
@@ -26,7 +29,7 @@ bool property treatAsHavok = false auto
   Upon ending translation, linked references will have their motion types set to `Motion_Dynamic`.) }
 
 ; =========================
-;   MARKER PROPERTIES (m_)
+;     MARKER PROPERTIES
 ; =========================
 
 float property m_delay = 0.0 auto
@@ -90,6 +93,10 @@ bool property m_matchRotation = false auto
 bool property m_toPlayer = false auto
 { Default: False - Should the translating objects move to the player? }
 
+; =========================
+;          EVENTS
+; =========================
+
 event onInit()
   parent.onInit()
   if ( ! self.nextMarker )
@@ -100,6 +107,10 @@ event onInit()
     endIf
   endIf
 endEvent
+
+; =========================
+;         METHODS
+; =========================
 
 ;/ Make the given DivineTranslatorMarker object property values conform to 
 this objects values of the same property name if those values are not default /; 
@@ -125,6 +136,10 @@ function conformMarkerProperties(DivineTranslatorMarker markerRef)
   markerRef.rotateOnArrival = conformBool(markerRef.rotateOnArrival, self.m_rotateOnArrival, false)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
+
+; =========================
+;      LIFECYCLE HOOKS
+; =========================
 
 function onSignalling()
   if ( ! self.nextMarker && self.noMarkersAttached )
