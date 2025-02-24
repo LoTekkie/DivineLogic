@@ -6,6 +6,7 @@ scriptName DivineObjectReference extends ObjectReference
 ; Divinity itself
 
 import DivineUtils
+import DivineConstants
 
 ; =========================
 ;        PROPERTIES
@@ -23,12 +24,6 @@ objectReference property linkedRef auto hidden
 
 objectReference[] property keywordRefs auto hidden
 { All keyword-linked object references that are attached with the "DivineRef" keyword. }
-
-int property maxKeywordRefs = 9 auto hidden
-{ The maxiumum number of keyword-linked references allowed to be attached to this object. }
-
-string property keywordRefSignature = "DivineRef" auto hidden
-{ The base keyword signature used to identify objects available to enter the keywordRefs property. }
 
 string property formName auto hidden
 { A reference to the form name of this object when it's loaded. }
@@ -124,10 +119,10 @@ endFunction
 
 ; Get an array of keyword-linked object references attached with the "DivineRef" keyword signature
 objectReference[] function getKeywordRefs()
-  objectReference[] refs = new objectReference[9] ; int matches self.maxKeywordRefs
-  int refIndex = self.maxKeywordRefs
+  objectReference[] refs = new objectReference[9] ; int matches self.KEYWORD_REFS_MAX
+  int refIndex = self.KEYWORD_REFS_MAX
   while(refIndex > 0)
-    string kwName = self.keywordRefSignature + "0" + refIndex
+    string kwName = self.KEYWORD_REFS_SIGNATURE + "0" + refIndex
     keyword kw = keyword.getKeyword(kwName)
     objectReference ref = self.getLinkedRef(kw)
     if (ref != self.linkedRef)
@@ -937,6 +932,11 @@ float[] function buildRefPositionsArray(objectReference objectRef)
   positions[4] = objectRef.getAngleY()
   positions[5] = objectRef.getAngleZ()
   return positions
+endFunction
+
+; Set debug for this object
+function setDebug(bool debug)
+  self.showDebug = debug
 endFunction
 
 ; =========================
