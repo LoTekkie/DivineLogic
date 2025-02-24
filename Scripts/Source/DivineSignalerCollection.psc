@@ -15,7 +15,7 @@ DivineSignaler[] signalers
 
 ; Add a signaler to the collection
 bool function add(DivineSignaler signaler)    
-    self.signalers = self.signalers + [signaler]
+    signalers = signalers + [signaler]
     return self
 endFunction
 
