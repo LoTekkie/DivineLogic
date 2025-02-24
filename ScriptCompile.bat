@@ -17,7 +17,7 @@ REM 3️⃣ Define the current working version of the mod (Update this before ru
 SET version=0.9.4
 
 REM 4️⃣ Set the path to the mod's scripts being worked on
-SET compile="C:\Users\Sjsho\Github\DivineLogic\v%version%\Scripts\Source"
+SET compile="C:\Users\Sjsho\Github\DivineLogic\Scripts\Source"
 
 REM 5️⃣ Set the output directory for compiled scripts in Skyrim's Data folder
 SET output="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts"
