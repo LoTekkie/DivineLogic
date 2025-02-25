@@ -34,6 +34,12 @@ actor property playerRef auto hidden
 bool property showDebug = false auto
 { Default: False - Output divine logic debug messages to logs. }
 
+int property KEYWORD_REFS_MAX = 9 autoReadOnly hidden
+{ The maxiumum number of keyword-linked references allowed to be attached to this object. }
+
+string property KEYWORD_REFS_SIGNATURE = "DivineRef" autoReadOnly hidden
+{ The base keyword signature used to identify objects available to enter the keywordRefs property. }
+
 ; =========================
 ;       EVENTS
 ; =========================
@@ -120,9 +126,9 @@ endFunction
 ; Get an array of keyword-linked object references attached with the "DivineRef" keyword signature
 objectReference[] function getKeywordRefs()
   objectReference[] refs = new objectReference[9] ; int matches self.KEYWORD_REFS_MAX
-  int refIndex = KEYWORD_REFS_MAX
+  int refIndex = self.KEYWORD_REFS_MAX
   while(refIndex > 0)
-    string kwName = KEYWORD_REFS_SIGNATURE + "0" + refIndex
+    string kwName = self.KEYWORD_REFS_SIGNATURE + "0" + refIndex
     keyword kw = keyword.getKeyword(kwName)
     objectReference ref = self.getLinkedRef(kw)
     if (ref != self.linkedRef)
@@ -935,8 +941,8 @@ float[] function buildRefPositionsArray(objectReference objectRef)
 endFunction
 
 ; Set debug for this object
-function setDebug(bool debug)
-  self.showDebug = debug
+function setDebug(bool showDebug)
+  self.showDebug = showDebug
 endFunction
 
 ; =========================
