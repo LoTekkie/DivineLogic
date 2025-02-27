@@ -3,6 +3,7 @@
 ; v1.0
 
 scriptName DivineMarker extends DivineObjectReference
+; Akatosh – The Dragon God of Time and chief god of the pantheon
 
 import DivineUtils
 

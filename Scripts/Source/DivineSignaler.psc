@@ -6,6 +6,7 @@ scriptName DivineSignaler extends DivineObjectReference
 ; Base class for all Divine Logic signalers
 
 import DivineUtils
+import StringUtil
 import Math
 
 ; =========================
@@ -84,6 +85,11 @@ float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 int property signalCount = 0 auto hidden
 { How many times has this signaled? }
 
+string property signalerID auto
+{ Default: "" - A unique identifier that is broadcast to sent mod events from this signaler. If empty, the form ID will be sent instead. }
+
+DivineLogicAPI property api auto hidden
+
 ; =========================
 ;         EVENTS
 ; =========================
@@ -92,6 +98,7 @@ event onInit()
   parent.onInit()
   self.initRotation()
   self.setKeywordRefSpacingOffsets()
+  self.api = self.getApi()
 endEvent
 
 event onLoad()
@@ -245,7 +252,9 @@ endFunction
 ;/ Event method used to customize behavior within the "busy" state
 To be overriden within child scripts /;
 function onSignalling()
-  info(self + "@ eventHandler: onSignalling", enabled=self.showDebug)
+  info(self + "@ function: onSignalling", enabled=self.showDebug)
+  ;fire off a signal mod event
+  self.api.fireSignalEvent(self)
 endFunction
 
 ;/ Event method used to customize behavior within the onUpdating event
@@ -264,6 +273,22 @@ function initRotation()
     return
   endIf
   self.setAngle(0.00, 0.00, 0.0000001)
+endFunction
+
+; Get the divine logic api reference object, retrieve from cache or generate a new instance
+DivineLogicAPI function getApi()
+  if ( ! self.api )
+    return DivineLogicAPI.getInstance()
+  endIf
+  return self.api
+endFunction
+
+; Get the unique signaler ID for this signler
+string function getSignalerID()
+  if (self.signalerID != "")
+    return self.signalerID
+  endIf
+  return "" + self.GetFormID()
 endFunction
 
 ; =========================
@@ -319,6 +344,10 @@ endState
 state busy
   event onBeginState()
     info(self + "@ state: busy", enabled=self.showDebug)
+    if (self.shutDown)
+      goToState("off")
+      return
+    endIf  
     if (self.paused || self.ignoreBusy)
       goToState("waiting")
       return

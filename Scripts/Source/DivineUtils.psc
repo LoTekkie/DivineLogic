@@ -3,6 +3,7 @@
 ; v1.0
 
 scriptName DivineUtils
+; Anu - The primordial force of stasis and light, representing absolute divinity, order, and the essence of Aetherius.
 
 import Debug
 import Utility
@@ -14,13 +15,13 @@ function info(string msg, string prefix="[DL:*] > ", bool enabled=true) global
 endFunction
 
 ; Log an error message
-function err(string msg) global
-  info(msg, "[DL:ERR] > ", true)
+function err(string msg, bool enabled=true) global
+  info(msg, "[DL:ERR] > ", enabled)
 endFunction
 
 ; Log a warning message
-function wrn(string msg) global
-  info(msg, "[DL:WARN] > ", true)
+function wrn(string msg, bool enabled=true) global
+  info(msg, "[DL:WARN] > ", enabled)
 endFunction
 
 ; Clamp the given float value between min and max
@@ -255,4 +256,16 @@ float[] function getPosXYZRotateAroundRef(ObjectReference akOrigin, ObjectRefere
   fNewPos[1] = fNewY + myOriginPosY
   fNewPos[2] = fNewZ + myOriginPosZ
   return fNewPos
+endFunction
+
+; Determine if all values in the given array are true
+bool function isArrAllTrue(bool[] arr) global
+  int i = 0
+  while (i < arr.length)
+    if (!arr[i])
+      return false
+    endIf
+    i += 1
+  endWhile
+  return true 
 endFunction

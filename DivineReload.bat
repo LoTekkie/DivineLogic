@@ -1,0 +1,9 @@
+reloadscript DivineLogicAPI
+reloadscript DivineLogicAPITests
+reloadscript DivineUtils
+stopquest DivineLogicAPIQuest
+startquest DivineLogicAPIQuest
+pcb
+refreshini
+save DivineReloadTemp
+load DivineReloadTemp

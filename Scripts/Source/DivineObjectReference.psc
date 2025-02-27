@@ -40,6 +40,9 @@ int property KEYWORD_REFS_MAX = 9 autoReadOnly hidden
 string property KEYWORD_REFS_SIGNATURE = "DivineRef" autoReadOnly hidden
 { The base keyword signature used to identify objects available to enter the keywordRefs property. }
 
+bool property shutDown = false auto hidden
+{ A flag to indicate that this trigger should be in the off state and not recieve any events. }
+
 ; =========================
 ;       EVENTS
 ; =========================
@@ -940,9 +943,10 @@ float[] function buildRefPositionsArray(objectReference objectRef)
   return positions
 endFunction
 
-; Set debug for this object
-function setDebug(bool showDebug)
-  self.showDebug = showDebug
+; Send this signaler into a state that does not listen for events 
+function shutDown()
+  self.shutDown = true
+  goToState("off")
 endFunction
 
 ; =========================
@@ -958,5 +962,12 @@ endState
 state busy
   event onBeginState()
     goToState("waiting")
+  endEvent
+endState
+
+state off
+  ;do nothing
+  event onBeginState()
+    info(self + "@ state: off", enabled=self.showDebug)
   endEvent
 endState
