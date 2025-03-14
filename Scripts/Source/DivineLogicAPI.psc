@@ -7,6 +7,7 @@ ScriptName DivineLogicAPI Extends Quest
 
 import Utility
 import DivineUtils
+import Debug
 
 ; =========================
 ;        PROPERTIES
@@ -90,4 +91,12 @@ bool function fireSignalEvent(DivineSignaler signaler)
         endIf    
 	endIf
     return false
+endFunction
+
+function profileScriptStart(string script)
+  Debug.StartScriptProfiling(script)
+endFunction
+
+function profileScriptEnd(string script)
+  Debug.StopScriptProfiling(script)
 endFunction

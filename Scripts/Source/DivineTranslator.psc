@@ -141,7 +141,8 @@ endFunction
 ; =========================
 ;      LIFECYCLE HOOKS
 ; =========================
-
+; consider updating this to be event driven, waiting for translation to be complete
+; this is executing too quickly and filling up the call stack
 function onSignalling()
   if ( ! self.nextMarker && self.noMarkersAttached )
     if (self.treatAsHavok)
