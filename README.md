@@ -1,14 +1,12 @@
 # Divine Logic
 
-Divine Logic is a Skyrim Creation Kit framework for building gameplay logic with pre-scripted trigger boxes.
+Divine Logic is a Skyrim Creation Kit framework for building richer dungeon logic with pre-scripted trigger boxes.
 
-It is made for mod authors who want to build puzzles, traps, moving objects, item transfers, cutscenes, staged encounters, and other interactive systems without writing new Papyrus scripts for every idea. You place Divine Logic boxes in the Creation Kit, configure their script properties, and connect them with linked references.
+It was created for mod authors who want puzzle-heavy spaces with readable mechanisms, moving parts, item checks, staged reveals, cutscenes, traps, and timed events, without writing and recompiling a custom Papyrus script for every idea. You build by placing Divine Logic boxes, setting properties, and wiring references directly in the Creation Kit, which makes puzzle iteration much faster.
 
-Divine Logic was created from the desire to build more puzzle-heavy dungeons in Skyrim: spaces with readable mechanisms, moving parts, staged reveals, item checks, timing, and puzzle logic that can be changed quickly while building. Instead of writing and recompiling a custom Papyrus script for every puzzle idea, Divine Logic lets you iterate directly in the Creation Kit by placing boxes, changing properties, and rewiring references.
+Under the hood, Divine Logic uses Skyrim's normal `Activate()` path as its signal bus. That keeps logic visible in the editor and lets boxes trigger other boxes the same way activators, doors, markers, and scripted references already interact.
 
-Divine Logic uses Skyrim's normal `Activate()` path as its signal bus. That is intentional: it keeps the system visible in the Creation Kit and lets boxes trigger other boxes the same way activators, doors, markers, and scripted references already interact.
-
-The name Divine Logic comes from the idea that the gods lend a little of their power to your creations. Each script is associated with a deity whose sphere fits the box's role: Akatosh for movement through time and space, Zenithar for work and exchange, Julianos for logic and knowledge, and so on. For example, `DivineTranslator` is associated with Zenithar because it performs work by moving objects from one place to another. The theme is documentation flavor, not a gameplay requirement, but it gives each tool a memorable identity.
+The name comes from the idea that the gods lend a little of their power to your creations. Each script is associated with a deity whose sphere fits the box's role: Zenithar guides work and exchange, Akatosh shapes time and movement, Julianos governs logic and knowledge. For example, `DivineTranslator` belongs to Zenithar because it performs work by moving objects from one place to another. The theme is flavor, not a gameplay requirement, but it gives each tool a memorable identity.
 
 ## Index
 
@@ -930,3 +928,5 @@ Copyright (c) 2019, Sjshovan (LoTekkie).
 ## Credits
 
 Created by Sjshovan (LoTekkie).
+
+Special thanks to Bruno Mara for helping test Divine Logic and motivating me to finish it.
