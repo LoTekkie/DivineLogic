@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivinePlayerController extends DivineSignaler
-; Morihaus (First Breath of Man) – ancient hero god of the Cyro-Nordics, associated with the Thu'um and Kynareth.
+; Morihaus - First Breath of Man; maps to player control, camera, and embodied agency.
 
 import DivineUtils
 
@@ -89,6 +89,10 @@ bool property toggleSettingsReady = false auto hidden
 
 ; Sets actor visibility and ghost status
 function setActorVisible(actor actorRef, bool visible=true)
+    if (!actorRef)
+        return
+    endIf
+
     float alpha = 1.0
     if (!visible)
         alpha = 0.0

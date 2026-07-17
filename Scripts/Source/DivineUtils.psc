@@ -3,7 +3,7 @@
 ; v1.0
 
 scriptName DivineUtils
-; Anu - The primordial force of stasis and light, representing absolute divinity, order, and the essence of Aetherius.
+; Anu - Primordial principle of order; maps to shared utility, bounds, and stable rules.
 
 import Debug
 import Utility
@@ -188,7 +188,7 @@ endFunction
  
 ;-------------\
 ;Return Values \
-;----------------------------------------------------------------
+;----------------------------------------------------------------we
 ;               fNewPos[0]      =        The new X position of the point
 ;               fNewPos[1]      =        The new Y position of the point
 ;               fNewPos[2]      =        The new Z position of the point

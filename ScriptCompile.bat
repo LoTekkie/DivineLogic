@@ -1,6 +1,6 @@
 REM Divine Logic (c) 2019, Sjshovan (LoTekkie) 
 REM Licensed under BSD 3-Clause (see main file or LICENSE)
-REM v1.0
+REM v1.1
 
 REM ################################################################################
 REM # This script compiles all Papyrus scripts for Divine Logic using Bethesda's  #
@@ -12,7 +12,7 @@ REM Set the path to the Papyrus Compiler
 SET compiler="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Papyrus Compiler\PapyrusCompiler.exe"
 
 REM Set the location of the Papyrus source scripts in Skyrim's Data folder
-SET source="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Scripts\Source"
+SET source="C:\Program Files (x86)\Steam\steamapps\common\Skyrim Special Edition\Data\Source\Scripts"
 
 REM Set the path to the mod's scripts being worked on
 SET compile="C:\Users\Sjsho\Github\DivineLogic\Scripts\Source"

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineActorModifier extends DivineSignaler
-; Julianos – God of Wisdom and Logic
+; Julianos - God of Wisdom and Logic; maps to actor-value rules and comparisons.
 
 import DivineUtils
 

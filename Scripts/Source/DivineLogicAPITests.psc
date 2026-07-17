@@ -1,9 +1,9 @@
-; Divine Logic API (c) 2019, Sjshovan (LoTekkie)
+; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 ScriptName DivineLogicAPITests extends DivineSignaler
-; Stendarr – God of Compassion, Mercy, Justice, Charity, Luck, and Righteous Rule by Might and Merciful Forbearance.
+; Julianos - God of Wisdom and Logic; maps to API validation and test assertions.
 
 import DivineLogicAPI
 import DivineUtils
@@ -12,11 +12,14 @@ import DivineUtils
 ;        PROPERTIES
 ; =========================
 
-bool property runOnStart = true auto
-{ Default: True - run the Divine Logic API tests when the game is loaded. }
+bool property runOnStart = false auto
+{ Default: False - run the Divine Logic API tests when the game is loaded. }
 
-bool property runOnSignal = true auto
-{ Default: True - run when the object this script is attached to sends a signal. }
+bool property runOnSignal = false auto
+{ Default: False - run when the object this script is attached to sends a signal. }
+
+bool property enableTests = false auto
+{ Default: False - allow this development-only test script to run. Keep disabled in production cells. }
 
 DivineSignaler Property signalerRef auto
 { a signaler object to test with }
@@ -29,6 +32,9 @@ bool property profileScript = false auto
 
 string property profileScriptName auto
 { Default: "" - the name of the script to profile }
+
+float property profileDuration = 10.0 auto
+{ Default: 10.0 - seconds to profile when profileScript is enabled. }
 
 bool property isTestsRunning = false auto hidden
 { Flag to indicate if tests are currently running. }
@@ -53,7 +59,7 @@ event onInit()
 endEvent
 
 event onLoad()
-    if (self.runOnStart)
+    if (self.enableTests && self.runOnStart)
       if ( ! self.isTestsRunning )
         self.runTests()
       endIf  
@@ -65,7 +71,7 @@ endEvent
 
 event onSignalling()
   parent.onSignalling()
-  if (self.runOnSignal)
+  if (self.enableTests && self.runOnSignal)
     if ( ! self.isTestsRunning )
       self.runTests()
     endIf  
@@ -104,29 +110,43 @@ bool function hasProfileRequirements(bool quiet=true)
 endFunction
 
 function runProfiler()
+  if ( ! self.enableTests )
+    return
+  endIf
+
   self.isProfilerRunning = true
   info(self + "@ function: runProfiler | start", enabled=self.showDebug)
 
   ; Run the profiler
   if (self.hasProfileRequirements())
     self.api.profileScriptStart(self.profileScriptName)
+    if (self.profileScript && self.profileDuration > 0.0)
+      utility.wait(self.profileDuration)
+      self.api.profileScriptEnd(self.profileScriptName)
+    endIf
   endIf  
 
   info(self + "@ function: runProfiler | end", enabled=self.showDebug)
   info(self + "@ function: runProfiler | report:", enabled=self.showDebug)
   info(self + "@ function: runProfiler | has requirements: " + self.hasProfileRequirements(), enabled=self.showDebug)
+  self.isProfilerRunning = false
 endFunction
 
 ; Run the tests
 function runTests() 
+    if ( ! self.enableTests )
+      return
+    endIf
+
     self.isTestsRunning = true
     info(self + "@ function: runTests | start", enabled=self.showDebug)
-    bool[] results = new bool[2]
+    bool[] results = new bool[3]
     
     ;run tests
     if (self.hasTestRequirements()) 
       results[0] = self.testRegisterForSignalEvents()
       results[1] = self.testFireSignalEvents()
+      results[2] = self.testGetSignalersInSameCell()
     endIf  
     
     bool eval = isArrAllTrue(results)
@@ -149,6 +169,12 @@ endFunction
 ; Test that we can fire a signal event
 bool function testFireSignalEvents()
   return self.api.fireSignalEvent(self)
+endFunction
+
+; Test that the API can find signalers in a loaded cell
+bool function testGetSignalersInSameCell()
+  DivineLogicAPI queryResult = self.api.getSignalersInSameCell(self.signalerRef)
+  return queryResult && queryResult.contains(self.signalerRef)
 endFunction
 
 ; Run some custom logic

@@ -1,12 +1,11 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineObjectReference extends ObjectReference
-; Divinity itself
+; Anu - Primordial principle of order; maps to the shared base reference contract.
 
 import DivineUtils
-import DivineConstants
 
 ; =========================
 ;        PROPERTIES
@@ -116,14 +115,23 @@ endFunction
 
 ; Set the form name on the given objectReference
 function setRefFormName(objectReference objectRef, string name="")
-  form refForm = objectRef.getBaseObject()
-  refForm.setName(name)
+  if (objectRef)
+    form refForm = objectRef.getBaseObject()
+    if (refForm)
+      refForm.setName(name)
+    endIf
+  endIf
 endFunction
 
 ; Get the form name of the given objectReference
 string function getRefFormName(objectReference objectRef)
-  form refForm = objectRef.getBaseObject()
-  return refForm.GetName()
+  if (objectRef)
+    form refForm = objectRef.getBaseObject()
+    if (refForm)
+      return refForm.GetName()
+    endIf
+  endIf
+  return ""
 endFunction
 
 ; Get an array of keyword-linked object references attached with the "DivineRef" keyword signature
@@ -134,9 +142,11 @@ objectReference[] function getKeywordRefs()
     string kwName = self.KEYWORD_REFS_SIGNATURE + "0" + refIndex
     keyword kw = keyword.getKeyword(kwName)
     objectReference ref = self.getLinkedRef(kw)
-    if (ref != self.linkedRef)
+    if (ref && ref != self.linkedRef)
       int next = refs.find(none)
-      refs[next] = ref
+      if (next >= 0)
+        refs[next] = ref
+      endIf
     endIf
     refIndex -= 1
   endWhile
@@ -145,10 +155,11 @@ endFunction
 
 ; Scale the objectReference to the given scale
 function scaleRef(objectReference objectRef, float scale, bool withCollision=false)
-  objectRef.setScale(scale)
-  if (withCollision)
-    ; TODO: is this needed?
+  if ( ! objectRef )
+    return
   endIf
+
+  objectRef.setScale(scale)
   info(self + "@ function: scaleRef | ref: " + objectRef + " scale: " + scale, enabled=self.showDebug)
 endFunction
 
@@ -168,6 +179,10 @@ function setRefPosition(       \
   float x, float y, float z,   \
   float aX, float aY, float aZ \
   )
+  if ( ! objectRef )
+    return
+  endIf
+
   objectRef.setPosition(x, y, z)
   objectRef.setAngle(aX, aY, aZ)
 endFunction
@@ -181,8 +196,12 @@ function moveRefTo(                                           \
   float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
   bool matchRotation=false                                    \
   )
-  if ( axisLimits.length != 6 )
-    axisLimits = new bool[6]
+  if ( ! objectRef || ! destinationRef )
+    return
+  endIf
+
+  if (axisLimits.length != 6)
+    return
   endIf
   float newX = ternaryFloat(axisLimits[0], objectRef.X, destinationRef.X + xOffset)
   float newY = ternaryFloat(axisLimits[1], objectRef.Y, destinationRef.Y + yOffset)
@@ -205,6 +224,10 @@ function impulseRef(                        \
   float magnitude,                          \
   bool explode=false, bool implode=false    \
   )
+  if ( ! objectRef )
+    return
+  endIf
+
   float xOffset = objectRef.X - self.X
   float yOffset = objectRef.Y - self.Y
   if (explode)
@@ -232,6 +255,10 @@ function animateRef(         \
   bool startOver=false,      \
   float easeInTime=0.0       \
   )
+  if ( ! objectRef )
+    return
+  endIf
+
   actor actorRef = objectRef as actor
   if (actorRef)
     if (subGraph)
@@ -257,6 +284,10 @@ function setRefAnimationVariable( \
   bool isFloat=false,             \
   bool isInt=false                \
   )
+  if ( ! objectRef || variableName == "" )
+    return
+  endIf
+
   if (isBool)
     objectRef.setAnimationVariableBool(variableName, variableValue as bool)
   elseIf (isFloat)
@@ -277,6 +308,10 @@ function modifyActorValue( \
   bool restore=false,      \
   bool set=true            \
   )
+  if ( ! actorRef || valueName == "" )
+    return
+  endIf
+
   if (force)
     actorRef.forceActorValue(valueName, value)
   elseIf (damage)
@@ -299,6 +334,10 @@ bool function compareActorValue( \
   bool asBase=false,             \
   bool asPercentage=false        \
   )
+  if ( ! actorRef || valueName == "" )
+    return false
+  endIf
+
   float currentValue = actorRef.getActorValue(valueName)
   
   if (asBase)
@@ -316,22 +355,36 @@ function waitForRefAt(                  \
   float[] destination,                  \
   bool positions=true, bool angles=true \
   )
+  if ( ! objectRef || destination.length < 6 )
+    return
+  endIf
+
+  int maxWaitCount = 600
   if (positions)
     float destX = destination[0]
     float destY = destination[1]
     float destZ = destination[2]
-    while( ! self.refPosAt(objectRef, destX, destY, destZ) )
-      ; wait for object to finish translation
+    int posWaitCount = 0
+    while( ! self.refPosAt(objectRef, destX, destY, destZ) && posWaitCount < maxWaitCount )
+      utility.wait(0.1)
+      posWaitCount += 1
     endWhile
+    if (posWaitCount >= maxWaitCount)
+      wrn(self + "@ function: waitForRefAt | position wait timed out for ref: " + objectRef, enabled=self.showDebug)
+    endIf
   endIf
   if (angles)
     float destAx = destination[3]
     float destAy = destination[4]
     float destAZ = destination[5]
-    while ( ! self.refAnglesAt(objectRef, destAx, destAy, destAz) )
-      ; wait for object to finish translation
-      info(self + "@ function: waitForRefAt | refAnglesAt: " + self.refAnglesAt(objectRef, destAx, destAy, destAz), enabled=self.showDebug)
+    int angleWaitCount = 0
+    while ( ! self.refAnglesAt(objectRef, destAx, destAy, destAz) && angleWaitCount < maxWaitCount )
+      utility.wait(0.1)
+      angleWaitCount += 1
     endWhile
+    if (angleWaitCount >= maxWaitCount)
+      wrn(self + "@ function: waitForRefAt | angle wait timed out for ref: " + objectRef, enabled=self.showDebug)
+    endIf
   endIf
 endFunction
 
@@ -361,6 +414,10 @@ endFunction
 
 ; Toggle the given objectReference enabled
 function toggleRefEnabled(objectReference objectRef, bool allowFade=false)
+  if ( ! objectRef )
+    return
+  endIf
+
   self.setRefEnabled(objectRef, objectRef.isDisabled(), allowFade)  
 endFunction
 
@@ -369,6 +426,10 @@ bool function refAnglesAt(              \
   objectReference objectRef,            \
   float posAx, float posAy, float posAz \
   )
+  if ( ! objectRef )
+    return false
+  endIf
+
   float tolerance = 0.1
   float refAx = objectRef.getAngleX()
   float refAy = objectRef.getAngleY()
@@ -377,10 +438,7 @@ bool function refAnglesAt(              \
     refAz -= 360.0 * math.floor(math.ceiling(refAz)/360.0)
   endIf
   info(self + "@ function: refAnglesAt | "+ refAX + "=" + posAx + " | " + refAY + "=" + posAy + " | " + refAz + "=" + posAz + " | realPosAz " + objectRef.getAngleZ(), enabled=self.showDebug)
-  if (!floatsWithin(posAx, refAx, tolerance) || !floatsWithin(posAy, refAy, tolerance) || !floatsWithin(posAz, refAz, tolerance))
-    return false
-  endIf
-  return true
+  return floatsWithin(posAx, refAx, tolerance) && floatsWithin(posAy, refAy, tolerance) && floatsWithin(posAz, refAz, tolerance)
 endFunction
 
 ; Determine if the object reference is at the same position as the given coordinates
@@ -388,18 +446,23 @@ bool function refPosAt(               \
   objectReference objectRef,          \
   float posX, float posY, float posZ  \
   )
+  if ( ! objectRef )
+    return false
+  endIf
+
   float tolerance = 0.1
   float refX = objectRef.getPositionX()
   float refY = objectRef.getPositionY()
   float refZ = objectRef.getPositionZ()
-  if (!floatsWithin(refX, posX, tolerance) || !floatsWithin(refY, posY, tolerance) || !floatsWithin(refZ, posZ, tolerance))
-    return false
-  endIf 
-  return true
+  return floatsWithin(refX, posX, tolerance) && floatsWithin(refY, posY, tolerance) && floatsWithin(refZ, posZ, tolerance)
 endFunction
 
 ; Delete the given object reference
 function deleteRef(objectReference objectRef, bool whenAble)
+  if ( ! objectRef )
+    return
+  endIf
+
   DivineSignaler signalerRef = objectRef as DivineSignaler
   if (signalerRef)
     signalerRef.destroySelf()
@@ -458,8 +521,8 @@ function moveKeywordRefsTo(                                   \
   float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
   bool matchRotation=false                                    \
   )
-  if ( spacingOffsets.length != 27 )
-    spacingOffsets = new float[27]
+  if (spacingOffsets.length != 27 || axisLimits.length != 6)
+    return
   endIf
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
@@ -489,18 +552,41 @@ endFunction
 
 ; Wait for all object references to be at the given destinations
 function waitForKeywordRefsAt(float[] destinations, bool positions=true, bool angles=true)
+  if (destinations.length != 54)
+    return
+  endIf
+
+  int maxWaitCount = 600
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
     objectReference ref = self.keywordRefs[refIndex]
     if (ref)
-        float[] destination = new float[6]
-        destination[0] = getFloatFromCoordinateArrayXY(destinations, 0, refIndex) 
-        destination[1] = getFloatFromCoordinateArrayXY(destinations, 1, refIndex)
-        destination[2] = getFloatFromCoordinateArrayXY(destinations, 2, refIndex)
-        destination[3] = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
-        destination[4] = getFloatFromCoordinateArrayXY(destinations, 4, refIndex)
-        destination[5] = getFloatFromCoordinateArrayXY(destinations, 5, refIndex)
-        self.waitForRefAt(ref, destination, positions, angles)
+      if (positions)
+        float destX = getFloatFromCoordinateArrayXY(destinations, 0, refIndex)
+        float destY = getFloatFromCoordinateArrayXY(destinations, 1, refIndex)
+        float destZ = getFloatFromCoordinateArrayXY(destinations, 2, refIndex)
+        int posWaitCount = 0
+        while( ! self.refPosAt(ref, destX, destY, destZ) && posWaitCount < maxWaitCount )
+          utility.wait(0.1)
+          posWaitCount += 1
+        endWhile
+        if (posWaitCount >= maxWaitCount)
+          wrn(self + "@ function: waitForKeywordRefsAt | position wait timed out for ref: " + ref, enabled=self.showDebug)
+        endIf
+      endIf
+      if (angles)
+        float destAx = getFloatFromCoordinateArrayXY(destinations, 3, refIndex)
+        float destAy = getFloatFromCoordinateArrayXY(destinations, 4, refIndex)
+        float destAz = getFloatFromCoordinateArrayXY(destinations, 5, refIndex)
+        int angleWaitCount = 0
+        while ( ! self.refAnglesAt(ref, destAx, destAy, destAz) && angleWaitCount < maxWaitCount )
+          utility.wait(0.1)
+          angleWaitCount += 1
+        endWhile
+        if (angleWaitCount >= maxWaitCount)
+          wrn(self + "@ function: waitForKeywordRefsAt | angle wait timed out for ref: " + ref, enabled=self.showDebug)
+        endIf
+      endIf
     endIf
     refIndex -= 1
   endWhile
@@ -565,9 +651,14 @@ function translateRefTo(                                      \
   float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
   bool matchRotation=false, bool rotateOnArrival=false        \
   )
+  if ( ! objectRef || ! destinationRef )
+    return
+  endIf
+
+  bool shouldWait = destinationRef != (self.playerRef as objectReference)
   float[] destination = new float[6]
-  if ( axisLimits.length != 6 )
-    axisLimits = new bool[6]
+  if (axisLimits.length != 6)
+    return
   endIf 
   float newX = ternaryFloat(axisLimits[0], objectRef.X, destinationRef.X + xOffset)
   float newY = ternaryFloat(axisLimits[1], objectRef.Y, destinationRef.Y + yOffset)
@@ -605,15 +696,19 @@ function translateRefTo(                                      \
       speed, rotationSpeedClamp  \
     )
   endIf
-  self.waitForRefAt(objectRef, destination, true, false)
-  if (rotateOnArrival)
+  if (shouldWait)
+    self.waitForRefAt(objectRef, destination, true, false)
+  endIf
+  if (rotateOnArrival && shouldWait)
     objectRef.translateTo(                            \
       destination[0], destination[1], destination[2], \
       destination[3], destination[4], destination[5], \
       speed, rotationSpeedClamp                       \
     )
   endIf
-  self.waitForRefAt(objectRef, destination, false, true)
+  if (shouldWait)
+    self.waitForRefAt(objectRef, destination, false, true)
+  endIf
 endFunction
 
 ; Translate all keyword-linked object references to the given objectReference
@@ -628,12 +723,14 @@ function translateKeywordRefsTo(                              \
   float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
   bool matchRotation=false, bool rotateOnArrival=false        \
   )
-  if ( spacingOffsets.length != 27 )
-    spacingOffsets = new float[27]
+  if ( ! objectRef )
+    return
   endIf
-  if ( axisLimits.length != 6 )
-    axisLimits = new bool[6]
-  endIf 
+
+  if (spacingOffsets.length != 27 || axisLimits.length != 6)
+    return
+  endIf
+  bool shouldWait = objectRef != (self.playerRef as objectReference)
   float[] destinations = new float[54]
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
@@ -683,9 +780,10 @@ function translateKeywordRefsTo(                              \
     endIf
     refIndex -= 1
   endWhile
-  bool shouldWait = objectRef != self.playerRef as objectReference
-  self.waitForKeywordRefsAt(destinations, shouldWait, false)
-  if (rotateOnArrival)
+  if (shouldWait)
+    self.waitForKeywordRefsAt(destinations, true, false)
+  endIf
+  if (rotateOnArrival && shouldWait)
     refIndex = self.keywordRefs.length - 1
     while (refIndex >= 0)
       objectReference ref = self.keywordRefs[refIndex]
@@ -705,7 +803,9 @@ function translateKeywordRefsTo(                              \
       refIndex -= 1
     endWhile
   endIf
-  self.waitForKeywordRefsAt(destinations, false, shouldWait)
+  if (shouldWait)
+    self.waitForKeywordRefsAt(destinations, false, true)
+  endIf
 endFunction
 
 ; Spawn an instance of all keyword-linked object references at the given objectReference location
@@ -718,10 +818,13 @@ function spawnKeywordRefsAt(                                  \
   float aXOffset=0.0, float aYOffset=0.0, float aZOffset=0.0, \
   bool matchRotation=false                                    \
   )
-  if ( spacingOffsets.length != 27 )
-    spacingOffsets = new float[27]
+  if ( ! objectRef )
+    return
   endIf
-  int spawnCount = 0;
+
+  if (spacingOffsets.length != 27 || axisLimits.length != 6)
+    return
+  endIf
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
     objectReference ref = self.keywordRefs[refIndex]
@@ -733,16 +836,20 @@ function spawnKeywordRefsAt(                                  \
       float offsetY = ySpacingOffset + yOffset
       float offsetZ = zSpacingOffset + zOffset
       form refForm = ref.getBaseObject()
-      objectReference spawnedRef = objectRef.placeAtMe(refForm, 1, false, true)
-      self.moveRefTo(                 \
-        ref,                          \
-        objectRef,                    \
-        axisLimits,                   \
-        offsetX, offsetY, offsetZ,    \
-        aXOffset, aYOffset, aZOffset, \
-        matchRotation                 \
-      )
-      self.setRefEnabled(spawnedRef)
+      if (refForm)
+        objectReference spawnedRef = objectRef.placeAtMe(refForm, 1, false, true)
+        if (spawnedRef)
+          self.moveRefTo(                 \
+            spawnedRef,                   \
+            objectRef,                    \
+            axisLimits,                   \
+            offsetX, offsetY, offsetZ,    \
+            aXOffset, aYOffset, aZOffset, \
+            matchRotation                 \
+          )
+          self.setRefEnabled(spawnedRef)
+        endIf
+      endIf
       if (delay > 0)
         utility.wait(delay)
       endIf
@@ -866,6 +973,10 @@ endFunction
 
 ; Transfer all items from all keyword-linked object references to the target ref
 function transferKeywordRefsItemsTo(objectReference targetRef, bool keepOwnership=false, bool transferQuestItems=false)
+  if ( ! targetRef )
+    return
+  endIf
+
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
     objectReference ref = self.keywordRefs[refIndex]
@@ -878,6 +989,10 @@ endFunction
 
 ; Transfer all items from the target ref to the first available keyword-linked object reference 
 function tranferItemsToKeywordRefsFrom(objectReference targetRef, bool keepOwnership=false, bool transferQuestItems=false, bool randomize=false)
+  if ( ! targetRef )
+    return
+  endIf
+
   if ( ! randomize )
     int refIndex = self.keywordRefs.length - 1
     while (refIndex >= 0)
@@ -890,19 +1005,28 @@ function tranferItemsToKeywordRefsFrom(objectReference targetRef, bool keepOwner
     endWhile
   else 
     int refIndex = self.keywordRefs.length - 1
-    int lastRefIndex = -1
+    int refCount = 0
     while (refIndex >= 0)
       objectReference ref = self.keywordRefs[refIndex]
       if (ref)
-        lastRefIndex = refIndex
-        refIndex = 0
+        refCount += 1
       endIf
       refIndex -= 1
     endWhile
-    if (lastRefIndex >= 0)
-      int randIndex = utility.randomInt(0, lastRefIndex)
-      objectReference randRef = self.keywordRefs[randIndex]
-      targetRef.removeAllItems(randRef, keepOwnership, transferQuestItems)
+    if (refCount > 0)
+      int randIndex = utility.randomInt(0, refCount - 1)
+      refIndex = self.keywordRefs.length - 1
+      while (refIndex >= 0)
+        objectReference randRef = self.keywordRefs[refIndex]
+        if (randRef)
+          if (randIndex == 0)
+            targetRef.removeAllItems(randRef, keepOwnership, transferQuestItems)
+            return
+          endIf
+          randIndex -= 1
+        endIf
+        refIndex -= 1
+      endWhile
     endIf
   endIf 
 endFunction

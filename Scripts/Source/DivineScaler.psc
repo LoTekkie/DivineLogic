@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineScaler extends DivineSignaler
-; Dibella – Goddess of Beauty and Love
+; Dibella - Goddess of Beauty and Art; maps to proportion, scale, and visual form.
 
 import DivineUtils
 

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineTranslator extends DivineSignaler
-; Zenithar - God of Work and Commerce, Trader God
+; Zenithar - God of Work and Commerce; maps to translation, logistics, and object movement.
 
 import DivineUtils
 
@@ -29,12 +29,21 @@ bool property treatAsHavok = false auto
   (Before translation, linked references will have their motion types set to `Motion_Keyframed`. 
   Upon ending translation, linked references will have their motion types set to `Motion_Dynamic`.) }
 
+bool property translationRunning = false auto hidden
+{ Internal guard that prevents overlapping translation chains on this box. }
+
+DivineTranslatorMarker property pendingCompletedMarker auto hidden
+{ Completed marker waiting for scheduled activation. }
+
+bool property markerActivationPending = false auto hidden
+{ Internal guard for scheduled marker activation. }
+
 ; =========================
 ;     MARKER PROPERTIES
 ; =========================
 
 float property m_delay = 0.0 auto
-{ Default: 0.0 - Seconds to wait before the keyword-linked object references translate to this marker. }
+{ Default: 0.0 - Seconds to wait after the keyword-linked object references arrive at this marker. }
 
 float property m_speed = 100.0 auto
 { Default: 100.0 - Speed at which the keyword-linked object references will translate to this marker. }
@@ -138,17 +147,47 @@ function conformMarkerProperties(DivineTranslatorMarker markerRef)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
+function prepareTranslationRefs()
+  if (self.treatAsHavok)
+    self.setKeywordRefsAIEnabled(false)
+    self.setKeywordRefsMotionType(Motion_Keyframed)
+  endIf
+endFunction
+
+function restoreTranslationRefs()
+  if (self.treatAsHavok)
+    self.setKeywordRefsMotionType(Motion_Dynamic)
+    self.setKeywordRefsAIEnabled(true)
+    self.animateKeywordRefs("IdleForceDefaultState")
+  endIf
+endFunction
+
+function scheduleCompletedMarkerActivation(DivineTranslatorMarker completedMarker)
+  if ( ! completedMarker )
+    return
+  endIf
+
+  self.pendingCompletedMarker = completedMarker
+  if ( ! self.markerActivationPending )
+    self.markerActivationPending = true
+    self.registerForSingleUpdate(0.01)
+  endIf
+endFunction
+
 ; =========================
 ;      LIFECYCLE HOOKS
 ; =========================
-; consider updating this to be event driven, waiting for translation to be complete
-; this is executing too quickly and filling up the call stack
 function onSignalling()
+  if (self.translationRunning)
+    wrn(self + "@ function: onSignalling | translation already running", enabled=self.showDebug)
+    return
+  endIf
+
+  parent.onSignalling()
+
   if ( ! self.nextMarker && self.noMarkersAttached )
-    if (self.treatAsHavok)
-      self.setKeywordRefsAIEnabled(false)
-      self.setKeywordRefsMotionType(Motion_Keyframed)
-    endIf 
+    self.translationRunning = true
+    self.prepareTranslationRefs()
     objectReference destinationRef = self
     if (self.m_toPlayer)
       destinationRef = self.playerRef
@@ -174,25 +213,23 @@ function onSignalling()
       self.m_matchRotation,          \
       self.m_rotateOnArrival         \
     )
+    if (self.m_delay > 0.0)
+      utility.wait(self.m_delay)
+    endIf
     if (self.relayActivation)
+      self.yieldToVM()
       self.setRefActivated(self.linkedRef, self)
     endIf
-    if (self.treatAsHavok)
-      self.setKeywordRefsMotionType(Motion_Dynamic)
-      self.setKeywordRefsAIEnabled(true)
-      self.animateKeywordRefs("IdleForceDefaultState")
-    endIf 
+    self.restoreTranslationRefs()
+    self.translationRunning = false
   elseIf (self.nextMarker)
-    if (self.treatAsHavok)
-      self.setKeywordRefsAIEnabled(false)
-      self.setKeywordRefsMotionType(Motion_Keyframed)
-    endIf 
+    self.translationRunning = true
+    self.prepareTranslationRefs()
     self.conformMarkerProperties(self.nextMarker)
     float[] spacingOffsets = new float[27]
     if ( ! self.nextMarker.collapseSpacing )
       spacingOffsets = self.keywordRefSpacingOffsets
     endIf
-    utility.wait(nextMarker.delay)
     objectReference destinationRef = self.nextMarker
     if (self.nextMarker.toPlayer)
       destinationRef = self.playerRef
@@ -218,12 +255,30 @@ function onSignalling()
       self.nextMarker.matchRotation,      \
       self.nextMarker.rotateOnArrival     \
     ) 
-    self.setRefActivated(self.nextMarker, self)
-    self.nextMarker = self.nextMarker.linkedRef as DivineTranslatorMarker
-    if ( ! self.nextMarker && self.treatAsHavok )
-      self.setKeywordRefsMotionType(Motion_Dynamic)
-      self.setKeywordRefsAIEnabled(true)
-      self.animateKeywordRefs("IdleForceDefaultState")
+    if (self.nextMarker.delay > 0.0)
+      utility.wait(self.nextMarker.delay)
+    endIf
+    DivineTranslatorMarker completedMarker = self.nextMarker
+    self.nextMarker = completedMarker.linkedRef as DivineTranslatorMarker
+    if ( ! self.nextMarker )
+      self.restoreTranslationRefs()
     endIf 
+    self.translationRunning = false
+    self.yieldToVM()
+    self.scheduleCompletedMarkerActivation(completedMarker)
+  endIf
+endFunction
+
+function onUpdating()
+  if ( ! self.markerActivationPending )
+    return
+  endIf
+
+  DivineTranslatorMarker completedMarker = self.pendingCompletedMarker
+  self.pendingCompletedMarker = none
+  self.markerActivationPending = false
+
+  if (completedMarker)
+    self.setRefActivated(completedMarker, self)
   endIf
 endFunction

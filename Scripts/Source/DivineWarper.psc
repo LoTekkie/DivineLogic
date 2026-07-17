@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineWarper extends DivineSignaler
-; Akatosh – The Dragon God of Time and chief god of the pantheon
+; Akatosh - Dragon God of Time; maps to instantaneous movement through space and sequence.
 
 import DivineUtils
 
@@ -150,13 +150,13 @@ function onSignalling()
         self.playerRef,               \
         self,                         \
         axisLimits,                   \
-        self.nextMarker.offsetX,      \
-        self.nextMarker.offsetY,      \
-        self.nextMarker.offsetZ,      \
-        self.nextMarker.offsetAX,     \
-        self.nextMarker.offsetAY,     \
-        self.nextMarker.offsetAZ,     \
-        self.nextMarker.matchRotation \
+        self.m_offsetX,               \
+        self.m_offsetY,               \
+        self.m_offsetZ,               \
+        self.m_offsetAX,              \
+        self.m_offsetAY,              \
+        self.m_offsetAZ,              \
+        self.m_matchRotation          \
       )
     endIf
     if (self.relayActivation)
@@ -168,7 +168,7 @@ function onSignalling()
     if ( ! self.nextMarker.collapseSpacing )
       spacingOffsets = self.keywordRefSpacingOffsets
     endIf
-    utility.wait(nextMarker.delay)
+    utility.wait(self.nextMarker.delay)
     objectReference destinationRef = self.nextMarker
     if (self.nextMarker.toPlayer)
       destinationRef = self.playerRef
@@ -205,8 +205,6 @@ function onSignalling()
       )
     endIf
     self.setRefActivated(self.nextMarker, self)
-    if (self.nextMarker.linkedRef as DivineWarperMarker)
-      self.nextMarker = self.nextMarker.linkedRef as DivineWarperMarker
-    endIf
+    self.nextMarker = self.nextMarker.linkedRef as DivineWarperMarker
   endIf
 endFunction
