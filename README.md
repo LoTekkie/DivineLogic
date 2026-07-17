@@ -4,7 +4,34 @@ Divine Logic is a Skyrim Creation Kit framework for building gameplay logic with
 
 It is made for mod authors who want to build puzzles, traps, moving objects, item transfers, cutscenes, staged encounters, and other interactive systems without writing new Papyrus scripts for every idea. You place Divine Logic boxes in the Creation Kit, configure their script properties, and connect them with linked references.
 
+Divine Logic was created from the desire to build more puzzle-heavy dungeons in Skyrim: spaces with readable mechanisms, moving parts, staged reveals, item checks, timing, and puzzle logic that can be changed quickly while building. Instead of writing and recompiling a custom Papyrus script for every puzzle idea, Divine Logic lets you iterate directly in the Creation Kit by placing boxes, changing properties, and rewiring references.
+
 Divine Logic uses Skyrim's normal `Activate()` path as its signal bus. That is intentional: it keeps the system visible in the Creation Kit and lets boxes trigger other boxes the same way activators, doors, markers, and scripted references already interact.
+
+The name Divine Logic comes from the idea that the gods lend a little of their power to your creations. Each script is associated with a deity whose sphere fits the box's role: Akatosh for movement through time and space, Zenithar for work and exchange, Julianos for logic and knowledge, and so on. For example, `DivineTranslator` is associated with Zenithar because it performs work by moving objects from one place to another. The theme is documentation flavor, not a gameplay requirement, but it gives each tool a memorable identity.
+
+## Index
+
+- [Requirements](#requirements)
+- [Release Format](#release-format)
+- [Quick Start](#quick-start)
+- [How Signals Work](#how-signals-work)
+- [Activation vs Signal](#activation-vs-signal)
+- [Linked References](#linked-references)
+- [Base Signaler Properties](#base-signaler-properties)
+- [Quest State](#quest-state)
+- [Marker Defaults And Overrides](#marker-defaults-and-overrides)
+- [Logic Box Reference](#logic-box-reference)
+- [Box Properties](#box-properties): [Activator](#activator), [Actor Modifier](#actor-modifier), [Animator](#animator), [Comparer](#comparer), [Containerizer](#containerizer), [Cutscene Creator](#cutscene-creator), [Destroyer](#destroyer), [Enabler](#enabler), [Forcer](#forcer), [Global Modifier](#global-modifier), [Marker](#marker), [Messenger](#messenger), [Mixer](#mixer), [Player Controller](#player-controller), [Scaler](#scaler), [Spawner](#spawner), [Translator](#translator), [Warper](#warper)
+- [Marker Reference](#marker-reference): [Cutscene Marker Properties](#cutscene-marker-properties), [Spawner Marker Properties](#spawner-marker-properties), [Translator Marker Properties](#translator-marker-properties), [Warper Marker Properties](#warper-marker-properties)
+- [Divine Logic API](#divine-logic-api): [Getting The API](#getting-the-api), [Live Signaler Queries](#live-signaler-queries), [Query Examples](#query-examples), [Signal Events](#signal-events), [API Testing](#api-testing), [API Settings](#api-settings)
+- [Common Examples](#common-examples)
+- [Divine Laboratory](#divine-laboratory)
+- [Performance And Release Guidance](#performance-and-release-guidance)
+- [Compatibility Notes](#compatibility-notes)
+- [Community And Support](#community-and-support)
+- [License](#license)
+- [Credits](#credits)
 
 ## Requirements
 
@@ -161,26 +188,26 @@ Because defaults also act as sentinels, a marker cannot always distinguish "expl
 
 ## Logic Box Reference
 
-| Box | Script | Theme | Purpose |
+| Box | Script | Divine Theme | Purpose |
 | --- | --- | --- | --- |
-| Activator | `DivineActivator.psc` | Stendarr | Activates the normal linked ref and all, one random, or one sequential keyword-linked ref. |
-| Actor Modifier | `DivineActorModifier.psc` | Julianos | Modifies or compares actor values on linked actors and optionally the player. |
-| Animator | `DivineAnimator.psc` | Lorkhan | Plays animation events, sets animation variables, or controls actor look-at behavior. |
-| Comparer | `DivineComparer.psc` | Julianos | Compares keyword-linked Divine refs and activates the linked ref when true. |
-| Containerizer | `DivineContainerizer.psc` | Zenithar | Transfers inventory between the player, linked container, and keyword-linked containers. |
-| Cutscene Creator | `DivineCutsceneCreator.psc` | Talos | Runs camera-driven cutscenes with optional marker chains. |
-| Destroyer | `DivineDestroyer.psc` | Arkay | Deletes linked and keyword-linked references. |
-| Enabler | `DivineEnabler.psc` | Arkay | Toggles linked and keyword-linked references enabled or disabled. |
-| Forcer | `DivineForcer.psc` | Kynareth | Applies Havok impulses to linked refs, keyword refs, and optionally the player. |
-| Global Modifier | `DivineGlobalModifier.psc` | Julianos | Sets, modifies, or compares a global variable. |
-| Marker | `DivineMarker.psc` | Akatosh | Activates or enable-toggles keyword-linked refs. |
-| Messenger | `DivineMessenger.psc` | Reman | Shows messages, notifications, help messages, or trace output. |
-| Mixer | `DivineMixer.psc` | Dibella | Plays sounds, adjusts sound categories, or adds/removes music types. |
-| Player Controller | `DivinePlayerController.psc` | Morihaus | Controls player camera, controls, fast travel, visibility, god mode, combat, and handoff behavior. |
-| Scaler | `DivineScaler.psc` | Dibella | Scales linked and keyword-linked refs. |
-| Spawner | `DivineSpawner.psc` | Mara | Spawns copies of keyword-linked refs at the box, player, or marker chain. |
-| Translator | `DivineTranslator.psc` | Zenithar | Smoothly moves keyword-linked refs to the box, player, or marker chain. |
-| Warper | `DivineWarper.psc` | Akatosh | Instantly moves keyword-linked refs and optionally the player. |
+| Activator | `DivineActivator.psc` | Stendarr - mercy, justice, righteous action | Activates the normal linked ref and all, one random, or one sequential keyword-linked ref. |
+| Actor Modifier | `DivineActorModifier.psc` | Julianos - wisdom, knowledge, ordered rules | Modifies or compares actor values on linked actors and optionally the player. |
+| Animator | `DivineAnimator.psc` | Lorkhan - change, embodiment, mortal motion | Plays animation events, sets animation variables, or controls actor look-at behavior. |
+| Comparer | `DivineComparer.psc` | Julianos - logic, comparison, judgment | Compares keyword-linked Divine refs and activates the linked ref when true. |
+| Containerizer | `DivineContainerizer.psc` | Zenithar - work, trade, exchange | Transfers inventory between the player, linked container, and keyword-linked containers. |
+| Cutscene Creator | `DivineCutsceneCreator.psc` | Talos - heroic action, command, spectacle | Runs camera-driven cutscenes with optional marker chains. |
+| Destroyer | `DivineDestroyer.psc` | Arkay - endings, death, release | Deletes linked and keyword-linked references. |
+| Enabler | `DivineEnabler.psc` | Arkay - cycles, passage, return | Toggles linked and keyword-linked references enabled or disabled. |
+| Forcer | `DivineForcer.psc` | Kynareth - wind, motion, natural force | Applies Havok impulses to linked refs, keyword refs, and optionally the player. |
+| Global Modifier | `DivineGlobalModifier.psc` | Julianos - numbers, rules, recorded state | Sets, modifies, or compares a global variable. |
+| Marker | `DivineMarker.psc` | Akatosh - time, sequence, destination | Activates or enable-toggles keyword-linked refs. |
+| Messenger | `DivineMessenger.psc` | Reman - proclamation, command, public voice | Shows messages, notifications, help messages, or trace output. |
+| Mixer | `DivineMixer.psc` | Dibella - art, sound, atmosphere | Plays sounds, adjusts sound categories, or adds/removes music types. |
+| Player Controller | `DivinePlayerController.psc` | Morihaus - strength, control, battle-presence | Controls player camera, controls, fast travel, visibility, god mode, combat, and handoff behavior. |
+| Scaler | `DivineScaler.psc` | Dibella - form, beauty, proportion | Scales linked and keyword-linked refs. |
+| Spawner | `DivineSpawner.psc` | Mara - creation, care, bringing forth | Spawns copies of keyword-linked refs at the box, player, or marker chain. |
+| Translator | `DivineTranslator.psc` | Zenithar - labor, movement, purposeful work | Smoothly moves keyword-linked refs to the box, player, or marker chain. |
+| Warper | `DivineWarper.psc` | Akatosh - time, space, sudden passage | Instantly moves keyword-linked refs and optionally the player. |
 
 The theme column is documentation only. It is a quick Elder Scrolls deity association for each script's role.
 
