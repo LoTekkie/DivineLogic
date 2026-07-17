@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineEnabler extends DivineSignaler
-; Arkay – God of the Cycle of Life and Death, governing the Cycle of Life and Death, funerals, and mortal burials.
+; Arkay - God of the Cycle of Life and Death; maps to enable/disable state transitions.
 
 import DivineUtils
 

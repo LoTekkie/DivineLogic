@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineSpawner extends DivineSignaler
-; Mara - Goddess of Love and compassion, the Mother Goddess
+; Mara - Mother Goddess; maps to creation, spawning, and generative flow.
 
 import DivineUtils
 
@@ -131,6 +131,8 @@ endFunction
 ; =========================
 
 function onSignalling()
+  parent.onSignalling()
+
   if ( ! self.nextMarker && self.noMarkersAttached )
     if (self.totalSpawns != self.maxSpawns)
       objectReference destinationRef = self

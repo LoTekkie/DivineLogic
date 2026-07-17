@@ -1,11 +1,12 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineSignaler extends DivineObjectReference
-; Base class for all Divine Logic signalers
+; Magnus - God of Magic; maps to signal flow, events, and active logic power.
 
 import DivineUtils
+import StringUtil
 import Math
 
 ; =========================
@@ -20,6 +21,9 @@ bool property signalOnce = false auto
 
 int property signalLimit = 0 auto
 { Default: 0 - How many times total should this trigger signal? (Overridden when setting signalOnce to True, values less than 0 will signal once) }
+
+int property signalEvery = 1 auto
+{ Default: 1 - Number of valid activations required before this trigger sends a signal. Values less than 1 behave as 1. }
 
 bool property signalContinuously = false auto
 { Default: False - Send a signal every x number of seconds where x is the value of "signalDelay".
@@ -84,6 +88,19 @@ float property continuousSignalDelayMin = 0.25 autoReadOnly hidden
 int property signalCount = 0 auto hidden
 { How many times has this signaled? }
 
+int property signalActivationCount = 0 auto hidden
+{ Number of valid activations counted toward signalEvery. }
+
+string property signalerID auto
+{ Default: "" - A unique identifier that is broadcast to sent mod events from this signaler. If empty, the form ID will be sent instead. }
+
+string property cachedSignalerID = "" auto hidden
+{ Cached generated signaler ID used when signalerID is empty. }
+
+DivineLogicAPI property api auto hidden
+
+objectReference currentActivatorRef
+
 ; =========================
 ;         EVENTS
 ; =========================
@@ -92,10 +109,14 @@ event onInit()
   parent.onInit()
   self.initRotation()
   self.setKeywordRefSpacingOffsets()
+  self.api = self.getApi()
+  self.cacheSignalerID()
 endEvent
 
 event onLoad()
   parent.onLoad()
+  self.api = self.getApi()
+  self.cacheSignalerID()
   if (self.signalOnStart)
     self.activate(self)
   endIf
@@ -113,6 +134,10 @@ endFunction
 ;/ Set whether or not a divineRef object is paused
 Pausing prevents any input and disables activation/signalling until unpaused /;
 function setRefPaused(DivineSignaler divineRef, bool pause=true)
+  if ( ! divineRef )
+    return
+  endIf
+
   divineRef.paused = pause
   divineRef.setActivationBlocked(pause)
   info(self + "@ signal: pause | ref: " + divineRef + " | paused: " + divineRef.paused, enabled=self.showDebug)
@@ -120,7 +145,7 @@ endFunction
 
 ; Set the keywordRefSpacingOffsets property
 function setKeywordRefSpacingOffsets()
-  if ( ! self.keywordRefSpacingOffsets.length )
+  if (self.keywordRefSpacingOffsets.length != 27)
     self.keywordRefSpacingOffsets = self.getKeywordRefSpacingOffsets()
     info(self + "@ function: setKeywordRefSpacingOffsets | offsets: " + self.keywordRefSpacingOffsets, enabled=self.showDebug)
   endIf
@@ -139,43 +164,59 @@ function toggleKeywordRefsPaused()
   int refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
     objectReference ref = self.keywordRefs[refIndex]
-    self.toggleRefPaused(ref)
+    if (ref)
+      self.toggleRefPaused(ref)
+    endIf
     refIndex -= 1
   endWhile
 endFunction
 
 ; Make boolean comparisons on the signaled property of all keyword-linked object references
 bool function compareKeywordRefs(bool andCompare=false, bool notCompare=false, bool orCompare=false, bool xorCompare=false)
-  if ( ! xorCompare )
-    int refIndex = self.keywordRefs.length - 1
-    bool result = false
-    while (refIndex >= 0)
-      DivineSignaler divineRef = self.keywordRefs[refIndex] as DivineSignaler
-      if (divineRef)
-        result = true
-        if (andCompare)
-          if ( ! divineRef.signaled ) ; found false
-            return false
-          endIf
-        elseIf (notCompare)
-          if (divineRef.signaled) ; found true
-            return false
-          endIf
-        elseIf (orCompare)
-          result = false
-          if (divineRef.signaled)
-            return true ; at least one true found
-          endIf  
+  if (xorCompare)
+    bool foundTrue = false
+    bool foundFalse = false
+    int xorIndex = self.keywordRefs.length - 1
+    while (xorIndex >= 0)
+      DivineSignaler xorRef = self.keywordRefs[xorIndex] as DivineSignaler
+      if (xorRef)
+        if (xorRef.signaled)
+          foundTrue = true
         else
-          return false ; no comparisons made
+          foundFalse = true
         endIf
       endIf
-      refIndex -= 1
+      xorIndex -= 1
     endWhile
-    return result
-  else
-    return !self.compareKeywordRefs(andCompare=true) && self.compareKeywordRefs(orCompare=true)
-  endIf  
+    return foundTrue && foundFalse
+  endIf
+
+  int refIndex = self.keywordRefs.length - 1
+  bool result = false
+  while (refIndex >= 0)
+    DivineSignaler divineRef = self.keywordRefs[refIndex] as DivineSignaler
+    if (divineRef)
+      result = true
+      if (andCompare)
+        if ( ! divineRef.signaled ) ; found false
+          return false
+        endIf
+      elseIf (notCompare)
+        if (divineRef.signaled) ; found true
+          return false
+        endIf
+      elseIf (orCompare)
+        result = false
+        if (divineRef.signaled)
+          return true ; at least one true found
+        endIf
+      else
+        return false ; no comparisons made
+      endIf
+    endIf
+    refIndex -= 1
+  endWhile
+  return result
 endFunction
 
 ; Get offsets from the calculated collective center of all attched object references
@@ -213,10 +254,9 @@ float[] function getKeywordRefSpacingOffsets()
     endIf
     refIndex -= 1
   endWhile
-  float[] center = new float[3]
-  center[0] = (xMax + xMin) / 2
-  center[1] = (yMax + yMin) / 2
-  center[2] = (zMax + zMin) / 2
+  float centerX = (xMax + xMin) / 2
+  float centerY = (yMax + yMin) / 2
+  float centerZ = (zMax + zMin) / 2
   refIndex = self.keywordRefs.length - 1
   while (refIndex >= 0)
     objectReference ref = self.keywordRefs[refIndex]
@@ -224,9 +264,9 @@ float[] function getKeywordRefSpacingOffsets()
       float posX = ref.X
       float posY = ref.Y
       float posZ = ref.Z
-      setFloatInCoordinateArrayXY(offsets, 0, refIndex, posX - center[0])
-      setFloatInCoordinateArrayXY(offsets, 1, refIndex, posY - center[1])
-      setFloatInCoordinateArrayXY(offsets, 2, refIndex, posZ - center[2])
+      setFloatInCoordinateArrayXY(offsets, 0, refIndex, posX - centerX)
+      setFloatInCoordinateArrayXY(offsets, 1, refIndex, posY - centerY)
+      setFloatInCoordinateArrayXY(offsets, 2, refIndex, posZ - centerZ)
     endIf
     refIndex -= 1
   endWhile
@@ -245,7 +285,12 @@ endFunction
 ;/ Event method used to customize behavior within the "busy" state
 To be overriden within child scripts /;
 function onSignalling()
-  info(self + "@ eventHandler: onSignalling", enabled=self.showDebug)
+  info(self + "@ function: onSignalling", enabled=self.showDebug)
+  if (self.api)
+    self.api.fireSignalEvent(self)
+  else
+    wrn(self + "@ function: onSignalling | API unavailable", enabled=self.showDebug)
+  endIf
 endFunction
 
 ;/ Event method used to customize behavior within the onUpdating event
@@ -258,12 +303,42 @@ To be overriden within child scripts /;
 function onDestroyed()
 endFunction
 
+; Give the Papyrus VM a scheduling point during long activation chains.
+function yieldToVM()
+  utility.wait(0.0)
+endFunction
+
 ; Ensure all rotation angles on this signaler are not 0 to allow for player activation 
 function initRotation()
   if (self.getAngleX() || self.getAngleY() || self.getAngleZ())
     return
   endIf
   self.setAngle(0.00, 0.00, 0.0000001)
+endFunction
+
+; Get the divine logic api reference object, retrieve from cache or generate a new instance
+DivineLogicAPI function getApi()
+  if ( ! self.api )
+    return DivineLogicAPI.getInstance()
+  endIf
+  return self.api
+endFunction
+
+function cacheSignalerID()
+  if (self.signalerID == "" && self.cachedSignalerID == "")
+    self.cachedSignalerID = "" + self.GetFormID()
+  endIf
+endFunction
+
+; Get the unique signaler ID for this signler
+string function getSignalerID()
+  if (self.signalerID != "")
+    return self.signalerID
+  endIf
+  if (self.cachedSignalerID == "")
+    self.cacheSignalerID()
+  endIf
+  return self.cachedSignalerID
 endFunction
 
 ; =========================
@@ -276,6 +351,7 @@ state waiting
     info(self + "@ state: waiting", enabled=self.showDebug)
   endEvent
   event onActivate (objectReference triggerRef)
+    currentActivatorRef = triggerRef
     goToState("busy")
   endEvent
   event onHit(                                           \
@@ -286,12 +362,22 @@ state waiting
     bool hitBlocked                                      \
     )
     if (self.detectHit)
-      info(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + source.getName() + " | projectile: " + akProjectile.getName(),  enabled=self.showDebug)
+      string sourceName = ""
+      string projectileName = ""
+      if (source)
+        sourceName = source.getName()
+      endIf
+      if (akProjectile)
+        projectileName = akProjectile.getName()
+      endIf
+      info(self + "@ event: onHit | activate: " + self.detectHit + " | source: " + sourceName + " | projectile: " + projectileName,  enabled=self.showDebug)
       if (self.detectHitSource != "")
-        if (self.detectHitSource == source.getName() || self.detectHitSource == akProjectile.getName())
+        if (self.detectHitSource == sourceName || self.detectHitSource == projectileName)
+          currentActivatorRef = objectRef
           goToState("busy")
         endIf 
       else
+        currentActivatorRef = objectRef
         goToState("busy")
       endIf 
     endIf
@@ -299,14 +385,17 @@ state waiting
 
   event onTriggerEnter(objectReference objectRef)
     bool signal = false
-    if (objectRef as actor == self.playerRef as actor && self.detectPlayer)
+    actor triggerActor = objectRef as actor
+    actor playerActor = self.playerRef
+    if (triggerActor == playerActor && self.detectPlayer)
       signal = true
     endIf
-    if (objectRef as actor != self.playerRef as actor && self.detectNPC)
+    if (triggerActor && triggerActor != playerActor && self.detectNPC)
       signal = true
     endIf
     info(self + "@ event: onTriggerEnter | signal:" + signal, enabled=self.showDebug)
     if (signal)
+      currentActivatorRef = objectRef
       goToState("busy")
     endIf
   endEvent
@@ -319,7 +408,12 @@ endState
 state busy
   event onBeginState()
     info(self + "@ state: busy", enabled=self.showDebug)
+    if (self.shutDown)
+      goToState("off")
+      return
+    endIf  
     if (self.paused || self.ignoreBusy)
+      currentActivatorRef = none
       goToState("waiting")
       return
     endIf
@@ -327,12 +421,41 @@ state busy
       bool leftDetected = self.playerRef.getEquippedItemType(0) == self.detectEquippedItemType
       bool rightDetected = self.playerRef.getEquippedItemType(1) == self.detectEquippedItemType
       if ( !leftDetected && !rightDetected )
+        currentActivatorRef = none
         goToState("waiting")
         return
       endIf
     endIf 
+    bool playerStarted = currentActivatorRef == (self.playerRef as objectReference)
+    int requiredActivations = self.signalEvery
+    if (requiredActivations < 1)
+      requiredActivations = 1
+    endIf
+    self.signalActivationCount += 1
+    if (self.signalActivationCount < requiredActivations)
+      info(self + "@ state: busy | signalEvery:" + requiredActivations + " | signalActivationCount: " + self.signalActivationCount, enabled=self.showDebug)
+      currentActivatorRef = none
+      if ( ! self.signalContinuously || self.paused || self.ignoreBusy )
+        self.yieldToVM()
+        goToState("waiting")
+      else
+        float missedDelay = clampf(            \
+          self.signalDelay,                    \
+          self.continuousSignalDelayMin,       \
+          self.signalDelay                     \
+        )
+        utility.wait(missedDelay)
+        self.yieldToVM()
+        goToState("busy")
+      endIf
+      return
+    endIf
+    self.signalActivationCount = 0
     self.setRefActivated(self, self)
-    self.setActivationBlocked(true)
+    if (playerStarted)
+      self.setActivationBlocked(true)
+    endIf
+    self.yieldToVM()
     if ( ! self.signalContinuously )
       utility.wait(self.signalDelay)
     endIf
@@ -343,14 +466,19 @@ state busy
     if ( ! self.preventDefaultSignal )
       self.signalCount += 1
       self.onSignalling()
+      self.yieldToVM()
     endIf
     if ( ! self.signalContinuously )
       utility.wait(self.postSignalDelay)
     endIf
-    self.setActivationBlocked(false)
+    if (playerStarted)
+      self.setActivationBlocked(false)
+    endIf
+    currentActivatorRef = none
     info(self + "@ state: busy | signalLimit:" + self.signalLimit + " | signalCount: " + self.signalCount, enabled=self.showDebug)
     if ( ! self.signalOnce && ternaryBool(self.signalLimit == 0, true, self.signalCount + 1 <= self.signalLimit) )
       if ( ! self.signalContinuously || self.paused || self.ignoreBusy )
+        self.yieldToVM()
         goToState("waiting")
       else
         float delay = clampf(            \
@@ -359,6 +487,7 @@ state busy
           self.signalDelay               \
         )
         utility.wait(delay)
+        self.yieldToVM()
         goToState("busy")
       endIf 
     endIf

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineForcer extends DivineSignaler
-; Kynareth - Goddess of Air, Wind, Sky, and the Elements
+; Kynareth - Goddess of Air, Wind, Sky, and the Elements; maps to physical impulse and force.
 
 import DivineUtils
 
@@ -57,6 +57,8 @@ endEvent
 ; =========================
 
 function onSignalling()
+    parent.onSignalling()
+
     ; Toggle explode/implode in heartbeat mode
     if (self.heartbeat)
         self.explode = !self.explode

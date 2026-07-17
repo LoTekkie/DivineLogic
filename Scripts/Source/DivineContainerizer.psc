@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineContainerizer extends DivineSignaler
-; Zenithar - God of Work and Commerce, Trader God
+; Zenithar - God of Work and Commerce; maps to item transfer and resource flow.
 
 import DivineUtils
 
@@ -43,12 +43,14 @@ bool property relayActivation = false auto
 function transferToContainers()
   if (self.transferToPlayer)
     ; Transfer all keyword-linked container items to the player
-    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    if (self.linkedRef)
+      self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    endIf
     self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
   else
     ; Transfer all keyword-linked container items to the linkedRef
     self.transferKeywordRefsItemsTo(self.linkedRef, self.keepOwnership, self.transferQuestItems)
-    if (self.transferFromPlayer)
+    if (self.transferFromPlayer && self.linkedRef)
       self.playerRef.removeAllItems(self.linkedRef, self.keepOwnership, self.transferQuestItems)
     endIf
   endIf
@@ -57,7 +59,9 @@ endFunction
 function transferFromContainers()
   if (self.transferToPlayer)
     ; Transfer all keyword-linked container items to the player
-    self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    if (self.linkedRef)
+      self.linkedRef.removeAllItems(self.playerRef, self.keepOwnership, self.transferQuestItems)
+    endIf
     self.transferKeywordRefsItemsTo(self.playerRef, self.keepOwnership, self.transferQuestItems)
   else
     ; Transfer from linkedRef to keyword-linked references

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineCutsceneCreatorMarker extends DivineMarker
-; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man
+; Talos - Hero-God of Mankind; maps to cutscene waypoints and staged presentation.
 
 import DivineUtils
 
@@ -12,7 +12,7 @@ import DivineUtils
 ; =========================
 
 float property delay = 0.0 auto
-{ Default: 0.0 - Seconds to wait before the keyword-linked object references translate to this marker. }
+{ Default: 0.0 - Seconds to wait after the camera arrives at this marker. }
 
 float property speed = 100.0 auto
 { Default: 100.0 - Speed at which the keyword-linked object references will translate to this marker. }

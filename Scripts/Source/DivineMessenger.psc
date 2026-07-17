@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineMessenger extends DivineSignaler
-; Reman – culture god-hero of the Second Empire.
+; Reman - Culture God-Hero of the Second Empire; maps to messages and proclamations.
 
 import DivineUtils
 

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineGlobalModifier extends DivineSignaler
-; Julianos – God of Wisdom and Logic
+; Julianos - God of Wisdom and Logic; maps to global-variable rules and comparisons.
 
 import DivineUtils
 
@@ -51,6 +51,12 @@ bool property activateKeywordRefs = false auto
 
 function onSignalling()
   parent.onSignalling()
+
+  if ( ! self.variable && ! self.relayActivation )
+    wrn(self + "@ function: onSignalling | variable is not set", enabled=self.showDebug)
+    return
+  endIf
+
   if ( ! compareVariable )
     if ( ! self.relayActivation )
       if ( ! self.modValue ) ; set
@@ -69,6 +75,11 @@ function onSignalling()
       self.setKeywordRefsActivated()
     endIf 
   else ; compare mode
+    if ( ! self.variable )
+      wrn(self + "@ function: onSignalling | variable is not set", enabled=self.showDebug)
+      return
+    endIf
+
     float currentValue = self.variable.getValue()
     bool result = false
     if ( ! self.asInt )

@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineCutsceneCreator extends DivineSignaler
-; Talos - Hero-god of Mankind, conqueror God, God of Might, Honor, State, Law, and Man
+; Talos - Hero-God of Mankind; maps to staged heroic presentation and camera control.
 
 import DivineUtils
 
@@ -67,7 +67,7 @@ bool property allowSkip = true auto
 ; =========================
 
 float property m_delay = 0.0 auto
-{ Default: 0.0 - Seconds to wait before the keyword-linked object references translate to this marker. }
+{ Default: 0.0 - Seconds to wait after the camera arrives at this marker. }
 
 float property m_speed = 100.0 auto
 { Default: 100.0 - Speed at which the keyword-linked object references will translate to this marker. }
@@ -193,20 +193,32 @@ endFunction
 
 ; Apply fadeTo imageSpaceModifier in the given number of seconds
 function fadeOut(float delay)
-  utility.wait(delay)
-  fadeTo.apply()
+  if (delay > 0.0)
+    utility.wait(delay)
+  endIf
+  if (fadeTo)
+    fadeTo.apply()
+  endIf
   game.fadeOutGame(false, true, 50, 1)  ; Gradual fade to black
 endFunction
 
 ; Apply the fadeFrom imageSpaceModifier in the given number of seconds
 function fadeIn(float delay)
-  utility.wait(delay)
+  if (delay > 0.0)
+    utility.wait(delay)
+  endIf
   game.fadeOutGame(false, true, 0.1, 0.1)  ; Quick fade back in
-  fadeTo.popTo(fadeFrom)  ; Restore original screen state
+  if (fadeTo && fadeFrom)
+    fadeTo.popTo(fadeFrom)  ; Restore original screen state
+  endIf
 endFunction
 
 ; Set the given Actor reference visibility
 function setActorVisible(actor actorRef, bool visible=true)
+  if ( ! actorRef )
+    return
+  endIf
+
   float alpha = 1.0
   if ( ! visible )
     alpha = 0.0
@@ -217,11 +229,19 @@ endFunction
 
 ; Create a new camera actor
 actor function createCameraActor()
-    return self.placeAtMe(game.getForm(self.cameraActorFormId)) as Actor
+    form cameraActorForm = game.getForm(self.cameraActorFormId)
+    if ( ! cameraActorForm )
+      return none
+    endIf
+    return self.placeAtMe(cameraActorForm) as Actor
 endFunction
 
 ; Set which Actor reference should be used as our cutscene camera
 function setCameraTarget(actor actorRef)
+  if ( ! actorRef )
+    return
+  endIf
+
   game.setCameraTarget(actorRef)
   game.forceFirstPerson()
   game.forceThirdPerson()
@@ -241,12 +261,23 @@ function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
     self.cameraActor = self.createCameraActor()
     utility.wait(1.0)
   endIf
+  if ( ! self.cameraActor )
+    wrn(self + "@ function: startCutScene | camera actor unavailable", enabled=self.showDebug)
+    utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
+    utility.setIniBool("bDisablePlayerCollision:Havok", false)
+    debug.toggleCollisions()
+    game.enablePlayerControls()
+    debug.setGodMode(false)
+    self.fadeIn(fadeInDelay)
+    self.inCutScene = false
+    return
+  endIf
   self.cameraActor.enableAI(false)
-  self.cameraActor.setMotionType(Motion_Keyframed)
+  self.setActorVisible(self.cameraActor, false)
+  self.cameraActor.setMotionType(Motion_Keyframed, false)
   if (self.nextMarker)
     self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
   endIf
-  self.setActorVisible(self.cameraActor, false)
   if (self.hidePlayer)
     self.setActorVisible(self.playerRef, false)
   endIf 
@@ -258,12 +289,17 @@ endFunction
 function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.ignoreBusy = true
   self.cutSceneLocked = true
-  info("Ending Cutscene", enabled=true)
+  unregisterForUpdate()
+  info("Ending Cutscene", enabled=self.showDebug)
   self.fadeOut(fadeOutDelay)
-  self.cameraActor.stopTranslation()
+  if (self.cameraActor)
+    self.cameraActor.stopTranslation()
+  endIf
   utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 10.0)
   utility.setIniBool("bDisablePlayerCollision:Havok", false)
-  self.cameraActor.delete()
+  if (self.cameraActor)
+    self.cameraActor.delete()
+  endIf
   self.cameraActor = None
   debug.toggleCollisions()
   self.setCameraTarget(self.playerRef)
@@ -285,8 +321,13 @@ endFunction
 ; =========================
 
 function onSignalling()
+  parent.onSignalling()
+
   if ( ! self.inCutScene && ! self.cutSceneLocked )
-    self.startCutScene(self.fadeInDelay, self.fadeOutDelay)
+    self.startCutScene(self.fadeOutDelay, self.fadeInDelay)
+    if ( ! self.inCutScene )
+      return
+    endIf
     registerForSingleUpdate(0.0)
     if (self.nextMarker)
       self.setRefActivated(self.nextMarker, self)
@@ -322,12 +363,14 @@ function onSignalling()
     if (self.m_shakeCamera)
        game.shakeCamera(self.playerRef, self.m_cameraShakeStrength, self.m_cameraShakeDuration)
     endIf  
+    if (self.m_delay > 0.0)
+      utility.wait(self.m_delay)
+    endIf
     if (self.relayActivation)
       self.setRefActivated(self.linkedRef, self)  
     endIf
   elseIf (self.nextMarker)
     self.conformMarkerProperties(self.nextMarker)
-    utility.wait(nextMarker.delay)
     objectReference destinationRef = self.nextMarker
     if (self.nextMarker.toPlayer)
       destinationRef = self.playerRef
@@ -355,13 +398,17 @@ function onSignalling()
     if (self.nextMarker.shakeCamera)
       game.shakeCamera(self.playerRef, self.nextMarker.cameraShakeStrength, self.nextMarker.cameraShakeDuration)
     endIf  
-    self.setRefActivated(self.nextMarker, self)
-    self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
+    if (self.nextMarker.delay > 0.0)
+      utility.wait(self.nextMarker.delay)
+    endIf
+    DivineCutsceneCreatorMarker completedMarker = self.nextMarker
+    self.nextMarker = completedMarker.linkedRef as DivineCutsceneCreatorMarker
+    self.setRefActivated(completedMarker, self)
   endIf
   if ( ! self.nextMarker && self.inCutScene )
     utility.wait(self.cutsceneEndDelay)
     if ( ! self.cutSceneLocked )
-      self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
+      self.endCutScene(self.fadeOutDelay, self.fadeInDelay)
     endIf
   endIf
 endFunction
@@ -369,10 +416,10 @@ endFunction
 function onUpdating()
   if (self.inCutScene)
     if (self.allowSkip)
-      debug.notification("Hold Enter to skip Cutscene")
+      debug.notification("Hold Enter to skip")
       if (input.isKeyPressed(self.skipCutSceneKeyId))
         if ( ! self.cutSceneLocked )
-          self.endCutScene(self.fadeInDelay, self.fadeOutDelay)
+          self.endCutScene(self.fadeOutDelay, self.fadeInDelay)
           goToState("waiting")
         endIf
       endIf

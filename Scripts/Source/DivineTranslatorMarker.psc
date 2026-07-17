@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineTranslatorMarker extends DivineMarker
-; Zenithar - God of Work and Commerce, Trader God
+; Zenithar - God of Work and Commerce; maps to movement waypoints and logistics.
 
 import DivineUtils
 
@@ -12,7 +12,7 @@ import DivineUtils
 ; =========================
 
 float property delay = 0.0 auto
-{ Default: 0.0 - Seconds to wait before the keyword-linked object references translate to this marker. }
+{ Default: 0.0 - Seconds to wait after the keyword-linked object references arrive at this marker. }
 
 float property speed = 100.0 auto
 { Default: 100.0 - Speed at which the keyword-linked object references will translate to this marker. }

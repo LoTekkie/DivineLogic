@@ -1,9 +1,9 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.0
+; v1.1
 
 scriptName DivineAnimator extends DivineSignaler
-; Lorkhan - The et'Ada most directly responsible for the existence of Nirn and is the god of all mortals.
+; Lorkhan - Architect of mortal form; maps to animation, motion, and embodied behavior.
 
 import DivineUtils
 
