@@ -22,7 +22,7 @@ The name comes from the idea that the gods lend a little of their power to your 
 - [Logic Box Reference](#logic-box-reference)
 - [Box Properties](#box-properties): [Activator](#activator), [Actor Modifier](#actor-modifier), [Animator](#animator), [Comparer](#comparer), [Containerizer](#containerizer), [Cutscene Creator](#cutscene-creator), [Destroyer](#destroyer), [Enabler](#enabler), [Forcer](#forcer), [Global Modifier](#global-modifier), [Marker](#marker), [Messenger](#messenger), [Mixer](#mixer), [Player Controller](#player-controller), [Scaler](#scaler), [Spawner](#spawner), [Translator](#translator), [Warper](#warper)
 - [Marker Reference](#marker-reference): [Cutscene Marker Properties](#cutscene-marker-properties), [Spawner Marker Properties](#spawner-marker-properties), [Translator Marker Properties](#translator-marker-properties), [Warper Marker Properties](#warper-marker-properties)
-- [Divine Logic API](#divine-logic-api): [Getting The API](#getting-the-api), [Live Signaler Queries](#live-signaler-queries), [Query Examples](#query-examples), [Signal Events](#signal-events), [API Testing](#api-testing), [API Settings](#api-settings)
+- [Divine Logic API](#divine-logic-api): [Getting The API](#getting-the-api), [Live Signaler Queries](#live-signaler-queries), [Query Examples](#query-examples), [Signal Events](#signal-events), [API Settings](#api-settings)
 - [Common Examples](#common-examples)
 - [Divine Laboratory](#divine-laboratory)
 - [Performance And Release Guidance](#performance-and-release-guidance)
@@ -47,7 +47,6 @@ Divine Logic ships as a master plugin and compiled scripts.
 - `DivineLogic_v1.1.esm` is the framework master.
 - `Scripts/*.pex` files provide runtime behavior.
 - `Scripts/Source/*.psc` files are included for reference and documentation.
-- The development `.esp` is not part of the normal authoring workflow.
 
 Do not edit `DivineLogic_v1.1.esm` directly. Create your own plugin, make Divine Logic a master, and build your content there.
 
@@ -659,7 +658,7 @@ if ( ! api )
 endIf
 ```
 
-`getInstance()` looks for `DivineLogic_v1.1.esm` first and falls back to `DivineLogic_v1.1.esp` for development builds. If neither plugin is loaded, it returns `None`.
+`getInstance()` looks for the `DivineLogic_v1.1.esm` framework master. If Divine Logic is not loaded, it returns `None`.
 
 ### Live Signaler Queries
 
@@ -793,23 +792,6 @@ Payload order:
 
 Set `signalerID` on important boxes when external listeners need a stable ID. If `signalerID` is blank, Divine Logic falls back to the signaler's form ID.
 
-### API Testing
-
-`DivineLogicAPICellTest.psc` is a quick development script for checking the API inside a real loaded cell. Attach it to a temporary activator or reference, set `filterType`, and activate it in game. It logs how many Divine signalers were found, how many matched the filter, and can optionally activate the matches.
-
-Recommended first test:
-
-| Property | Value |
-| --- | --- |
-| `filterType` | `DivineActivator` or another Divine script in the cell. |
-| `activateMatches` | `False` for the first run. |
-| `showTrace` | `True`. |
-| `expectedSignaler` | Optional known Divine signaler in the same cell. |
-
-Set `activateMatches = True` only when you intentionally want to test API-driven activation. A broad query can activate a whole group of boxes and may trigger loops if those boxes activate the test object again.
-
-Do not ship placed `DivineLogicAPICellTest` objects or enabled `DivineLogicAPITests` objects in release content.
-
 ### API Settings
 
 | Property or function | Purpose |
@@ -821,8 +803,6 @@ Do not ship placed `DivineLogicAPICellTest` objects or enabled `DivineLogicAPITe
 | `getModVersion()` | Returns the Divine Logic version string. |
 | `profileScriptStart(scriptName)` | Starts Papyrus profiling for a script. Development only. |
 | `profileScriptEnd(scriptName)` | Stops Papyrus profiling for a script. Development only. |
-
-`DivineLogicAPITests.psc` is a development test script. Keep `enableTests`, debug, and profiling options disabled in release cells.
 
 ## Common Examples
 
