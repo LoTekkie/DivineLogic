@@ -1,8 +1,12 @@
 # Divine Logic
 
-Divine Logic is a Skyrim Creation Kit framework for building richer dungeon logic with pre-scripted trigger boxes.
+Divine Logic is a Skyrim Creation Kit framework for adding gameplay logic with pre-scripted, modular trigger boxes.
 
-It was created for mod authors who want puzzle-heavy spaces with readable mechanisms, moving parts, item checks, staged reveals, cutscenes, traps, and timed events, without writing and recompiling a custom Papyrus script for every idea. You build by placing Divine Logic boxes, setting properties, and wiring references directly in the Creation Kit, which makes puzzle iteration much faster.
+It is made for mod authors who want to build puzzle-heavy dungeons, moving objects, cutscenes, traps, item transfers, staged events, and other interactive systems without writing a new Papyrus script for every mechanic.
+
+If you understand how to drag, drop, configure, and connect objects in the Creation Kit, you can use Divine Logic. You place boxes, set their properties, and wire them together. That keeps your logic visible, fast to iterate on, and easier to debug while building.
+
+Divine Logic was created because Papyrus is a major barrier for many would-be creators. The goal is not to replace scripting for every possible mod idea, but to give authors a practical alternative for common dungeon and puzzle logic so more ideas can be built directly in the editor.
 
 Under the hood, Divine Logic uses Skyrim's normal `Activate()` path as its signal bus. That keeps logic visible in the editor and lets boxes trigger other boxes the same way activators, doors, markers, and scripted references already interact.
 
@@ -641,9 +645,9 @@ Markers are destination and sequence points. They also inherit `DivineMarker` be
 
 ## Divine Logic API
 
-Normal Divine Logic usage does not require the API. The boxes work through linked refs and activation.
+Normal Divine Logic usage does not require the API or custom Papyrus. The boxes work through linked refs, properties, and activation.
 
-`DivineLogicAPI.psc` is for mod authors who want to query active Divine Logic boxes, chain actions against them, listen for Divine Logic signals, or run profiling while developing. It is a quest script included with the framework.
+`DivineLogicAPI.psc` is for advanced mod authors who do want to write scripts and integrate with Divine Logic directly. It can query active Divine Logic boxes, chain actions against them, listen for Divine Logic signals, or run profiling while developing. It is a quest script included with the framework.
 
 ### Getting The API
 
