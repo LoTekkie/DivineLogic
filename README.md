@@ -1,8 +1,12 @@
 # Divine Logic
 
-Divine Logic is a Skyrim Creation Kit framework for building richer dungeon logic with pre-scripted trigger boxes.
+Divine Logic is a Skyrim Creation Kit framework for adding gameplay logic with pre-scripted, modular trigger boxes.
 
-It was created for mod authors who want puzzle-heavy spaces with readable mechanisms, moving parts, item checks, staged reveals, cutscenes, traps, and timed events, without writing and recompiling a custom Papyrus script for every idea. You build by placing Divine Logic boxes, setting properties, and wiring references directly in the Creation Kit, which makes puzzle iteration much faster.
+It is made for mod authors who want to build puzzle-heavy dungeons, moving objects, cutscenes, traps, item transfers, staged events, and other interactive systems without writing a new Papyrus script for every mechanic.
+
+If you understand how to drag, drop, configure, and connect objects in the Creation Kit, you can use Divine Logic. You place boxes, set their properties, and wire them together. That keeps your logic visible, fast to iterate on, and easier to debug while building.
+
+Divine Logic was created because Papyrus is a major barrier for many would-be creators. The goal is not to replace scripting for every possible mod idea, but to give authors a practical alternative for common dungeon and puzzle logic so more ideas can be built directly in the editor.
 
 Under the hood, Divine Logic uses Skyrim's normal `Activate()` path as its signal bus. That keeps logic visible in the editor and lets boxes trigger other boxes the same way activators, doors, markers, and scripted references already interact.
 
@@ -22,7 +26,7 @@ The name comes from the idea that the gods lend a little of their power to your 
 - [Logic Box Reference](#logic-box-reference)
 - [Box Properties](#box-properties): [Activator](#activator), [Actor Modifier](#actor-modifier), [Animator](#animator), [Comparer](#comparer), [Containerizer](#containerizer), [Cutscene Creator](#cutscene-creator), [Destroyer](#destroyer), [Enabler](#enabler), [Forcer](#forcer), [Global Modifier](#global-modifier), [Marker](#marker), [Messenger](#messenger), [Mixer](#mixer), [Player Controller](#player-controller), [Scaler](#scaler), [Spawner](#spawner), [Translator](#translator), [Warper](#warper)
 - [Marker Reference](#marker-reference): [Cutscene Marker Properties](#cutscene-marker-properties), [Spawner Marker Properties](#spawner-marker-properties), [Translator Marker Properties](#translator-marker-properties), [Warper Marker Properties](#warper-marker-properties)
-- [Divine Logic API](#divine-logic-api): [Getting The API](#getting-the-api), [Live Signaler Queries](#live-signaler-queries), [Query Examples](#query-examples), [Signal Events](#signal-events), [API Testing](#api-testing), [API Settings](#api-settings)
+- [Divine Logic API](#divine-logic-api): [Getting The API](#getting-the-api), [Live Signaler Queries](#live-signaler-queries), [Query Examples](#query-examples), [Signal Events](#signal-events), [API Settings](#api-settings)
 - [Common Examples](#common-examples)
 - [Divine Laboratory](#divine-laboratory)
 - [Performance And Release Guidance](#performance-and-release-guidance)
@@ -47,7 +51,6 @@ Divine Logic ships as a master plugin and compiled scripts.
 - `DivineLogic_v1.1.esm` is the framework master.
 - `Scripts/*.pex` files provide runtime behavior.
 - `Scripts/Source/*.psc` files are included for reference and documentation.
-- The development `.esp` is not part of the normal authoring workflow.
 
 Do not edit `DivineLogic_v1.1.esm` directly. Create your own plugin, make Divine Logic a master, and build your content there.
 
@@ -642,9 +645,9 @@ Markers are destination and sequence points. They also inherit `DivineMarker` be
 
 ## Divine Logic API
 
-Normal Divine Logic usage does not require the API. The boxes work through linked refs and activation.
+Normal Divine Logic usage does not require the API or custom Papyrus. The boxes work through linked refs, properties, and activation.
 
-`DivineLogicAPI.psc` is for mod authors who want to query active Divine Logic boxes, chain actions against them, listen for Divine Logic signals, or run profiling while developing. It is a quest script included with the framework.
+`DivineLogicAPI.psc` is for advanced mod authors who do want to write scripts and integrate with Divine Logic directly. It can query active Divine Logic boxes, chain actions against them, listen for Divine Logic signals, or run profiling while developing. It is a quest script included with the framework.
 
 ### Getting The API
 
@@ -659,7 +662,7 @@ if ( ! api )
 endIf
 ```
 
-`getInstance()` looks for `DivineLogic_v1.1.esm` first and falls back to `DivineLogic_v1.1.esp` for development builds. If neither plugin is loaded, it returns `None`.
+`getInstance()` looks for the `DivineLogic_v1.1.esm` framework master. If Divine Logic is not loaded, it returns `None`.
 
 ### Live Signaler Queries
 
@@ -793,23 +796,6 @@ Payload order:
 
 Set `signalerID` on important boxes when external listeners need a stable ID. If `signalerID` is blank, Divine Logic falls back to the signaler's form ID.
 
-### API Testing
-
-`DivineLogicAPICellTest.psc` is a quick development script for checking the API inside a real loaded cell. Attach it to a temporary activator or reference, set `filterType`, and activate it in game. It logs how many Divine signalers were found, how many matched the filter, and can optionally activate the matches.
-
-Recommended first test:
-
-| Property | Value |
-| --- | --- |
-| `filterType` | `DivineActivator` or another Divine script in the cell. |
-| `activateMatches` | `False` for the first run. |
-| `showTrace` | `True`. |
-| `expectedSignaler` | Optional known Divine signaler in the same cell. |
-
-Set `activateMatches = True` only when you intentionally want to test API-driven activation. A broad query can activate a whole group of boxes and may trigger loops if those boxes activate the test object again.
-
-Do not ship placed `DivineLogicAPICellTest` objects or enabled `DivineLogicAPITests` objects in release content.
-
 ### API Settings
 
 | Property or function | Purpose |
@@ -821,8 +807,6 @@ Do not ship placed `DivineLogicAPICellTest` objects or enabled `DivineLogicAPITe
 | `getModVersion()` | Returns the Divine Logic version string. |
 | `profileScriptStart(scriptName)` | Starts Papyrus profiling for a script. Development only. |
 | `profileScriptEnd(scriptName)` | Stops Papyrus profiling for a script. Development only. |
-
-`DivineLogicAPITests.psc` is a development test script. Keep `enableTests`, debug, and profiling options disabled in release cells.
 
 ## Common Examples
 
