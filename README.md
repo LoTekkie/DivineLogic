@@ -60,11 +60,13 @@ Do not edit `DivineLogic_v1.1.esm` directly. Create your own plugin, make Divine
 2. Open the Creation Kit.
 3. Load `DivineLogic_v1.1.esm`.
 4. Create or load your own plugin and make it active.
-5. Place one or more Divine Logic boxes in your cell.
-6. Configure each box through script properties.
-7. Connect boxes and targets with normal linked refs or `DivineRef01` through `DivineRef09` keyword-linked refs.
-8. Save your plugin.
-9. Test in game through SKSE.
+5. Select an area or object in your cell and click the **Create Trigger** button in the top action bar.
+6. Choose the pre-defined Divine Logic trigger form that already has the correct script attached.
+7. Double-click the trigger box, open the **Scripts** tab, highlight the Divine script, and click **Properties**.
+8. Configure the script properties for the behavior you want.
+9. Connect boxes and targets with normal linked refs or `DivineRef01` through `DivineRef09` keyword-linked refs.
+10. Save your plugin.
+11. Test in game through SKSE.
 
 The simplest chain is a `DivineActivator` linked to another object. Activate the box in game, and the linked object receives an activation signal. From there, chains can branch into comparers, translators, markers, player controllers, messages, item transfers, and other boxes.
 
