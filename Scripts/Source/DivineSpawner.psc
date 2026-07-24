@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 scriptName DivineSpawner extends DivineSignaler
 ; Mara - Mother Goddess; maps to creation, spawning, and generative flow.
@@ -12,16 +12,16 @@ import DivineUtils
 ; =========================
 
 DivineSpawnerMarker property nextMarker auto hidden
-{ Refernce to the current DivineSpawnerMarker object being processed. }
+{ Reference to the current DivineSpawnerMarker object being processed. }
 
 bool property noMarkersAttached = true auto hidden
-{ Does this singaler have any markers attached when it's initializing? }
+{ Does this signaler have any markers attached when it's initializing? }
 
 int property totalSpawns = 0 auto hidden
 { Total number of spawns this signaler has performed. }
 
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of a spawn signal. }
+{ Default: False - Send an activation signal to the non-keyword linked reference instead of a spawn signal. }
 
 float property individualDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait between spawning of each keyword-linked object reference. 
@@ -80,7 +80,7 @@ bool property m_matchRotation = false auto
 { Default: false - Should the spawning objects match the rotation of this marker when they arrive? }
 
 bool property m_toPlayer = false auto
-{ Default: False - Should the translating objects move to the player? }
+{ Default: False - Should the spawned objects move to the player? }
 
 ; =========================
 ;         EVENTS
@@ -88,17 +88,8 @@ bool property m_toPlayer = false auto
 
 event onInit()
   parent.onInit()
-  if ( ! self.nextMarker )
-    DivineSpawnerMarker linkedMarker = self.getLinkedRef() as DivineSpawnerMarker
-    if (linkedMarker)
-      self.nextMarker = linkedMarker
-      self.noMarkersAttached = false
-    endIf
-  endIf
+  self.initNextMarker()
   self.maxSpawns = clampi(self.maxSpawns, 0, self.maxSpawns)
-  if (self.maxSpawns == 0)
-    self.totalSpawns += 1
-  endIf
 endEvent
 
 ; =========================
@@ -126,15 +117,33 @@ function conformMarkerProperties(DivineSpawnerMarker markerRef)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
+function initNextMarker()
+  if ( ! self.nextMarker )
+    self.nextMarker = self.getMarkerChainStart() as DivineSpawnerMarker
+  endIf
+  if (self.nextMarker)
+    self.noMarkersAttached = false
+  endIf
+endFunction
+
+bool function canSpawn()
+  return self.maxSpawns == 0 || self.totalSpawns < self.maxSpawns
+endFunction
+
+function advanceMarker()
+  self.nextMarker = self.getNextLoopedMarker(self.nextMarker) as DivineSpawnerMarker
+endFunction
+
 ; =========================
 ;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
   parent.onSignalling()
+  self.initNextMarker()
 
   if ( ! self.nextMarker && self.noMarkersAttached )
-    if (self.totalSpawns != self.maxSpawns)
+    if (self.canSpawn())
       objectReference destinationRef = self
       if (self.m_toPlayer)
         destinationRef = self.playerRef
@@ -176,7 +185,7 @@ function onSignalling()
       self.nextMarker.limitX, self.nextMarker.limitY, self.nextMarker.limitZ,   \
       self.nextMarker.limitAX, self.nextMarker.limitAY, self.nextMarker.limitAZ \
     )
-    if (self.totalSpawns != self.maxSpawns)
+    if (self.canSpawn())
       self.spawnKeywordRefsAt(        \
         destinationRef,               \
         spacingOffsets,               \
@@ -193,6 +202,6 @@ function onSignalling()
       self.totalSpawns += 1
     endIf
     self.setRefActivated(self.nextMarker, self)
-    self.nextMarker = self.nextMarker.linkedRef as DivineSpawnerMarker
+    self.advanceMarker()
   endIf
 endFunction

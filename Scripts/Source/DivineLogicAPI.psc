@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 ScriptName DivineLogicAPI Extends Quest
 ; Julianos - God of Wisdom and Logic; maps to the public logic API and event contract.
@@ -37,12 +37,12 @@ bool property showQueryDebug = false auto
 
 ; Get the current api version
 string function getApiVersion() global
-    return "1.1"
+    return "1.2.0"
 endFunction
 
 ; Get the current mod version
 string function getModVersion() global
-    return "1.1"
+    return "1.2.0"
 endFunction
 
 ; Get the string used to create signal mod events
@@ -55,13 +55,13 @@ int function getApiFormID() global
     return 0x2029B87
 endFunction
 
-; Get the versioned mod file name
+; Get the stable Divine Logic plugin file name
 string function getModFileName(bool isEsm = true) global
     string extension = ".esp"
     if (isEsm)
         extension = ".esm"
     endIf    
-    return "DivineLogic_v" + getApiVersion() + extension
+    return "DivineLogic" + extension
 endFunction
 
 ; Get the instance of DivineLogicAPI

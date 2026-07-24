@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 scriptName DivineSignaler extends DivineObjectReference
 ; Magnus - God of Magic; maps to signal flow, events, and active logic power.
@@ -306,6 +306,25 @@ endFunction
 ; Give the Papyrus VM a scheduling point during long activation chains.
 function yieldToVM()
   utility.wait(0.0)
+endFunction
+
+objectReference function getMarkerChainStart()
+  if (self.linkedRef)
+    return self.linkedRef
+  endIf
+  return self.getLinkedRef()
+endFunction
+
+objectReference function getNextLoopedMarker(objectReference currentMarker)
+  if ( ! currentMarker )
+    return self.getMarkerChainStart()
+  endIf
+
+  objectReference nextRef = currentMarker.getLinkedRef()
+  if (nextRef)
+    return nextRef
+  endIf
+  return self.getMarkerChainStart()
 endFunction
 
 ; Ensure all rotation angles on this signaler are not 0 to allow for player activation 

@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 ScriptName DivineLogicAPICellTest Extends ObjectReference
 ; Julianos - God of Wisdom and Logic; maps to quick API cell-query validation.

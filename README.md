@@ -48,17 +48,17 @@ SKSE is required. Divine Logic uses SKSE-backed Papyrus behavior for runtime nam
 
 Divine Logic ships as a master plugin and compiled scripts.
 
-- `DivineLogic_v1.1.esm` is the framework master.
+- `DivineLogic.esm` is the framework master.
 - `Scripts/*.pex` files provide runtime behavior.
 - `Scripts/Source/*.psc` files are included for reference and documentation.
 
-Do not edit `DivineLogic_v1.1.esm` directly. Create your own plugin, make Divine Logic a master, and build your content there.
+Do not edit `DivineLogic.esm` directly. Create your own plugin, make Divine Logic a master, and build your content there.
 
 ## Quick Start
 
 1. Install Divine Logic and SKSE.
 2. Open the Creation Kit.
-3. Load `DivineLogic_v1.1.esm`.
+3. Load `DivineLogic.esm`.
 4. Create or load your own plugin and make it active.
 5. Select an area or object in your cell and click the **Create Trigger** button in the top action bar.
 6. Choose the pre-defined Divine Logic trigger form that already has the correct script attached.
@@ -180,6 +180,10 @@ If Divine Logic later adds a quest-specific box, it should control actual quest 
 Translators, warpers, spawners, and cutscene creators can use marker chains.
 
 The main box has `m_` marker defaults. Each marker has matching properties. A marker value overrides the box default when it differs from the marker's default sentinel value.
+
+Spawner and warper marker chains loop back to the first marker when the chain ends. A single `Spawner -> Spawner Marker` or `Warper -> Warper Marker` setup can therefore reuse the same marker every time it is activated. Multiple spawner or warper markers act as a repeating sequence.
+
+Translator and cutscene marker chains advance through their markers as destination sequences. Cutscenes reset to their first marker when the scene ends.
 
 Important defaults:
 
@@ -504,6 +508,8 @@ Script: `DivineSpawner.psc`
 | `individualDelay` | `0.0` | Delay between each keyword-linked ref spawn. |
 | `maxSpawns` | `0` | Maximum spawn cycles. `0` means unlimited. |
 
+When linked to a `DivineSpawnerMarker`, each activation spawns at the current marker and advances to the next marker. When the chain ends, the spawner loops back to the first marker.
+
 Marker-default properties:
 
 | Property | Default | Description |
@@ -554,6 +560,8 @@ Script: `DivineWarper.psc`
 | --- | --- | --- |
 | `relayActivation` | `False` | Activate linked ref after warping. |
 | `individualDelay` | `0.0` | Delay between each keyword-linked ref warp. |
+
+When linked to a `DivineWarperMarker`, each activation warps to the current marker and advances to the next marker. When the chain ends, the warper loops back to the first marker.
 
 Marker-default properties:
 
@@ -664,7 +672,7 @@ if ( ! api )
 endIf
 ```
 
-`getInstance()` looks for the `DivineLogic_v1.1.esm` framework master. If Divine Logic is not loaded, it returns `None`.
+`getInstance()` looks for the `DivineLogic.esm` framework master. If Divine Logic is not loaded, it returns `None`.
 
 ### Live Signaler Queries
 
@@ -890,7 +898,7 @@ The lab is intentionally dense. Do not judge release performance from every lab 
 ## Compatibility Notes
 
 - Divine Logic requires SKSE.
-- Mods using Divine Logic should declare `DivineLogic_v1.1.esm` as a master.
+- Mods using Divine Logic should declare `DivineLogic.esm` as a master.
 - Do not rename or remove serialized Papyrus properties on placed objects in an existing release.
 - Existing saves can retain old script property data. Test script/property changes carefully.
 - If your mod depends on Divine Logic, list Divine Logic and SKSE as requirements.

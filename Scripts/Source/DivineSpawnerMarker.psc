@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 scriptName DivineSpawnerMarker extends DivineMarker
 ; Mara - Mother Goddess; maps to spawn points and generative waypoints.

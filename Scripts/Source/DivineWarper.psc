@@ -1,6 +1,6 @@
 ; Divine Logic (c) 2019, Sjshovan (LoTekkie)
 ; Licensed under BSD 3-Clause (see main file or LICENSE)
-; v1.1
+; v1.2.0
 
 scriptName DivineWarper extends DivineSignaler
 ; Akatosh - Dragon God of Time; maps to instantaneous movement through space and sequence.
@@ -12,13 +12,13 @@ import DivineUtils
 ; =========================
 
 DivineWarperMarker property nextMarker auto hidden
-{ Refernce to the current DivineWarperMarker object being processed. }
+{ Reference to the current DivineWarperMarker object being processed. }
 
 bool property noMarkersAttached = true auto hidden
-{ Does this singaler have any markers attached when it's initializing? }
+{ Does this signaler have any markers attached when it's initializing? }
 
 bool property relayActivation = false auto
-{ Default: False - Send an activation signal to the non-keyword linked reference instad of a warp signal. }
+{ Default: False - Send an activation signal to the non-keyword linked reference instead of a warp signal. }
 
 float property individualDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait between warping of each keyword-linked object reference. 
@@ -74,7 +74,7 @@ bool property m_matchRotation = false auto
 { Default: false - Should the warping objects match the rotation of this marker when they arrive? }
 
 bool property m_toPlayer = false auto
-{ Default: False - Should the translating objects move to the player? }
+{ Default: False - Should the warped objects move to the player? }
 
 ; =========================
 ;         EVENTS
@@ -82,13 +82,7 @@ bool property m_toPlayer = false auto
 
 event onInit()
   parent.onInit()
-  if ( ! self.nextMarker )
-    DivineWarperMarker linkedMarker = self.getLinkedRef() as DivineWarperMarker
-    if (linkedMarker)
-      self.nextMarker = linkedMarker
-      self.noMarkersAttached = false
-    endIf
-  endIf
+  self.initNextMarker()
 endEvent
 
 ; =========================
@@ -117,12 +111,27 @@ function conformMarkerProperties(DivineWarperMarker markerRef)
   markerRef.toPlayer = conformBool(markerRef.toPlayer, self.m_toPlayer, false)
 endFunction
 
+function initNextMarker()
+  if ( ! self.nextMarker )
+    self.nextMarker = self.getMarkerChainStart() as DivineWarperMarker
+  endIf
+  if (self.nextMarker)
+    self.noMarkersAttached = false
+  endIf
+endFunction
+
+function advanceMarker()
+  self.nextMarker = self.getNextLoopedMarker(self.nextMarker) as DivineWarperMarker
+endFunction
+
 ; =========================
 ;     LIFECYCLE HOOKS
 ; =========================
 
 function onSignalling()
   parent.onSignalling()
+  self.initNextMarker()
+
   if ( ! self.nextMarker && self.noMarkersAttached )
     objectReference destinationRef = self
     if (self.m_toPlayer)
@@ -205,6 +214,6 @@ function onSignalling()
       )
     endIf
     self.setRefActivated(self.nextMarker, self)
-    self.nextMarker = self.nextMarker.linkedRef as DivineWarperMarker
+    self.advanceMarker()
   endIf
 endFunction
