@@ -48,7 +48,7 @@ bool property hidePlayer = true auto
 { Default: True - Should the player be hidden when the cutscene starts? }
 
 float property fadeOutDelay = 0.0 auto
-{ Default: 0.0 - Seconds to wait before the scene fades out. }
+{ Default: 0.0 - Seconds to hold black during cutscene startup or wait before the scene fades out when ending. }
 
 float property fadeInDelay = 0.0 auto
 { Default: 0.0 - Seconds to wait before the scene fades in. }
@@ -228,12 +228,15 @@ function setActorVisible(actor actorRef, bool visible=true)
 endFunction
 
 ; Create a new camera actor
-actor function createCameraActor()
+actor function createCameraActor(objectReference spawnRef = none)
     form cameraActorForm = game.getForm(self.cameraActorFormId)
     if ( ! cameraActorForm )
       return none
     endIf
-    return self.placeAtMe(cameraActorForm) as Actor
+    if ( ! spawnRef )
+      spawnRef = self
+    endIf
+    return spawnRef.placeAtMe(cameraActorForm) as Actor
 endFunction
 
 ; Set which Actor reference should be used as our cutscene camera
@@ -243,6 +246,18 @@ function setCameraTarget(actor actorRef)
   endIf
 
   game.setCameraTarget(actorRef)
+  game.forceFirstPerson()
+  game.forceThirdPerson()
+  utility.wait(0.1)
+  game.forceFirstPerson()
+endFunction
+
+function restorePlayerCameraTarget()
+  if ( ! self.playerRef )
+    return
+  endIf
+
+  game.setCameraTarget(self.playerRef)
   game.forceFirstPerson()
   game.forceThirdPerson()
 endFunction
@@ -256,9 +271,17 @@ function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   utility.setIniFloat("fMouseWheelZoomSpeed:Camera", 0.0)
   utility.setIniBool("bDisablePlayerCollision:Havok", true)
   debug.toggleCollisions()
+  if (fadeTo)
+    fadeTo.apply()
+  endIf
+  game.forceFirstPerson()
   self.fadeOut(fadeOutDelay)
+  objectReference cameraStartRef = self
+  if (self.nextMarker)
+    cameraStartRef = self.nextMarker
+  endIf
   if ( ! self.cameraActor )
-    self.cameraActor = self.createCameraActor()
+    self.cameraActor = self.createCameraActor(cameraStartRef)
     utility.wait(1.0)
   endIf
   if ( ! self.cameraActor )
@@ -276,7 +299,8 @@ function startCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   self.setActorVisible(self.cameraActor, false)
   self.cameraActor.setMotionType(Motion_Keyframed, false)
   if (self.nextMarker)
-    self.moveRefTo(self.cameraActor, self.nextMarker, self.buildAxisLimitsArray(), matchRotation=true)
+    self.cameraActor.moveTo(self.nextMarker, 0.0, 0.0, 0.0, true)
+    utility.wait(0.1)
   endIf
   if (self.hidePlayer)
     self.setActorVisible(self.playerRef, false)
@@ -302,7 +326,7 @@ function endCutScene(float fadeOutDelay=0.0, float fadeInDelay=0.0)
   endIf
   self.cameraActor = None
   debug.toggleCollisions()
-  self.setCameraTarget(self.playerRef)
+  self.restorePlayerCameraTarget()
   if (self.hidePlayer)
     self.setActorVisible(self.playerRef, true)
   endIf 
@@ -330,9 +354,18 @@ function onSignalling()
     endIf
     registerForSingleUpdate(0.0)
     if (self.nextMarker)
-      self.setRefActivated(self.nextMarker, self)
-      self.cameraActorHomeMarker = self.nextMarker
-      self.nextMarker = self.nextMarker.linkedRef as DivineCutsceneCreatorMarker
+      DivineCutsceneCreatorMarker firstMarker = self.nextMarker
+      self.conformMarkerProperties(firstMarker)
+      self.setRefActivated(firstMarker, self)
+      self.cameraActorHomeMarker = firstMarker
+      if (firstMarker.shakeCamera)
+        game.shakeCamera(self.playerRef, firstMarker.cameraShakeStrength, firstMarker.cameraShakeDuration)
+      endIf
+      if (firstMarker.delay > 0.0)
+        utility.wait(firstMarker.delay)
+      endIf
+      self.nextMarker = firstMarker.linkedRef as DivineCutsceneCreatorMarker
+      return
     endIf
   endIf
   if ( ! self.nextMarker && self.noMarkersAttached )

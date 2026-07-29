@@ -79,7 +79,6 @@ DivineLogicAPI function getInstance() global
     endIf
 
     if apiQuest == none
-        err("@ function: getInstance | API Quest not found! | formID: " + getApiFormID() + " | esm: " + esmFileName + " | esp: " + espFileName)
         return none
     endIf
 

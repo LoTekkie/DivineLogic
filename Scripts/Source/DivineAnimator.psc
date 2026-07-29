@@ -121,8 +121,6 @@ function onSignalling()
         else
             self.setReferenceAnimationVariable(self.linkedRef)
         endIf
-    else
-        self.setRefActivated(self.linkedRef, self)
     endIf
 
     if (!sendAsVariable)
@@ -152,4 +150,8 @@ function onSignalling()
     endIf
 
     self.handleLookAtLogic()
+
+    if (self.relayActivation)
+        self.setRefActivated(self.linkedRef, self)
+    endIf
 endFunction

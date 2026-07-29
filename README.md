@@ -17,12 +17,15 @@ The name comes from the idea that the gods lend a little of their power to your 
 - [Requirements](#requirements)
 - [Release Format](#release-format)
 - [Quick Start](#quick-start)
+- [Creating Divine Logic Triggers](#creating-divine-logic-triggers)
 - [How Signals Work](#how-signals-work)
 - [Activation vs Signal](#activation-vs-signal)
-- [Linked References](#linked-references)
+- [Default Linked Ref vs DivineRef Keyword Refs](#default-linked-ref-vs-divineref-keyword-refs)
+- [Wiring Reference](#wiring-reference)
 - [Base Signaler Properties](#base-signaler-properties)
 - [Quest State](#quest-state)
 - [Marker Defaults And Overrides](#marker-defaults-and-overrides)
+- [Prebuilt Marker Forms](#prebuilt-marker-forms)
 - [Logic Box Reference](#logic-box-reference)
 - [Box Properties](#box-properties): [Activator](#activator), [Actor Modifier](#actor-modifier), [Animator](#animator), [Comparer](#comparer), [Containerizer](#containerizer), [Cutscene Creator](#cutscene-creator), [Destroyer](#destroyer), [Enabler](#enabler), [Forcer](#forcer), [Global Modifier](#global-modifier), [Marker](#marker), [Messenger](#messenger), [Mixer](#mixer), [Player Controller](#player-controller), [Scaler](#scaler), [Spawner](#spawner), [Translator](#translator), [Warper](#warper)
 - [Marker Reference](#marker-reference): [Cutscene Marker Properties](#cutscene-marker-properties), [Spawner Marker Properties](#spawner-marker-properties), [Translator Marker Properties](#translator-marker-properties), [Warper Marker Properties](#warper-marker-properties)
@@ -31,6 +34,7 @@ The name comes from the idea that the gods lend a little of their power to your 
 - [Divine Laboratory](#divine-laboratory)
 - [Performance And Release Guidance](#performance-and-release-guidance)
 - [Compatibility Notes](#compatibility-notes)
+- [Changelog](#changelog)
 - [Community And Support](#community-and-support)
 - [License](#license)
 - [Credits](#credits)
@@ -60,15 +64,31 @@ Do not edit `DivineLogic.esm` directly. Create your own plugin, make Divine Logi
 2. Open the Creation Kit.
 3. Load `DivineLogic.esm`.
 4. Create or load your own plugin and make it active.
-5. Select an area or object in your cell and click the **Create Trigger** button in the top action bar.
-6. Choose the pre-defined Divine Logic trigger form that already has the correct script attached.
-7. Double-click the trigger box, open the **Scripts** tab, highlight the Divine script, and click **Properties**.
-8. Configure the script properties for the behavior you want.
-9. Connect boxes and targets with normal linked refs or `DivineRef01` through `DivineRef09` keyword-linked refs.
-10. Save your plugin.
-11. Test in game through SKSE.
+5. Place a prebuilt Divine Logic trigger form.
+6. Double-click the trigger box, open the **Scripts** tab, highlight the Divine script, and click **Properties**.
+7. Configure the script properties for the behavior you want.
+8. Connect boxes and targets with normal linked refs or `DivineRef01` through `DivineRef09` keyword-linked refs.
+9. Save your plugin.
+10. Test in game through SKSE.
 
 The simplest chain is a `DivineActivator` linked to another object. Activate the box in game, and the linked object receives an activation signal. From there, chains can branch into comparers, translators, markers, player controllers, messages, item transfers, and other boxes.
+
+## Creating Divine Logic Triggers
+
+Divine Logic boxes are prebuilt Creation Kit trigger forms. You are not choosing a blank trigger and manually attaching scripts. You are choosing the Divine Logic form that already has the correct script attached.
+
+1. Load `DivineLogic.esm`.
+2. Make your own plugin active.
+3. In the render window, select the object or area where the trigger should be created.
+4. Click **Create Trigger** in the top action bar.
+5. Search for the Divine Logic trigger you want, such as `DivineActivator`, `DivineComparer`, or `DivineTranslator`.
+6. Choose the prebuilt Divine Logic trigger form.
+7. Double-click the placed trigger box.
+8. Open the **Scripts** tab.
+9. Highlight the attached Divine script and click **Properties**.
+10. Configure the properties and linked references.
+
+Sizing tip: if you want a clean trigger volume around a small object, drop a kettle or similarly sized object into the scene, select it, click **Create Trigger**, then delete or move the kettle after the trigger is created.
 
 ## How Signals Work
 
@@ -98,7 +118,7 @@ Examples:
 
 Use activation to describe the incoming trigger. Use signal to describe the Divine Logic event or action that actually fires.
 
-## Linked References
+## Default Linked Ref vs DivineRef Keyword Refs
 
 Divine Logic uses two link types.
 
@@ -111,8 +131,34 @@ Common patterns:
 
 - Use the normal linked ref for the next box, a primary target, or the first marker in a chain.
 - Use keyword refs for groups of objects being moved, enabled, compared, deleted, scaled, spawned, or modified.
+- Keyword refs are read in numerical order from `DivineRef01` through `DivineRef09`.
 - Marker chains use normal linked refs from one marker to the next marker.
 - A final marker can link back to the starting box when the box itself should act as the final sequence point.
+
+Different boxes use these links differently. A default linked ref might be the next box in a logic chain, the first marker in a path, the main object being changed, or the output that fires when a check succeeds. `DivineRef01` through `DivineRef09` are for grouped targets or inputs.
+
+## Wiring Reference
+
+| Box | Normal linked ref | `DivineRef01` - `DivineRef09` |
+| --- | --- | --- |
+| Activator | Activated first. | Activated all at once, one random ref, or one sequential ref. |
+| Actor Modifier | Modified in normal mode. In compare mode, activated only when the check passes. | Actor inputs modified or checked. |
+| Animator | Animated in normal mode. With `relayActivation`, activated after keyword refs and player work. | Animated, updated with animation variables, or used for look-at behavior. |
+| Comparer | Activated only when the comparison passes. | Divine signaler inputs being checked. |
+| Containerizer | Primary container or transfer output. | Secondary source or destination containers. |
+| Cutscene Creator | First cutscene marker when linked to a marker. Without markers, optional relay output. | Not used for camera pathing. |
+| Destroyer | Deleted, or activated when `relayActivation` is enabled. | Always deleted. |
+| Enabler | Enable-toggled, or activated when `relayActivation` is enabled. | Enable-toggled. |
+| Forcer | Receives impulse, or becomes activation output when `relayActivation` is enabled. | Receives impulse. |
+| Global Modifier | Activation output when relaying or when a comparison passes. | Optional activation outputs after modification or successful comparison. |
+| Marker | Used as the next marker when another box is following a marker chain. | Activated or enable-toggled by the marker. |
+| Messenger | Not used for message behavior. | Not used for message behavior. |
+| Mixer | Optional activation output when `relayActivation` is enabled. | Optional activation outputs when `activateKeywordRefs` is enabled. |
+| Player Controller | Actor used for control or camera transfer, or relay output. | Optional activation outputs when `activateKeywordRefs` is enabled. |
+| Scaler | Scaled, or activated when `relayActivation` is enabled. | Scaled. |
+| Spawner | First spawner marker when linked to a marker. Without markers, optional relay output. | Template refs whose base forms are spawned. |
+| Translator | First translator marker when linked to a marker. Without markers, optional relay output. | Objects being moved. |
+| Warper | First warper marker when linked to a marker. Without markers, optional relay output. | Objects being warped. |
 
 ## Base Signaler Properties
 
@@ -193,6 +239,21 @@ Important defaults:
 
 Because defaults also act as sentinels, a marker cannot always distinguish "explicitly use `0.0`" from "use the box default." Use box defaults for global behavior and marker values for non-default per-marker changes.
 
+## Prebuilt Marker Forms
+
+Divine Logic includes prebuilt marker activator forms for cutscenes, spawners, translators, and warpers. These forms already have the correct marker scripts and heading marker setup, so use them instead of building raw markers from scratch.
+
+Drag the marker form you need from the Object Window into your cell, then wire the owning box to the first marker with the normal linked ref. For multi-marker paths, link each marker to the next marker with the normal linked ref.
+
+Marker forms are destination and sequence points:
+
+- `DivineCutsceneCreatorMarker` controls camera path points.
+- `DivineSpawnerMarker` controls where spawned refs appear.
+- `DivineTranslatorMarker` controls where keyword refs move.
+- `DivineWarperMarker` controls where keyword refs or the player warp.
+
+Set shared movement behavior on the owning box with the `m_` properties. Set marker-specific behavior on the marker itself when that step should override the box defaults.
+
 ## Logic Box Reference
 
 | Box | Script | Divine Theme | Purpose |
@@ -229,7 +290,7 @@ Script: `DivineActivator.psc`
 | Property | Default | Description |
 | --- | --- | --- |
 | `randomlyActivateKeywordRefs` | `False` | Activate one random keyword-linked ref instead of all keyword-linked refs. |
-| `sequentiallyActivateKeywordRefs` | `False` | Activate one keyword-linked ref per signal, advancing through the list. Ignored when random mode is enabled. |
+| `sequentiallyActivateKeywordRefs` | `False` | Activate one keyword-linked ref per signal, advancing from `DivineRef01` through `DivineRef09`. Ignored when random mode is enabled. |
 
 The normal linked ref always receives activation first. If both keyword-ref modes are disabled, all keyword-linked refs are activated.
 
@@ -274,7 +335,7 @@ Script: `DivineAnimator.psc`
 | `lookAtPlayer` | `False` | Actor refs look at the player. |
 | `lookAtPlayerWhilePathing` | `False` | Actor refs keep looking at the player while pathing. |
 | `clearLookAt` | `False` | Clear actor look-at targets. Overrides look-at options. |
-| `relayActivation` | `False` | Activate the linked ref instead of animating. |
+| `relayActivation` | `False` | Animate keyword refs/player, then activate the linked ref instead of animating it. |
 
 Targets: normal linked ref, keyword-linked refs, and optionally the player.
 
@@ -315,7 +376,7 @@ Script: `DivineCutsceneCreator.psc`
 | --- | --- | --- |
 | `relayActivation` | `False` | Activate the linked ref after the cutscene action. |
 | `hidePlayer` | `True` | Hide and ghost the player during the cutscene. |
-| `fadeOutDelay` | `0.0` | Wait before fade out. |
+| `fadeOutDelay` | `0.0` | At startup, hold black before camera setup; when ending, wait before fade out. |
 | `fadeInDelay` | `0.0` | Wait before fade in. |
 | `cutsceneEndDelay` | `0.0` | Wait before ending after the final marker. |
 | `cutsceneEndPause` | `False` | Pause this box after the cutscene ends. |
@@ -340,7 +401,7 @@ Marker-default properties:
 | `m_cameraShakeStrength` | `0.5` | Camera shake strength. |
 | `m_cameraShakeDuration` | `0.0` | Camera shake duration. |
 
-Use `DivineCutsceneCreatorMarker` objects for multi-point camera paths.
+Use `DivineCutsceneCreatorMarker` objects for multi-point camera paths. The first marker is the opening camera position, and the camera actor is moved there while the screen is faded out. If no marker is attached, the cutscene creator itself is used as the opening camera anchor.
 
 ### Destroyer
 
@@ -902,6 +963,40 @@ The lab is intentionally dense. Do not judge release performance from every lab 
 - Do not rename or remove serialized Papyrus properties on placed objects in an existing release.
 - Existing saves can retain old script property data. Test script/property changes carefully.
 - If your mod depends on Divine Logic, list Divine Logic and SKSE as requirements.
+
+## Changelog
+
+### v1.2.0
+
+- Renamed the framework master to `DivineLogic.esm` so dependent plugins can keep a stable master filename across future releases.
+- Updated `DivineLogicAPI` to resolve `DivineLogic.esm` / `DivineLogic.esp` instead of deriving plugin filenames from the version number.
+- Updated all script headers and API version methods to `1.2.0`.
+- Added compiled `.pex` scripts to the release structure.
+- Removed old archive and image folders from the development branch.
+- Added shared marker-chain helper behavior in `DivineSignaler`.
+- Updated `DivineSpawner` marker chains so single-marker setups can spawn repeatedly and multi-marker chains loop back to the first marker.
+- Updated `DivineWarper` marker chains so single-marker setups can warp repeatedly and multi-marker chains loop back to the first marker.
+- Clarified marker-chain behavior in the documentation.
+- Updated keyword-ref ordering so `DivineRef01` through `DivineRef09` are read in numerical order.
+- Added Creation Kit trigger creation, marker form, and linked-ref wiring guidance.
+- Updated `DivineCutsceneCreator` startup to force first-person camera mode during blackout and avoid inheriting third-person zoom for the cutscene camera target.
+- Updated `DivineAnimator` relay behavior so it performs its animation/variable/look-at work first, then activates its linked reference when `relayActivation` is enabled.
+- Clarified `DivineAnimator.relayActivation` documentation.
+
+### v1.1.1
+
+- Updated README documentation.
+
+### v1.1.0
+
+- Added the public `DivineLogicAPI` for scripted integrations.
+- Added live signaler query support for finding, filtering, and activating Divine Logic signalers from Papyrus.
+- Added API signal events for advanced mod authors.
+- Added activator keyword-ref random and sequential activation modes.
+- Added `signalEvery` support for signaling after a configured number of valid activations.
+- Improved translator scheduling to reduce deep activation bursts during marker chains.
+- Improved translator handling for marker delays and marker-level behavior overrides.
+- Added and updated production documentation, API examples, quick-start instructions, performance guidance, and Divine Laboratory guidance.
 
 ## Community And Support
 
